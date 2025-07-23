@@ -1,11 +1,11 @@
 
-from models import DecisionTree, Logistic
+from .models import DecisionTree, Logistic
 
-def Classification(model, data):
+def Classification(model, data, ref):
     if model == 'DecisionTree':
-        DecisionTree(data)
+        DecisionTree(data, ref)
     elif (model == 'Logistic'):
-        Logistic(data)
+        Logistic(data, ref)
     else:
         return False
     return True

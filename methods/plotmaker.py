@@ -3,6 +3,7 @@ def Plotter(cs, title):
     #--@cs:components
     import matplotlib.pyplot as plt
     filepath = 'output.png'
+    cols = [] #just column names
     for col in cs.columns:
         cols.append(col)
     plt.figure(figsize=(8,6))

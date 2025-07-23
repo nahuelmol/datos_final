@@ -2,22 +2,20 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
-from plotmaker import Plotter
+from .plotmaker import Plotter
 
-def get_data():
-    try:
-        df = pd.read_csv("NBA_2324_players.csv")
-        return True, df
-    except:
-        return False, None
 
-def PCAnalysis(data):
-    cols_to_drop = ['TEAM', 'POS', 'NAME']
+def PCAnalysis(data, ref):
+    cols_to_drop = []
+    for col in data.columns:
+        if data[col].dtype != 'float64':
+            if col != ref:
+                cols_to_drop.append(col)
     data = data.loc[:, ~data.columns.isin(cols_to_drop)]
         
-    rank = data.pop('RANK')
-    data.insert(0, 'RANK', rank)
-    rank = data.pop('RANK')
+    rank = data.pop(ref)
+    data.insert(0, ref, rank)
+    rank = data.pop(ref)
 
     #data as features
     n_components = int(input('How many components you want?'))
