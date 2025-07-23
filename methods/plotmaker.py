@@ -1,6 +1,6 @@
 
 def Plotter(cs, title):
-    #cs--@components
+    #--@cs:components
     import matplotlib.pyplot as plt
     filepath = 'output.png'
     for col in cs.columns:
