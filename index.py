@@ -3,8 +3,7 @@ import pandas as pd
 import numpy as np
 
 from sklearn.decomposition import PCA
-from methods.applyPCA import PCAnalysis
-from methods.applyICA import ICAnalysis
+from methods.dim_reduction import PCAnalysis, ICAnalysis, TSNEanalysis
 
 from classification.kind import Classification
 from data_setter import checkAvailableData, getData
@@ -38,8 +37,9 @@ if __name__ == "__main__":
         Available Analysis
         1.PCA
         2.ICA
-        3.Classification problem -> Decision Tree
-        4.Ckassification problem -> Logistic Regression 
+        3.TSNE
+        4.Classification problem -> Decision Tree
+        5.Ckassification problem -> Logistic Regression 
 
         Exit (press any) 
 
@@ -53,12 +53,14 @@ if __name__ == "__main__":
     elif (opc == 2):
         ICAnalysis(data, ref)
     elif (opc == 3):
+        TSNEanalysis(data, ref)
+    elif (opc == 4):
         res = Classification('DecisionTree', data, ref)
         if res:
             print('worked')
         else:
             print('not working')
-    elif (opc == 4):
+    elif (opc == 5):
         res = Classification('Logistic', data, ref)
         if res:
             print('worked')
