@@ -1,10 +1,15 @@
 
+import pandas as pd
+
+from sklearn import svc
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
 
 def DecisionTree(data, ref):
-    import pandas as pd
-    from sklearn.tree import DecisionTreeClassifier, plot_tree
-    from sklearn.metrics import accuracy_score
-
     #ref=C
     col     = input('select column: ') #POS
     first   = input('select first possible response: ') #C
@@ -32,24 +37,13 @@ def DecisionTree(data, ref):
     print('accuracy score: ', REPORT['as'])
 
 def Logistic(data, ref):
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.model_selection import train_test_split
-    from sklearn.datasets import make_classification
-    from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
     y = data.pop(ref)
     cols_to_drop = []
     for col in data.columns:
         if data[col].dtype != 'float64':
-            if col != ref:
-                cols_to_drop.append(col)
+            cols_to_drop.append(col)
     X = data.loc[:, ~data.columns.isin(cols_to_drop)]
-
-    #X, y = make_classification(n_samples=100, 
-    #                           n_features=2, 
-    #                           n_informative=2, 
-    #                           n_redundant=0, 
-    #                           random_state=42)
 
     random_state    = int(input('Set random state: ')) #42
     test_size       = float(input('Set test size: ')) #0.2
@@ -76,3 +70,55 @@ def Logistic(data, ref):
     }
     print(REPORT['model_intercept'])
 
+
+def kNearestNeighbor(data):
+    nneigh = 5
+    algorithm = 'auto'
+    metric = 'minkowski'
+    y = [0,0,1,1]
+    neigh = KNeighborsClassifier(n_neighbors=nneigh)
+    classifier = neigh.fit(data, y)
+    
+    INPUT = int(input('predict?'))
+    p  = classifier.predict([INPUT])
+    pp = classifier.predct_proba([INPUT])
+    out= classifier.neighbors([[1.,1.,1.]])
+
+    predictions = {
+            'p':p,
+            'pp':pp,
+    }
+    REPORT = {
+            'predictions':predictions,
+    }
+
+
+def RandomForest(data,ref):
+    y = data.pop(ref)
+    X_train, X_test, y_train, y_test = train_test_split(data, y, random_state=42)
+
+    nestm = int(input('insert n estimators')) #100
+    ranst = int(input('insert random state')) #42
+    rf_classifier = RandomForestClassifier(n_estimators=nestm, random_state=ranst)
+    rf_classifier.fit(X_train, y_train)
+
+    y_pred = rf_classifier.predict(X_test)
+
+    accuracy = accuracy_score(y_test, y_pred)
+    REPORT = {
+        'ac':accuracy,
+    }
+
+def SupportVectorMachines(data, ref):
+    y = data.pop(ref)
+    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.3, random_state=42)
+
+    model = svm.SVC(kernel='rbf', C=1, gamma='scale')
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+
+    accuracy = accuracy_score(y_test, y_pred)
+    REPORT = {
+        'ac':accuracy,
+    }

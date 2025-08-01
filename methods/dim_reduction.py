@@ -48,8 +48,6 @@ def PCAnalysis(data, ref):
     print('-> {}'.format(1-np.sum(variance)))
     Plotter(complete, 'PCA - Principal Components Analysis')
 
-
-
 def ICAnalysis(data, ref):
     #the same, select numerical columns (an what I aim to separate?)
     target = data.pop(ref)
@@ -68,7 +66,6 @@ def ICAnalysis(data, ref):
     x_ica   = ica.fit_transform(x_scaled)
     ICs  = pd.DataFrame(x_ica, columns=['IC1', 'IC2'])
     result  = pd.concat([target, ICs], axis=1)
-    print(ICs)
 
     Plotter(result, 'ICA - Independent Components Analysis')
 
