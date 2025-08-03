@@ -19,10 +19,27 @@ from sklearn.decomposition import PCA
 
 In scikit-learn, PCA is implemented as a transform object that takes componentes as inputs and generates others onto which the variance is better projected.
 
-Besides PCA, other methods are implemented:
+### Implemented methods
 
+For now, the following methods were implemented:
+
+#### Dimension reduction algorithms
 * ICA
+* PCA
+* tSNE
+
+#### Classification algorithms
 * Logistic Regression
-* Decision Tree
+* Decision Tree as classifier
+* Random Forest classifier
+* K-nearest neighbors classifier
+* Support vector classifer
+
+#### Regression algorithms
+* Linear regression
+* Ridge regression
+* Decision Tree regressor
+* K-nearest neighbor regressor
+* Support vector regressor
 
 They are all provided by the sklearn module.
