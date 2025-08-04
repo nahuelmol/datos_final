@@ -3,70 +3,51 @@ import pandas as pd
 import numpy as np
 
 from sklearn.decomposition import PCA
-from methods.dim_reduction import PCAnalysis, ICAnalysis, TSNEanalysis
 
+from dimreduction.kind import DimReduction
 from classification.kind import Classification
+from regression.kind import Regression
+
 from data_setter import checkAvailableData, getData
+from abss.commands import Command
+from abss.checker import checker
+
+def switch(cmd):
+    if command.rootCommand == 'new':
+        if command.targetType == 'project':
+            newProject(command.target, self.options)
+    elif command.rootCommand == 'del':
+        if command.targetType == 'project':
+            delProject(command.target, self.options)
+    elif command.rootCommand == 'switch':
+        if command.targetType == 'project':
+            switchProject(command.target, command.options)
+    elif command.rootCommand == 'check':
+        checker(command)
+    elif command.rootCommand == 'apply':
+        if command.targetType == 'dr':
+            DimReduction(command)
+        elif command.targetType == 'c':
+            Classification(command)
+        elif command.targetType == 'r':
+            Regression(command)
+        else:
+            print('not recognized target type')
+
+    else:
+        print('unrecognized command')
+
 
 if __name__ == "__main__":
-    message = """
-
-        Available Datasets
-
-    """
-    print(message)
-    res, dataAv = checkAvailableData()
-    if res:
-        i=1
-        for data in dataAv:
-            print('{}.{}'.format(i, data))
-            i+=1
+    command = None
+    if (len(sys.argv) > 0):
+        command = Command(sys.argv)
     else:
-        print('not data available')
-        sys.exit(0)
-    print("\n\n")
-    opc = int(input("select one option: "))
-    filename = dataAv[opc-1]
-    res, data = getData(filename)
-    if res == False:
-        print("data was not obtained")
-        sys.exit(0)
-
-    message = """
-
-        Available Analysis
-        1.PCA
-        2.ICA
-        3.TSNE
-        4.Classification problem -> Decision Tree
-        5.Ckassification problem -> Logistic Regression 
-
-        Exit (press any) 
-
-    """
-
-    print(message)
-    opc = int(input('What analysis to do? '))
-    ref = input('Select target for this dataset: (RANK?)')
-    if(opc == 1):
-        PCAnalysis(data, ref)
-    elif (opc == 2):
-        ICAnalysis(data, ref)
-    elif (opc == 3):
-        TSNEanalysis(data, ref)
-    elif (opc == 4):
-        res = Classification('DecisionTree', data, ref)
-        if res:
-            print('worked')
-        else:
-            print('not working')
-    elif (opc == 5):
-        res = Classification('Logistic', data, ref)
-        if res:
-            print('worked')
-        else:
-            print('not working')
-    else:
-        sys.exit(0)
+        msg = 'please type a valid command'
+        sys.exit(msg)
+    command.setCommand()
+    command.isAvailableRootCommand()
+    command.setArgs()
+    switch(command)
 
 
