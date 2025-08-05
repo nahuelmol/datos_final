@@ -1,6 +1,7 @@
 
 import json
 import os
+from data_setter import checkAvailableData, getData
 
 def lookFor(fileType):
     datapath = ''
@@ -20,12 +21,6 @@ def lookFor(fileType):
 
 
 def checker(command):
-    checkAvailableData()
-    filename = dataAv[opc-1]
-    res, data = getData(filename)
-    if res == False:
-        print("data was not obtained")
-        sys.exit(0)
     if '-d' in command.options:
         idx = options.index('-d')
         if(options(idx + 1) == '-ft'):
@@ -44,8 +39,18 @@ def checker(command):
                     print('content {}', msg)
             else:
                 print('not recognized value')
-    elif '-cur':
+    elif '-cur' in command.options:
         print('current project')
+    elif '-all' in command.options:
+        res, cnt = checkAvailableData()
+        if res == False:
+            print("not available data")
+            sys.exit(0)
+        else:
+            for file in cnt:
+                print(file)
+    else:
+        print('sending check command information')
 
 
 

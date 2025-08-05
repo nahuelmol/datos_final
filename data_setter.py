@@ -1,8 +1,8 @@
 import os
+import json
 import pandas as pd
 
-def getData(filename):
-    filepath = 'data/{}'.format(filename)
+def getData(filepath):
     try:
         df = pd.read_csv(filepath)
         return True, df
@@ -10,7 +10,10 @@ def getData(filename):
         return False, None
 
 def checkAvailableData():
-    datapath = 'data'
+    datapath = ''
+    with open('manifest.json', 'r') as f:
+        data = json.load(f)
+        datapath = data['datapath']
     if os.path.exists(datapath):
         cnts = os.listdir(datapath)
         if len(cnts) > 0:

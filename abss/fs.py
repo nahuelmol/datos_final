@@ -1,14 +1,37 @@
 import json
 import os
-from datetime import datetime
+from datetime import date
 
-def newProject(name, opt):
-    date = datetime.date()
-    datapath = '{}/data'.format(getcwd())
-    manipath = '{}/manifest.json'.format(getcwd())
+def emptyManifest():
+    pass
+
+def delProject(cmd):
+    manipath = '{}\manifest.json'.format(os.getcwd())
+    projipath = '{}\projects.txt'.format(os.getcwd())
+    if not (os.path.exists(manipath): 
+        return True, 'there is not a project to delete'
+    if not (os.path.exists(projipath)):
+        return True, 'there is not a project to delete'
+
+    projectname = cmd.target.strip()
+    projectscnt = ''
+    with open('projects.txt', 'r') as f:
+        projectscnt = f.read()
+    projectscnt = projectscnt.replace(projectname, "")
+    with open('projects.txt', 'w') as f:
+        f.write(projectscnt)
+    emptyManifest(projectname)
+    return True, 'project deleted'
+
+def newProject(cmd):
+    name    = cmd.target
+    opt     = cmd.options
+    today   = date.today().strftime("%Y-%m-%d")
+    datapath = '{}\data'.format(os.getcwd())
+    manipath = '{}\manifest.json'.format(os.getcwd())
     content = {
             'project_name': name,
-            'datetime': date,
+            'datetime': today,
             'datapath': datapath,
             'dependencies':{},
     }
@@ -30,19 +53,24 @@ def newProject(name, opt):
         cnt = json.dumps(content)
         f.write(cnt)
 
+    print('datapath: ', datapath)
     if not (os.path.exists(datapath)):
         os.makedirs(datapath)
     else:
-        options = len(opt.spli(' '))
-        if('-f' in options):
+        if('-force' in opt):
             os.rmdir(datapath)
             os.makedirs(datapath)
 
+def currentProject():
+    with open('manifest.json', 'r') as f:
+        current = f.read()
+        cnt = json.load(current)
+        return cnt['project_name']
 
 def switchProject(target, options):
     new_cnt = ''
     cnt = None
-    manipath = '{}/manifest.json'.format(getcwd())
+    manipath = '{}\manifest.json'.format(os.getcwd())
     if not (os.path.exists(manifest)):
         return False, 'project does not exists'
 

@@ -1,7 +1,7 @@
 
 import pandas as pd
 
-from sklearn import svc
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
@@ -71,7 +71,7 @@ def Logistic(data, ref):
     print(REPORT['model_intercept'])
 
 
-def kNearestNeighbor(data):
+def KNearestNeighbor(data):
     nneigh = 5
     algorithm = 'auto'
     metric = 'minkowski'
@@ -113,7 +113,7 @@ def SupportVectorMachines(data, ref):
     y = data.pop(ref)
     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.3, random_state=42)
 
-    model = svm.SVC(kernel='rbf', C=1, gamma='scale')
+    model = SVC(kernel='rbf', C=1, gamma='scale')
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
