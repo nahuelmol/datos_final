@@ -5,10 +5,12 @@
   <img src="https://img.shields.io/github/languages/count/nahuelmol/datos_final"/>
 </div>
 
-### Introduction
+### This application
 
 For the Data Laboratory final exam I had to apply PCA using the R programming language.
-This respository contains the same project, but also a version implemented in Python.
+This respository contains the same project, but also a version implemented in Python and integrating other analytical methods.
+
+This application is CLI tool that aims for direct handling of data, its processing and corresponding outputs wether it's a plot or reports.
 
 ### scikit-learn
 The PCA is included in scikit-learn, among other methods, as a matrix decomposition algorithm. Explicitly using the skylearn.decomposition module:
@@ -43,3 +45,19 @@ For now, the following methods were implemented:
 * Support vector regressor
 
 They are all provided by the sklearn module.
+
+### Some commands
+
+The following command indicates that is applied the dimension reduction PCA algorithm. In addition, output file and reference (which is the target colummn in the dataframe) is specified.
+
+```
+cal apply dr:<example.csv>:pca -o <output> -ref <reference>
+```
+
+Let's create a new project called heisenberg (walter white)
+
+```
+cal new p:heisenberg
+```
+
+Soon other commands will be added here as the project grows
