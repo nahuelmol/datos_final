@@ -1,14 +1,15 @@
 import json
+import shutil
 import os
-from datetime import date
+from datetime import date, datetime
 
-def emptyManifest():
-    pass
+def outProject():
+    os.remove('manifest.json')
 
 def delProject(cmd):
     manipath = '{}\manifest.json'.format(os.getcwd())
-    projipath = '{}\projects.txt'.format(os.getcwd())
-    if not (os.path.exists(manipath): 
+    projipath = '{}\prs\projects.txt'.format(os.getcwd())
+    if not (os.path.exists(manipath)):
         return True, 'there is not a project to delete'
     if not (os.path.exists(projipath)):
         return True, 'there is not a project to delete'
@@ -20,11 +21,12 @@ def delProject(cmd):
     projectscnt = projectscnt.replace(projectname, "")
     with open('projects.txt', 'w') as f:
         f.write(projectscnt)
-    emptyManifest(projectname)
+    os.remove(manipath)
     return True, 'project deleted'
 
 def newProject(cmd):
-    name    = cmd.target
+    name    = cmd.target.strip()
+    print(name)
     opt     = cmd.options
     today   = date.today().strftime("%Y-%m-%d")
     datapath = '{}\data'.format(os.getcwd())
@@ -35,50 +37,46 @@ def newProject(cmd):
             'datapath': datapath,
             'dependencies':{},
     }
-
-    if not os.path.exists(manipath):
-        with open('projects.txt', 'w') as f:
-            name = '\n{}'.format(name)
-            f.write(name)
+    project  = 'prs'
+    if not (os.path.exists(project)):
+        os.mkdir(project)
+        os.mkdir('prs\{}'.format(name))
+        os.mkdir('prs\{}\outputs'.format(name))
+        with open('prs\projects.txt', 'w') as f:
+            f.write('\n{}'.format(name))
+        with open('manifest.json', 'w') as f:
+            cnt = json.dumps(content)
+            f.write(cnt)
+        with open('prs\{}\story.json'.format(name), 'w') as f:
+            story = {
+                    'project':name,
+                    'borntime':str(datetime.now()),
+                    'methods':[],
+            }
+            cnt = json.dumps(story)
+            f.write(cnt)
     else:
-        new_content = ''
-        with open('projects.txt', 'r') as f:
-            current_cnt = f.read()
-            name = '\n{}'.format(name)
-            new_content = '{}{}'.format(current_cnt, name)
-        with open('projects.txt', 'w') as f:
-            f.write(new_content)
+        with open('prs\projects.txt', 'r') as f:
+            name = '{}\n'.format(name)
+            new_content = '{}{}'.format(f.read(), name)
+        os.mkdir('prs\{}'.format(name))
+        shutil('manifest.json', '{}\manifest.json'.format(pathproject))
+        with open('manifest.json', 'r') as f:
+            f.write(content)
 
-    with open('manifest.json', 'w') as f:
-        cnt = json.dumps(content)
-        f.write(cnt)
 
-    print('datapath: ', datapath)
-    if not (os.path.exists(datapath)):
-        os.makedirs(datapath)
-    else:
-        if('-force' in opt):
-            os.rmdir(datapath)
-            os.makedirs(datapath)
-
-def currentProject():
+def currentProject(value):
     with open('manifest.json', 'r') as f:
-        current = f.read()
-        cnt = json.load(current)
-        return cnt['project_name']
+        cnt = json.load(f)
+        return cnt[value]
 
 def switchProject(target, options):
-    new_cnt = ''
-    cnt = None
     manipath = '{}\manifest.json'.format(os.getcwd())
-    if not (os.path.exists(manifest)):
-        return False, 'project does not exists'
+    projipath= 'prs\projects.txt'
 
-    with open('manifest.json', 'r') as f:
-        current = f.read()
-        cnt = json.load(current)
-        cnt['project_name'] = target
-    with open('manifest.json', 'w') as f:
-        f.write(json.dumps(cnt))
-    return False, 'manifest.json modified'
+    os.remove(manipath)
+    if not (os.path.exists('prs\{}\manifest.json'.format(target))):
+        shutil.copy('prs\{}\manifest.json'.format(target), 'manifest.json')
+
+
 

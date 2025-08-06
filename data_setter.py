@@ -7,6 +7,7 @@ def getData(filepath):
         df = pd.read_csv(filepath)
         return True, df
     except:
+        print('err')
         return False, None
 
 def checkAvailableData():

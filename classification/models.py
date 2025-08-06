@@ -71,7 +71,7 @@ def Logistic(data, ref):
     print(REPORT['model_intercept'])
 
 
-def KNearestNeighbor(data):
+def KNearestNeighbors(data):
     nneigh = 5
     algorithm = 'auto'
     metric = 'minkowski'
@@ -109,7 +109,7 @@ def RandomForest(data,ref):
         'ac':accuracy,
     }
 
-def SupportVectorMachines(data, ref):
+def SupportVectorClassifier(data, ref):
     y = data.pop(ref)
     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.3, random_state=42)
 

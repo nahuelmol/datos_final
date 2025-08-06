@@ -1,20 +1,19 @@
 
-from classification.models import DecisionTree, Logistic
+from classification.models import DecisionTree, Logistic, KNearestNeighbors, SupportVectorClassifier
 
-def Classification(command):
-    filepath = '{}/{}'.format(command.datapath, command.target)
+def Classification(cmd):
+    filepath = '{}/{}'.format(cmd.datapath, cmd.target)
     data = getData(filepath)
-    opc = command.method
-    if opc == 'DecisionTree':
-        DecisionTree(data, command.ref)
-    elif (opc == 'Logistic'):
-        Logistic(data, command.ref)
-    elif (opc == 'KNearestNeighbors'):
-        KNearestNeighbors(data, command.ref)
-    elif (opc == 'RandomForest'):
-        KNearestNeighbors(data, command.ref)
-    elif (opc == 'SupportVectorMachine'):
-        SupportVectorMachine(data, command.ref)
+    if cmd.method == 'DecisionTree':
+        DecisionTree(data, cmd.ref)
+    elif (cmd.method == 'Logistic'):
+        Logistic(data, cmd.ref)
+    elif (cmd.method == 'KNearestNeighbors'):
+        KNearestNeighbors(data, cmd.ref)
+    elif (cmd.method == 'RandomForest'):
+        KNearestNeighbors(data, cmd.ref)
+    elif (cmd.method == 'SupportVectorMachine'):
+        SupportVectorClassifier(data, cmd.ref)
     else:
         return False
     return True
