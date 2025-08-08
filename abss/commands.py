@@ -14,8 +14,11 @@ class Command:
         self.ref        = None
         self.options = []
         self.message = ''
-        self.availableFlags = ['-o', '-r']
+        self.forced = False
+        self.availableCoupledFlags  = ['-o', '-r', 'n']
+        self.availableAloneFlags    = ['-f']
         self.currentFlags = {}
+        self.aloneFlags = {}
         if self.manyArgs > 2:
             for i in range(2, len(self.args)):
                 self.options.append(args[i])
@@ -62,38 +65,61 @@ class Command:
         else:
             print('not available targetType: {}'.format(code))
 
+    def default(self, flag):
+        if flag == '-n':
+            return 2
+        elif flag == '-r':
+            return self.ref
+        elif flag == 'o':
+            return self.output
+
     def addFlags(self):
         if '-r' in self.currentFlags:
             self.ref = self.currentFlags['-r']
         if '-o' in self.currentFlags:
             self.output = self.currentFlags['-o']
+        if '-n' in self.currentFlags:
+            self.ncomps = self.currentFlags['-n']
+        if '-f' in self.aloneFlags:
+            self.forced = True
 
     def flagSetting(self):
-        for flag in self.availableFlags:
-            if(flag in self.options):
+        for flag in self.options:
+            if flag in self.availableCoupledFlags:
                 idx = self.options.index(flag)
                 if not self.args[idx+1]:
-                    print('flag without arg')
+                    print('{} without arg'.format(flag))
+                    self.currentFlags[flag] = self.default(flag)
                 else:
                     self.currentFlags[flag] = self.options[idx + 1]
+                    print('{}: {}'.format(flag, self.currentFlags[flag]))
+            elif flag in self.availableAloneFlags:
+                self.aloneFlags[flag] = True
         self.addFlags()
 
-    def setMethod(self, meth):
-        if meth == 'pca':
-            self.method = 'PCAnalysis'
-        elif meth == 'ica':
-            self.method = 'ICAnalysis'
-        elif meth == 'tsne':
-            self.method = 'TSNEanalysis'
-
     def setArgs(self):
-        if self.rootCommand == 'new':
+        if self.rootCommand == 'apply':
+            if self.manyArgs > 1:
+                tt = self.args[1].split(':')
+                if not len(tt) == 3:
+                    print('command error, arguments needed')
+                    sys.exit(0)
+                self.targetType = tt[0]
+                self.target = tt[1]
+                self.method = tt[2]
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting()
+            else:
+                print('you need more arguments')
+        elif self.rootCommand == 'new':
             if self.manyArgs > 1:
                 cntt = self.args[1].split(':')
                 self.setType(cntt[0])
                 self.target = cntt[1]
                 if self.manyArgs > 2:
                     self.options = self.args[1:]
+                    self.flagSetting()
             else:
                 print('you need more arguments')
         elif self.rootCommand == 'current':
@@ -160,20 +186,6 @@ class Command:
             else:
                 print('misterious error')
 
-        elif self.rootCommand == 'apply':
-            if self.manyArgs > 1:
-                tt = self.args[1].split(':')
-                if not len(tt) == 3:
-                    print('command error, arguments needed')
-                    sys.exit(0)
-                self.targetType = tt[0]
-                self.target = tt[1]
-                self.setMethod(tt[2])
-                if self.manyArgs > 2:
-                    self.options = self.args[2:]
-                    self.flagSetting()
-            else:
-                print('you need more arguments')
 
     def isAvailableRootCommand(self):
         availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'clean']

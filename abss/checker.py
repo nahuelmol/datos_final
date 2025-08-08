@@ -1,6 +1,8 @@
 
 import json
 import os
+
+from abss.fs import currentProject
 from data_setter import checkAvailableData, getData
 
 def lookFor(fileType):
@@ -39,6 +41,14 @@ def checker(command):
                     print('content {}', msg)
             else:
                 print('not recognized value')
+    elif '-meths' in command.options:
+        projectname = currentProject('project_name')
+        storypath = 'prs\{}\story.json'.format(projectname)
+        with open(storypath, 'r') as f:
+            data = json.load(f)
+            for meth in data['methods']:
+                print(meth['method'])
+                print(meth['time'])
     elif '-cur' in command.options:
         print('current project')
     elif '-all' in command.options:

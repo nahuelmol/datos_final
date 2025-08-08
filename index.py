@@ -42,6 +42,8 @@ def switch(cmd):
     elif cmd.rootCommand == 'switch':
         if cmd.targetType == 'project':
             switchProject(cmd.target, cmd.options)
+    elif cmd.rootCommand == 'visual':
+        pass
     else:
         print('unrecognized command')
 

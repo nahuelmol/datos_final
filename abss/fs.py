@@ -45,16 +45,14 @@ def newProject(cmd):
         with open('prs\projects.txt', 'w') as f:
             f.write('\n{}'.format(name))
         with open('manifest.json', 'w') as f:
-            cnt = json.dumps(content)
-            f.write(cnt)
+            json.dump(content, f, indent=4)
         with open('prs\{}\story.json'.format(name), 'w') as f:
             story = {
                     'project':name,
                     'borntime':str(datetime.now()),
                     'methods':[],
             }
-            cnt = json.dumps(story)
-            f.write(cnt)
+            json.dump(story, f, indent=4)
     else:
         with open('prs\projects.txt', 'r') as f:
             name = '{}\n'.format(name)
