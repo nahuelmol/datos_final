@@ -48,16 +48,30 @@ They are all provided by the sklearn module.
 
 ### Some commands
 
-The following command indicates that is applied the dimension reduction PCA algorithm. In addition, output file and reference (which is the target colummn in the dataframe) is specified.
-
-```
-cal apply dr:<example.csv>:pca -o <output> -ref <reference>
-```
-
 Let's create a new project called heisenberg (walter white)
 
 ```
 cal new p:heisenberg
 ```
 
-Soon other commands will be added here as the project grows
+The following command indicates that is applied the dimension reduction PCA algorithm. In addition, output file and reference (which is the target colummn in the dataframe) is specified.
+
+```
+cal apply dr:<example.csv>:pca -o <output> -ref <reference>
+```
+
+To check current project's methods applied
+
+```
+cal check -meths
+```
+
+### Installation
+
+Pyinstaller is used to compile the executable:
+
+```
+pyinstaller index.py
+```
+
+Other commands will be added here as the project grows
