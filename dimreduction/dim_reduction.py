@@ -14,7 +14,6 @@ from abss.fs import currentProject
 from .plotmaker import Plotter
 
 def data_separator(data, ref):
-    print('ref: ', ref)
     target = data.pop(ref)
     cols_to_drop = []
     for col in data.columns:

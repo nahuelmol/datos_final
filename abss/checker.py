@@ -44,11 +44,27 @@ def checker(command):
     elif '-meths' in command.options:
         projectname = currentProject('project_name')
         storypath = 'prs\{}\story.json'.format(projectname)
-        with open(storypath, 'r') as f:
-            data = json.load(f)
-            for meth in data['methods']:
-                print(meth['method'])
-                print(meth['time'])
+        if len(command.options) == 1:
+            with open(storypath, 'r') as f:
+                data = json.load(f)
+                for meth in data['methods']:
+                    print(meth['method'])
+                    print(meth['time'])
+        elif len(command.options) > 1:
+            idx = command.options.index('-meths') + 1
+            opc = command.options[idx]
+            if opc == 'w':
+                idx = command.options.index('w') + 1
+                target = command.options[idx]
+                with open(storypath, 'r') as f:
+                    data = json.load(f)
+                    for meth in data['methods']:
+                        if meth['method'] == target:
+                            print(meth['time'])
+            else:
+                print('incorrect commander {} calld'.format(opc))
+                print('only w commander is capable here'.format(opc))
+
     elif '-cur' in command.options:
         print('current project')
     elif '-all' in command.options:

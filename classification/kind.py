@@ -1,19 +1,24 @@
 
 from classification.models import DecisionTree, Logistic, KNearestNeighbors, SupportVectorClassifier
+from abss.fs import currentProject
+from data_setter import getData
 
 def Classification(cmd):
-    filepath = '{}/{}'.format(cmd.datapath, cmd.target)
-    data = getData(filepath)
-    if cmd.method == 'DecisionTree':
-        DecisionTree(data, cmd.ref)
-    elif (cmd.method == 'Logistic'):
-        Logistic(data, cmd.ref)
-    elif (cmd.method == 'KNearestNeighbors'):
-        KNearestNeighbors(data, cmd.ref)
-    elif (cmd.method == 'RandomForest'):
-        KNearestNeighbors(data, cmd.ref)
-    elif (cmd.method == 'SupportVectorMachine'):
-        SupportVectorClassifier(data, cmd.ref)
+    datapath = currentProject('datapath')
+    filepath = '{}\{}'.format(datapath, cmd.target)
+    res, data = getData(filepath)
+    if res == False:
+        print('data cannot be obtaind')
+    if cmd.method == 'dt':
+        DecisionTree(data, cmd)
+    elif (cmd.method == 'l'):
+        Logistic(data, cmd)
+    elif (cmd.method == 'knn'):
+        KNearestNeighbors(data, cmd)
+    elif (cmd.method == 'rf'):
+        KNearestNeighbors(data, cmd)
+    elif (cmd.method == 'svm'):
+        SupportVectorClassifier(data, cmd)
     else:
         return False
     return True

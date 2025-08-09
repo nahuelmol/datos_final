@@ -15,10 +15,14 @@ class Command:
         self.options = []
         self.message = ''
         self.forced = False
-        self.availableCoupledFlags  = ['-o', '-r', 'n']
-        self.availableAloneFlags    = ['-f']
+        self.availableCoupledFlags  = ['-o', '-r', '-n', '-m']
+        self.availableAloneFlags    = ['-f', '-all']
         self.currentFlags = {}
         self.aloneFlags = {}
+        self.random_state = 42
+        self.test_size = 0.2
+        self.meth = None
+        self.all = False
         if self.manyArgs > 2:
             for i in range(2, len(self.args)):
                 self.options.append(args[i])
@@ -80,8 +84,12 @@ class Command:
             self.output = self.currentFlags['-o']
         if '-n' in self.currentFlags:
             self.ncomps = self.currentFlags['-n']
+        if '-m' in self.currentFlags:
+            self.meth   = self.currentFlags['-m']
         if '-f' in self.aloneFlags:
             self.forced = True
+        if '-all' in self.aloneFlags:
+            self.all = True
 
     def flagSetting(self):
         for flag in self.options:
@@ -127,6 +135,17 @@ class Command:
                 self.options = None
             else:
                 print('too much arguments')
+        elif self.rootCommand == 'clean':
+            if self.manyArgs == 1:
+                print('insuficient args')
+            elif self.manyArgs > 1:
+                self.target = self.args[1]
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting()
+                else:
+                    self.all = True
+                self.flagSetting()
         elif self.rootCommand == 'switch':
             if self.manyArgs > 2:
                 res = self.args[1].split(':')

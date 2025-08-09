@@ -6,78 +6,82 @@ from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import confusion_matrix, roc_auc_score, f1_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
 
-def DecisionTree(data, ref):
-    #ref=C
+from datetime import datetime
+
+from dimreduction.dim_reduction import data_separator, add_method
+
+def DecisionTree(data, cmd):
     col     = input('select column: ') #POS
     first   = input('select first possible response: ') #C
     second  = input('select second possible response: ')#G
-    query = "{}.isin(('{}', '{}'))".format(col, first, second)
-    data = data.query(query)
+    query   = "{}.isin(('{}', '{}'))".format(col, first, second)
+    data    = data.query(query)
 
-    cols_to_drop = []
-    for col in data.columns:
-        if data[col].dtype != 'float64':
-            if col != ref:
-                cols_to_drop.append(col)
-    X = data.loc[:, ~data.columns.isin(cols_to_drop)]
-    y = (data[col] == ref) # =0 if C, =1 if G 
-
-    TREE = DecisionTreeClassifier(max_depth=1).fit(X, y) #finds the bias
-    plot_tree(TREE)
-    predictions = TREE.predict(X)
+    data, target = data_separator(data, cmd.ref)
+    TREE = DecisionTreeClassifier(max_depth=1).fit(data, target) #finds the bias
+    predictions = TREE.predict(data)
     predictions[3]
 
-    AS = accuracy_score(y, TREE.predict(X))
+    ass = accuracy_score(target, TREE.predict(data))
     REPORT = {
-            'as':AS
+            'method':'decisionTree',
+            'time':str(datetime.now()),
+            'ass':ass,
     }
-    print('accuracy score: ', REPORT['as'])
+    add_method(REPORT)
 
-def Logistic(data, ref):
+def Logistic(data, cmd):
 
-    y = data.pop(ref)
-    cols_to_drop = []
-    for col in data.columns:
-        if data[col].dtype != 'float64':
-            cols_to_drop.append(col)
-    X = data.loc[:, ~data.columns.isin(cols_to_drop)]
+    data, target = data_separator(data, cmd.ref)
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
 
-    random_state    = int(input('Set random state: ')) #42
-    test_size       = float(input('Set test size: ')) #0.2
-    X_train, X_test, y_train, y_test = train_test_split(X, y, 
-                                        test_size=test_size, 
-                                        random_state=random_state)
+    skyler = StandardScaler()
+    X_train_scaled = skyler.fit_transform(X_train)
+    X_test_scaled = skyler.transform(X_test)
+    model = LogisticRegression(max_iter=1000).fit(X_train_scaled, y_train)
+    predictions = model.predict(X_test_scaled) #making predictions over new X values (X_test)
+    probs = model.predict_proba(X_test_scaled)
 
-    model = LogisticRegression()
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_test) #making predictions over new X values (X_test)
+    #rocaucscore = roc_auc_score(y_test, probs, multi_class='ovr')
+    #model2 = LogisticRegression().fit(data, target)
+    #model2.predict_proba(data)
 
-    cr = classification_report(y_test, predictions) 
+    cr = classification_report(y_test, predictions, zero_division=0) 
     #taking y_test values with those predicted by the model
-    cm = confusion_matrix(y_test, predictions)
-    AS = accuracy_score(y_test, predictions)
-    mc = model.coef_
-    mi = model.intercept_
+    cm = confusion_matrix(y_test, predictions).tolist()
+    accuracy = accuracy_score(y_test, predictions)
+    f1score = f1_score(y_test, predictions, average='macro', zero_division=0).tolist()
+    mc = model.coef_.tolist()
+    mi = model.intercept_.tolist()
+
+    """
     REPORT = {
+        'method':'logistic',
+        'time':str(datetime.now()),
         'model_coef': mc,
         'model_intercept': mi,
         'confusion_matrix': cm,
         'classification_report': cr,
-        'as':AS
+        'as':accuracy,
+        'f1_score':f1_score,
     }
-    print(REPORT['model_intercept'])
+    add_method(REPORT)
+    """
+    
 
-
-def KNearestNeighbors(data):
+def KNearestNeighbors(data, cmd):
     nneigh = 5
     algorithm = 'auto'
     metric = 'minkowski'
     y = [0,0,1,1]
     neigh = KNeighborsClassifier(n_neighbors=nneigh)
-    classifier = neigh.fit(data, y)
+    data, target = data_separator(data, cmd.ref)
+    classifier = neigh.fit(data, cmd.ref)
     
     INPUT = int(input('predict?'))
     p  = classifier.predict([INPUT])
@@ -85,12 +89,15 @@ def KNearestNeighbors(data):
     out= classifier.neighbors([[1.,1.,1.]])
 
     predictions = {
+            'method':'knearest_neighbors',
+            'time':str(datetime.now()),
             'p':p,
             'pp':pp,
     }
     REPORT = {
             'predictions':predictions,
     }
+    add_method(REPORT)
 
 
 def RandomForest(data,ref):
@@ -106,12 +113,18 @@ def RandomForest(data,ref):
 
     accuracy = accuracy_score(y_test, y_pred)
     REPORT = {
+        'method':'random_forest',
+        'time':str(datetime.now()),
         'ac':accuracy,
     }
+    add_method(REPORT)
 
-def SupportVectorClassifier(data, ref):
-    y = data.pop(ref)
-    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.3, random_state=42)
+def SupportVectorClassifier(data, cmd):
+    data, target = data_separator(data, cmd.ref)
+    test_size = 0.3
+    rand_stte = 42
+    X_train, X_test, y_train, y_test = train_test_split(data, target, 
+                                                        test_size=test_size, random_state=rand_stte)
 
     model = SVC(kernel='rbf', C=1, gamma='scale')
     model.fit(X_train, y_train)
@@ -120,5 +133,8 @@ def SupportVectorClassifier(data, ref):
 
     accuracy = accuracy_score(y_test, y_pred)
     REPORT = {
+        'method':'support_vector_classifier',
+        'time':str(datetime.now()),
         'ac':accuracy,
     }
+    add_method(REPORT)

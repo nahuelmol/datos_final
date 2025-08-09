@@ -13,6 +13,7 @@ from abss.commands import Command
 from abss.checker import checker
 from abss.change import Change
 from abss.fs import newProject, delProject, currentProject, outProject
+from abss.meths import cleanMeths
 
 def switch(cmd):
     if cmd.rootCommand == 'apply':
@@ -31,6 +32,9 @@ def switch(cmd):
         checker(cmd)
     elif cmd.rootCommand == 'current':
         currentProject()
+    elif cmd.rootCommand == 'clean':
+        if cmd.target == 'meths':
+            cleanMeths(cmd)
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)
