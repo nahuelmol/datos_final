@@ -12,8 +12,9 @@ from data_setter import checkAvailableData, getData
 from abss.commands import Command
 from abss.checker import checker
 from abss.change import Change
-from abss.fs import newProject, delProject, currentProject, outProject
+from abss.fs import newProject, delProject, currentProject, outProject, switchProject
 from abss.meths import cleanMeths
+from abss.dataSetting import setData, delData
 
 def switch(cmd):
     if cmd.rootCommand == 'apply':
@@ -38,14 +39,19 @@ def switch(cmd):
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)
+        if cmd.targetType == 'data':
+            delData(cmd)
     elif cmd.rootCommand == 'new':
         if cmd.targetType == 'project':
             newProject(cmd)
     elif cmd.rootCommand == 'out':
         outProject()
-    elif cmd.rootCommand == 'switch':
+    elif cmd.rootCommand == 'sw':
         if cmd.targetType == 'project':
-            switchProject(cmd.target, cmd.options)
+            switchProject(cmd)
+    elif cmd.rootCommand == 'set':
+        if cmd.targetType == 'data':
+            setData(cmd)
     elif cmd.rootCommand == 'visual':
         pass
     else:

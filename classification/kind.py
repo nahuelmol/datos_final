@@ -4,7 +4,7 @@ from abss.fs import currentProject
 from data_setter import getData
 
 def Classification(cmd):
-    datapath = currentProject('datapath')
+    datapath = currentProject(['datapath','src'])
     filepath = '{}\{}'.format(datapath, cmd.target)
     res, data = getData(filepath)
     if res == False:
@@ -14,8 +14,6 @@ def Classification(cmd):
     elif (cmd.method == 'l'):
         Logistic(data, cmd)
     elif (cmd.method == 'knn'):
-        KNearestNeighbors(data, cmd)
-    elif (cmd.method == 'rf'):
         KNearestNeighbors(data, cmd)
     elif (cmd.method == 'svm'):
         SupportVectorClassifier(data, cmd)

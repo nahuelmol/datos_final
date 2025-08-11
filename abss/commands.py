@@ -15,7 +15,7 @@ class Command:
         self.options = []
         self.message = ''
         self.forced = False
-        self.availableCoupledFlags  = ['-o', '-r', '-n', '-m']
+        self.availableCoupledFlags  = ['-o', '-r', '-n', '-m', '-ft']
         self.availableAloneFlags    = ['-f', '-all']
         self.currentFlags = {}
         self.aloneFlags = {}
@@ -63,7 +63,7 @@ class Command:
         if code == 'p':
             self.targetType = 'project'
         elif code == 'd':
-            self.targetType = 'dataproject'
+            self.targetType = 'data'
         elif code == 'l':
             self.targetType = 'library'
         else:
@@ -146,18 +146,31 @@ class Command:
                 else:
                     self.all = True
                 self.flagSetting()
-        elif self.rootCommand == 'switch':
-            if self.manyArgs > 2:
+        elif self.rootCommand == 'sw':
+            if self.manyArgs > 1:
                 res = self.args[1].split(':')
-                self.targetType = res[0]
+                self.setType(res[0])
                 self.target = res[1]
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
             else:
                 print('you need more arguments')
+        elif self.rootCommand == 'set':
+            if self.manyArgs > 1:
+                res = self.args[1].split(':')
+                self.setType(res[0])
+                self.target = res[1]
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting()
+            else:
+                print('you need more arguments')
         elif self.rootCommand == 'check':
             if self.manyArgs > 1:
-                self.options = self.args[1:]
+                self.target = self.args[1]
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting() 
             else:
                 print('you need more arguments')
         elif self.rootCommand == 'meth':

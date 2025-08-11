@@ -5,7 +5,7 @@ from data_setter import getData
 from abss.fs import currentProject
 
 def DimReduction(cmd):
-    datapath = currentProject('datapath')
+    datapath = currentProject(['datapath','src'])
     filepath = '{}\{}'.format(datapath, cmd.target)
     res, data = getData(filepath)
     if res == False:
