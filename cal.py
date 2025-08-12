@@ -15,6 +15,7 @@ from abss.change import Change
 from abss.fs import newProject, delProject, currentProject, outProject, switchProject
 from abss.meths import cleanMeths
 from abss.dataSetting import setData, delData
+from abss.plotViewer import seePlot
 
 def switch(cmd):
     if cmd.rootCommand == 'apply':
@@ -46,6 +47,8 @@ def switch(cmd):
             newProject(cmd)
     elif cmd.rootCommand == 'out':
         outProject()
+    elif cmd.rootCommand == 'see':
+        seePlot(cmd)
     elif cmd.rootCommand == 'sw':
         if cmd.targetType == 'project':
             switchProject(cmd)

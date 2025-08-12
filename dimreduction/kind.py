@@ -6,10 +6,9 @@ from abss.fs import currentProject
 
 def DimReduction(cmd):
     datapath = currentProject(['datapath','src'])
-    filepath = '{}\{}'.format(datapath, cmd.target)
-    res, data = getData(filepath)
+    res, data = getData(datapath)
     if res == False:
-        print('data cannot be obtaind')
+        print('data cannot be obtained')
         sys.exit(0)
     if cmd.method == 'ica':
         ICAnalysis(data, cmd)

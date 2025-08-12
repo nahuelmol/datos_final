@@ -22,7 +22,7 @@ def data_separator(data, ref):
     data = data.loc[:, ~data.columns.isin(cols_to_drop)]
     return data, target
 
-def add_method(report):
+def add(what, report):
     name = ''
     with open('manifest.json', 'r') as file:
         name = json.load(file)['project_name']
@@ -30,7 +30,7 @@ def add_method(report):
     current = {}
     with open(storypath, 'r') as file:
         current = json.load(file)
-        current['methods'].append(report)
+        current[what].append(report)
 
     with open(storypath, 'w') as file:
         json.dump(current, file, indent=4)
@@ -53,8 +53,8 @@ def PCAnalysis(data, cmd):
     lost_information = (1-np.sum(variance_ratio))
     time = str(datetime.now())
 
-    projectname = currentProject('project_name')
-    chartpath   = 'prs\{}\outputs\{}'.format(projectname,cmd.output)
+    projectname = currentProject(['project_name'])
+    chartpath   = 'prs\{}\outputs\{}'.format(projectname, cmd.output)
     REPORT = {
         'method': 'pca',
         'time': time,
@@ -63,7 +63,7 @@ def PCAnalysis(data, cmd):
         'pca_chart_path':chartpath,
     }
     Plotter(complete, 'PCA - Principal Components Analysis', chartpath, cmd.ref)
-    add_method(REPORT)
+    add('methods', REPORT)
 
 def ICAnalysis(data, cmd):
     data, target = data_separator(data, cmd.ref)
@@ -85,7 +85,7 @@ def ICAnalysis(data, cmd):
     white = ica.whitening_.tolist()
     time = str(datetime.now())
 
-    projectname = currentProject('project_name')
+    projectname = currentProject(['project_name'])
     chartpath   = 'prs\{}\outputs\{}'.format(projectname,cmd.output)
     Plotter(complete, 'ICA - Independent Components Analysis', chartpath, cmd.ref)
     REPORT = {
@@ -97,7 +97,7 @@ def ICAnalysis(data, cmd):
         'meann':meann,
         'white':white,
     }
-    add_method(REPORT)
+    add('methods', REPORT)
 
 def TSNEanalysis(data, cmd):
     data, target = data_separator(data, cmd.ref)
@@ -116,7 +116,7 @@ def TSNEanalysis(data, cmd):
     tsnes  = pd.DataFrame(x_tsne, columns=tsnenames)
     complete  = pd.concat([tsnes, target], axis=1)
 
-    projectname = currentProject('project_name')
+    projectname = currentProject(['project_name'])
     chartpath   = 'prs\{}\outputs\{}'.format(projectname, cmd.output)
     Plotter(complete, 'tSNE Analysis', chartpath, cmd.ref)
     REPORT = {
@@ -124,7 +124,7 @@ def TSNEanalysis(data, cmd):
         'time': time,
         'chartpath':chartpath,
     }
-    add_method(REPORT)
+    add('methods', REPORT)
 
 
 

@@ -60,34 +60,47 @@ def checker(cmd):
             files = os.listdir(src)
             for file in files:
                 print('file: ', file)
-    elif cmd.target == '-meths':
-        projectname = currentProject('project_name')
+    elif cmd.target == '-mods':
+        projectname = currentProject(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
-        if len(command.options) == 1:
+        if cmd.all == True:
+            data = {}
+            with open(storypath, 'r') as f:
+                data = json.load(f)
+                for meth in data['models']:
+                    print(meth['model'])
+                    if cmd.ac == True:
+                        print(meth['ac'])
+                    else:
+                        print(meth['time'])
+
+        else:
+            with open(storypath, 'r') as f:
+                data = json.load(f)
+                for meth in data['methods']:
+                    if meth['method'] == cmd.cond:
+                        print(meth['time'])
+
+    elif cmd.target == '-meths':
+        projectname = currentProject(['project_name'])
+        storypath = 'prs\{}\story.json'.format(projectname)
+        if cmd.all == True:
             with open(storypath, 'r') as f:
                 data = json.load(f)
                 for meth in data['methods']:
                     print(meth['method'])
                     print(meth['time'])
-        elif len(command.options) > 1:
-            idx = command.options.index('-meths') + 1
-            opc = command.options[idx]
-            if opc == 'w':
-                idx = command.options.index('w') + 1
-                target = command.options[idx]
-                with open(storypath, 'r') as f:
-                    data = json.load(f)
-                    for meth in data['methods']:
-                        if meth['method'] == target:
-                            print(meth['time'])
-            else:
-                print('incorrect commander {} called'.format(opc))
-                print('only w commander is capable here'.format(opc))
+        else:
+            with open(storypath, 'r') as f:
+                data = json.load(f)
+                for meth in data['methods']:
+                    if meth['method'] == cmd.cond:
+                        print(meth['time'])
 
     elif cmd.target == 'tt' or cmd.target == 'tn' or cmd.target == 'src':
         ask_mani_for_data(cmd.target)
     elif cmd.target == '-cur':
-        pname = currentProject('project_name')
+        pname = currentProject(['project_name'])
         print('current project {}'.format(pname))
     elif cmd.target == '-all':
         res, cnt = checkAvailableData()

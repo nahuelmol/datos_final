@@ -15,14 +15,14 @@ class Command:
         self.options = []
         self.message = ''
         self.forced = False
-        self.availableCoupledFlags  = ['-o', '-r', '-n', '-m', '-ft']
-        self.availableAloneFlags    = ['-f', '-all']
+        self.availableCoupledFlags  = ['-o', '-r', '-n', '-m', '-ft', '-rs', '-ts', 'w']
+        self.availableAloneFlags    = ['-f', '-all', '-ac']
         self.currentFlags = {}
         self.aloneFlags = {}
         self.random_state = 42
         self.test_size = 0.2
         self.meth = None
-        self.all = False
+        self.all = True
         if self.manyArgs > 2:
             for i in range(2, len(self.args)):
                 self.options.append(args[i])
@@ -78,6 +78,7 @@ class Command:
             return self.output
 
     def addFlags(self):
+        print(self.currentFlags)
         if '-r' in self.currentFlags:
             self.ref = self.currentFlags['-r']
         if '-o' in self.currentFlags:
@@ -85,7 +86,18 @@ class Command:
         if '-n' in self.currentFlags:
             self.ncomps = self.currentFlags['-n']
         if '-m' in self.currentFlags:
+            self.all    = False
             self.meth   = self.currentFlags['-m']
+        if '-rs' in self.currentFlags:
+            self.random_state   = float(self.currentFlags['-rs'])
+        if '-ts' in self.currentFlags:
+            self.test_size      = float(self.currentFlags['-ts'])
+        if 'w' in self.currentFlags:
+            self.all = False
+            self.cond = self.currentFlags['w']
+
+        if '-ac' in self.aloneFlags:
+            self.ac = True
         if '-f' in self.aloneFlags:
             self.forced = True
         if '-all' in self.aloneFlags:
@@ -109,12 +121,14 @@ class Command:
         if self.rootCommand == 'apply':
             if self.manyArgs > 1:
                 tt = self.args[1].split(':')
-                if not len(tt) == 3:
-                    print('command error, arguments needed')
-                    sys.exit(0)
-                self.targetType = tt[0]
-                self.target = tt[1]
-                self.method = tt[2]
+                if len(tt) == 3:
+                    self.targetType = tt[0]
+                    self.target = tt[1]
+                    self.method = tt[2]
+                elif len(tt) == 2:
+                    self.targetType = tt[0]
+                    self.target = currentProject(['datapath', 'src'])
+                    self.method = tt[1]
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
                     self.flagSetting()
@@ -146,6 +160,12 @@ class Command:
                 else:
                     self.all = True
                 self.flagSetting()
+        elif self.rootCommand == 'see':
+            if self.manyArgs > 1:
+                self.target = self.args[1]
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting()
         elif self.rootCommand == 'sw':
             if self.manyArgs > 1:
                 res = self.args[1].split(':')

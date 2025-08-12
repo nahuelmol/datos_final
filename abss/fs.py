@@ -57,14 +57,8 @@ def newProject(cmd):
     manipath = '{}\manifest.json'.format(os.getcwd())
     data = {
         'src': datapath,
-        'train':{
-            'x':[],
-            'y':[],
-        },
-        'test' :{
-            'x':[],
-            'y':[],
-        },
+        'train':[],
+        'test' :[],
     }
     content = {
             'project_name': name,
@@ -88,6 +82,7 @@ def newProject(cmd):
                     'project':name,
                     'borntime':str(datetime.now()),
                     'methods':[],
+                    'models':[],
             }
             json.dump(story, f, indent=4)
     else:
@@ -105,15 +100,22 @@ def newProject(cmd):
                     'project':name,
                     'borntime':str(datetime.now()),
                     'methods':[],
+                    'models':[],
             }
             json.dump(story, f, indent=4)
 
 
-def currentProject(value):
-    l = len(value)
+def currentProject(val):
+    l = len(val)
+    cnt = {}
     with open('manifest.json', 'r') as f:
         cnt = json.load(f)
-    return cnt[value[0]][value[1]]
+    if(l == 1):
+        return cnt[val[0]]
+    elif(l == 2):
+        return cnt[val[0]][val[1]]
+    else:
+        return None
 
 def switchProject(cmd):
     projipath= 'prs\projects.txt'

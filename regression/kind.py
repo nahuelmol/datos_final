@@ -1,10 +1,14 @@
+import sys
+
 from .methods import LinearRegression, SupportVectorRegression, KNearestNeighbors, RidgeRegression, LinearRegression
 from data_setter import getData
 
-def Regression(command):
+def Regression(cmd):
     datapath = currentProject(['datapath','src'])
-    filepath = '{}\{}'.format(datapath, cmd.target)
-    data = getData(filepath)
+    res, data = getData(datapath)
+    if res == False:
+        print('regression failed')
+        sys.exit(0)
     if cmd.method == 'SVR':
         SupportVectorRegression(data, ref)
     elif (cmd.method == 'knneighbors'):

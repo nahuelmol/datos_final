@@ -1,29 +1,68 @@
 import json
+import os
 import pandas as pd
 import numpy as np
 
-def extract_data():
+def check_in_depth(file, sep):
+    seps = ['\t', ',', ';']
+    prev = 0
+    with open(file, 'r') as f:
+        lines = f.readlines()
+        for s in seps:
+            names = len(lines[0])
+            for line in lines:
+                if(len(line.split(s)) != names):
+                    prev = seps.index(s)
+                    break;
+    actual = prev + 1
+    return seps[actual]
+
+def file_type(filename, tipe):
+    file = filename.split('.')
+    file = file[-1]
+    if file == tipe:
+        return True
+    else:
+        chech_in_depth()
+        return False
+
+def extract_data(ref):
     data    = []
     cnt     = {}
-    X_train = np.array([])
-    X_test  = np.array([])
-    y_train = np.array([])
-    y_test  = np.array([])
+    X_train = {}
+    X_test  = {}
+    y_train = {}
+    y_test  = {}
+    if not (os.path.exists('{}\data\manifest.json'.format(os.getcwd()))):
+        return False, None
     with open('manifest.json', 'r') as f:
         cnt = json.load(f)
     for each in cnt['datapath']['test']: 
-        out = pd.read_csv(each)
-        if each == 'y':
-            y_test = np.array(out)
-        if each == 'x':
-            X_test = np.array(out)
+        if fyle_type(each, 'tsv'):
+            sep = '\t'
+        elif file_type(each, 'csv'):
+            sep = ','
+        elif file_type(each, 'txt'):
+            sep = check_in_depth(each)
+        else:
+            print('not type found')
+        data = pd.read_csv(each, sep=sep)
+        X_test, y_test = data_separator(data, ref)
 
     for each in cnt['datapath']['train']:
-        out = pd.reac_csv(each)
-        if each == 'y':
-            y_train = np.array(out)
-        if each == 'x':
-            X_train = np.array(out)
+        if fyle_type(each, 'tsv'):
+            sep = '\t'
+        elif file_type(each, 'csv'):
+            sep = ','
+        elif file_type(each, 'txt'):
+            sep = check_in_depth(each)
+        else:
+            print('not type found')
+        data = pd.read_csv(each, sep=sep)
+        X_train, y_train = data_separator(data, ref)
+
+    result = X_train, X_test, y_train, y_test
+    return True, result
 
 def delData(cmd):
     which = ''
@@ -52,23 +91,18 @@ def setData(cmd):
         cnt = json.load(f)
     if cmd.target == 'tt':
         print('gimme test data file')
-        xpath = input('x: ')
-        ypath = input('y: ')
-        xpath = 'data\{}'.format(xpath)
-        ypath = 'data\{}'.format(ypath)
-        cnt['datapath']['test']['x'].append(xpath)
-        cnt['datapath']['test']['y'].append(ypath)
+        path = input(': ')
+        xpath = 'data\{}'.format(path)
+        cnt['datapath']['test'].append(path)
     elif cmd.target == 'tn':
         print('gimme a train data file')
-        xpath = input('x: ')
-        ypath = input('y: ')
-        xpath = 'data\{}'.format(xpath)
-        ypath = 'data\{}'.format(ypath)
-        cnt['datapath']['train']['x'].append(xpath)
-        cnt['datapath']['train']['y'].append(ypath)
+        path = input(': ')
+        path = 'data\{}'.format(path)
+        cnt['datapath']['train'].append(path)
     elif cmd.target == 'src':
-        file = input('gimme a source data file')
-        path = 'data\{}'.format(file)
+        print('gimme a source data file')
+        file = input(':')
+        path = '{}\data\{}'.format(os.getcwd(), file)
         cnt['datapath']['src'] = path
     else:
         print('not valid target')
