@@ -1,5 +1,6 @@
 
 import pandas as pd
+import json
 
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier, plot_tree
@@ -15,7 +16,14 @@ from datetime import datetime
 from data_setter import getData
 from dimreduction.dim_reduction import data_separator, add 
 from abss.dataSetting import extract_data
-from abss.fs import currentProject
+from abss.fs import currentProject 
+from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
+
+def take_models_n():
+    pname = currentProject(['project_name'])
+    with open('prs\{}\story.json'.format(pname), 'r') as f:
+        data    = json.load(f)
+        return (len(data['models']) + 1)
 
 def DecisionTree(cmd):
     col     = input('select column: ') #POS
@@ -45,7 +53,6 @@ def Logistic(cmd):
     X_test  = {}
     y_train = {}
     y_test  = {} 
-    print(cmd.test_size)
     res = input('split original data?')
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
         datapath = currentProject(['datapath','src'])
@@ -60,28 +67,36 @@ def Logistic(cmd):
     X_test_scaled = skyler.transform(X_test)
     model = LogisticRegression(max_iter=1000).fit(X_train_scaled, y_train)
     predictions = model.predict(X_test_scaled) #making predictions over new X values (X_test)
-    probs = model.predict_proba(X_test_scaled)
-
+    
     #rocaucscore = roc_auc_score(y_test, probs, multi_class='ovr')
     #model2 = LogisticRegression().fit(data, target)
     #model2.predict_proba(data)
 
     mc = model.coef_.tolist()
     mi = model.intercept_.tolist()
-    cm = confusion_matrix(y_test, predictions).tolist()
+    cm = confusion_matrix(y_test, predictions)
     cr = classification_report(y_test, predictions, zero_division=0)
     accuracy = accuracy_score(y_test, predictions)
     f1score = f1_score(y_test, predictions, average='macro', zero_division=0).tolist()
 
+    n_models = take_models_n()
+    plot_files = {
+        'boundary_curve': 'log_{}_boundary_curve.png'.format(n_models),
+        'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n_models),
+    }
+    logistic_regression_plot(X_train, y_train, X_test, y_test, model, plot_files['boundary_curve'], cmd.class_)
+    confusion_matrix_plot(cm, model.classes_, plot_files['confusion_matrix'])
     REPORT = {
         'model':'logistic',
+        'n_models':n_models,
         'time':str(datetime.now()),
-        'model_coef': mc,
-        'model_intercept': mi,
-        'confusion_matrix': cm,
+        #'model_coef': mc,
+        #'model_intercept': mi,
+        'confusion_matrix': cm.tolist(),
         'classification_report': cr,
         'ac':accuracy,
-        'f1_score':str(f1_score),
+        #'f1_score':str(f1_score),
+        'outputs': plot_files,
     }
     add('models', REPORT)
     
@@ -104,6 +119,11 @@ def KNearestNeighbors(cmd):
     else:
         X_train, X_test, y_train, y_test = extract_data(cmd.ref)
 
+    n_models = take_models_n()
+    plot_files = {
+        'boundary_curve': 'log_{}_boundary_curve.png'.format(n_models),
+        'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n_models),
+    }
     neigh = KNeighborsClassifier(n_neighbors=nneigh)
     classifier = neigh.fit(X_train, y_train)
     
@@ -113,9 +133,10 @@ def KNearestNeighbors(cmd):
     #out= classifier.neighbors()
 
     predictions = {
-            'model':'knearest_neighbors',
-            'time':str(datetime.now()),
-            'ac':accuracy,
+        'model':'knearest_neighbors',
+        'time':str(datetime.now()),
+        'ac':accuracy,
+        'outputs': [],
     }
     add_model('models', REPORT)
 
@@ -146,6 +167,7 @@ def RandomForest(data, cmd):
         'model':'random_forest',
         'time':str(datetime.now()),
         'ac':accuracy,
+        'outputs': [],
     }
     add('models', REPORT)
 
@@ -176,5 +198,6 @@ def SupportVectorClassifier(cmd):
         'model':'support_vector_classifier',
         'time':str(datetime.now()),
         'ac':accuracy,
+        'outputs': [],
     }
     add('models', REPORT)

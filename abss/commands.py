@@ -3,29 +3,29 @@ from abss.fs import currentProject
 class Command:
     def __init__(self, args):
         self.ncomps = 2
-        self.args = args[1:]
-        self.manyArgs = len(self.args)
+        self.args   = args[1:]
+        self.all    = True
+        self.ac     = False
+        self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', '-rs', '-ts', 'w', '-cls']
+        self.availableAloneFlags    = ['-f', '-all', '-ac']
+        self.aloneFlags = {}
+        self.changeField = ''
+        self.class_ = 0
+        self.currentFlags = {}
+        self.datatarget = ''
+        self.manyArgs   = len(self.args)
+        self.message    = ''
+        self.meth   = None
+        self.mod    = None
+        self.random_state = 42
+        self.ref        = None
         self.rootCommand = None
         self.target = None
         self.targetType = None
-        self.output = None
-        self.changeField = ''
-        self.datatarget = ''
-        self.ref        = None
-        self.options = []
-        self.message = ''
+        self.test_size  = 0.2
         self.forced = False
-        self.availableCoupledFlags  = ['-o', '-r', '-n', '-m', '-ft', '-rs', '-ts', 'w']
-        self.availableAloneFlags    = ['-f', '-all', '-ac']
-        self.currentFlags = {}
-        self.aloneFlags = {}
-        self.random_state = 42
-        self.test_size = 0.2
-        self.meth = None
-        self.all = True
-        if self.manyArgs > 2:
-            for i in range(2, len(self.args)):
-                self.options.append(args[i])
+        self.output = None
+        self.options = []
 
     def setReference(self, ref):
         self.ref = ref
@@ -66,6 +66,8 @@ class Command:
             self.targetType = 'data'
         elif code == 'l':
             self.targetType = 'library'
+        elif code == 'o':
+            self.targetType = 'outputs'
         else:
             print('not available targetType: {}'.format(code))
 
@@ -85,9 +87,12 @@ class Command:
             self.output = self.currentFlags['-o']
         if '-n' in self.currentFlags:
             self.ncomps = self.currentFlags['-n']
-        if '-m' in self.currentFlags:
+        if '-me' in self.currentFlags:
             self.all    = False
             self.meth   = self.currentFlags['-m']
+        if '-mo' in self.currentFlags:
+            self.all    = False
+            self.mod    = self.currentFlags['-m']
         if '-rs' in self.currentFlags:
             self.random_state   = float(self.currentFlags['-rs'])
         if '-ts' in self.currentFlags:
@@ -95,6 +100,8 @@ class Command:
         if 'w' in self.currentFlags:
             self.all = False
             self.cond = self.currentFlags['w']
+        if '-cls' in self.currentFlags:
+            self.class_ = int(self.currentFlags['-cls'])
 
         if '-ac' in self.aloneFlags:
             self.ac = True

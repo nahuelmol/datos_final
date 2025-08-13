@@ -13,9 +13,10 @@ from abss.commands import Command
 from abss.checker import checker
 from abss.change import Change
 from abss.fs import newProject, delProject, currentProject, outProject, switchProject
-from abss.meths import cleanMeths
+from abss.story import story_cleaner
 from abss.dataSetting import setData, delData
 from abss.plotViewer import seePlot
+from abss.outputs import delOutputs
 
 def switch(cmd):
     if cmd.rootCommand == 'apply':
@@ -36,12 +37,16 @@ def switch(cmd):
         currentProject()
     elif cmd.rootCommand == 'clean':
         if cmd.target == 'meths':
-            cleanMeths(cmd)
+            story_cleaner('methods', cmd)
+        elif cmd.target == 'mods':
+            story_cleaner('models', cmd)
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)
         if cmd.targetType == 'data':
             delData(cmd)
+        if cmd.targetType == 'outputs':
+            delOutputs(cmd)
     elif cmd.rootCommand == 'new':
         if cmd.targetType == 'project':
             newProject(cmd)

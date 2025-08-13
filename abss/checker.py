@@ -5,6 +5,9 @@ import os
 from abss.fs import currentProject
 from data_setter import checkAvailableData, getData
 
+def printGreen(text, what):
+    print(text , f"\033[32m {what} \033[0m")
+    print(f"\033[32m {text}\033[0m")
 def takeType(file, ft):
     if not os.path.exists('{}/manifest.json'.format(os.getcwd())):
         return True, 'not existent project'
@@ -70,7 +73,7 @@ def checker(cmd):
                 for meth in data['models']:
                     print(meth['model'])
                     if cmd.ac == True:
-                        print(meth['ac'])
+                        printGreen(meth['ac'], 'ac')
                     else:
                         print(meth['time'])
 
