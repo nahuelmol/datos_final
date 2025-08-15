@@ -2,21 +2,23 @@ from abss.fs import currentProject
 
 class Command:
     def __init__(self, args):
-        self.ncomps = 2
+        self.ac     = False
         self.args   = args[1:]
         self.all    = True
-        self.ac     = False
-        self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', '-rs', '-ts', 'w', '-cls']
-        self.availableAloneFlags    = ['-f', '-all', '-ac']
+        self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', 
+                                       '-rs', '-ts', 'w', '-cls', 'log']
+        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help']
         self.aloneFlags = {}
         self.changeField = ''
         self.class_ = 0
         self.currentFlags = {}
         self.datatarget = ''
+        self.h = False
         self.manyArgs   = len(self.args)
         self.message    = ''
         self.meth   = None
         self.mod    = None
+        self.ncomps = 2
         self.random_state = 42
         self.ref        = None
         self.rootCommand = None
@@ -34,31 +36,49 @@ class Command:
         self.rootCommand = self.args[0]
 
     def helper(self):
-        if self.rootCommand == 'apply':
+        if self.all == True:
             msg = """
-            this command allows applying an specific data analysis method/algorithm
-            dr:<algorithm>      dimension reduction ; ica, pca, tsne
-            c:<algorithm>       classification
-            r:<algorithm>       regression
+            cal apply
+            cal check
+            cal cl
+            cal del
+            """
+            print(msg)
+        elif self.rootCommand == 'apply':
+            msg = """
+            cal apply dr:pca -r RANK
             """
             print(msg)
         elif self.rootCommand == 'check':
             msg = """
-            this command allows checking:
-            -all                shows every data content
-            -d -ft <filetype>   shows data of a certain type
+            cal check meths    (all)
+            cal check meths    w pca
+
+            cal check mods     w lr
+            """
+            print(msg)
+        elif self.rootCommand == 'cl':
+            msg = """
+            cal cl meths
+            cal cl meths     w pca
+
+            cal cl mods
+            cal cl mods      w lr
             """
             print(msg)
         elif self.rootCommand == 'del':
-            msg ="""
-            this command allows deleting:
-            p:<name>            projects
-            d:<name>            datafile
+            msg = """
+            cal del p:heisenberg
+            cal del p:all
             """
             print(msg)
         else:
-            print('not available command')
+            True, 'not command specified'
+        True, 'well provided command'
 
+    def setCond(self):
+        if self.cond == 'l':
+            self.cond = 'logistic'
     def setType(self, code):
         if code == 'p':
             self.targetType = 'project'
@@ -80,7 +100,6 @@ class Command:
             return self.output
 
     def addFlags(self):
-        print(self.currentFlags)
         if '-r' in self.currentFlags:
             self.ref = self.currentFlags['-r']
         if '-o' in self.currentFlags:
@@ -89,10 +108,10 @@ class Command:
             self.ncomps = self.currentFlags['-n']
         if '-me' in self.currentFlags:
             self.all    = False
-            self.meth   = self.currentFlags['-m']
+            self.meth   = self.currentFlags['-me']
         if '-mo' in self.currentFlags:
             self.all    = False
-            self.mod    = self.currentFlags['-m']
+            self.mod    = self.currentFlags['-mo']
         if '-rs' in self.currentFlags:
             self.random_state   = float(self.currentFlags['-rs'])
         if '-ts' in self.currentFlags:
@@ -102,13 +121,18 @@ class Command:
             self.cond = self.currentFlags['w']
         if '-cls' in self.currentFlags:
             self.class_ = int(self.currentFlags['-cls'])
+        if '-log' in self.currentFlags:
+            self.log_file = self.currentFlags['-log']
 
         if '-ac' in self.aloneFlags:
             self.ac = True
-        if '-f' in self.aloneFlags:
-            self.forced = True
         if '-all' in self.aloneFlags:
             self.all = True
+        if '-f' in self.aloneFlags:
+            self.forced = True
+        if '-h' in self.aloneFlags:
+            self.h = True
+            self.h_cmd = self.rootCommand
 
     def flagSetting(self):
         for flag in self.options:
@@ -125,6 +149,10 @@ class Command:
         self.addFlags()
 
     def setArgs(self):
+        if '-h' in self.args:
+            self.h = True
+            self.all = False
+            return True, 'done'
         if self.rootCommand == 'apply':
             if self.manyArgs > 1:
                 tt = self.args[1].split(':')
@@ -156,7 +184,7 @@ class Command:
                 self.options = None
             else:
                 print('too much arguments')
-        elif self.rootCommand == 'clean':
+        elif self.rootCommand == 'cl':
             if self.manyArgs == 1:
                 print('insuficient args')
             elif self.manyArgs > 1:
@@ -164,6 +192,7 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
                     self.flagSetting()
+                    self.setCond()
                 else:
                     self.all = True
                 self.flagSetting()
@@ -244,10 +273,16 @@ class Command:
                 print('to many arguments')
             else:
                 print('misterious error')
-
+        elif self.rootCommand == '-help':
+            if self.manyArgs > 1:
+                self.options = self.args[1:]
+                self.flagSetting()
+        else:
+            return False, 'not recognized root'
+        return True, 'args setting done'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'clean']
+        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl']
         if self.rootCommand in availableCommands:
             return True, 'the command is available'
         else:

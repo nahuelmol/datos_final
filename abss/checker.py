@@ -51,19 +51,16 @@ def ask_mani_for_data(what):
 
 def checker(cmd):
     if cmd.target == 'file':
+        ft = cmd.currentFlags['-ft']
+        src= currentProject(['datapath', 'src'])
+        files = os.listdir(src)
         if '-ft' in cmd.currentFlags:
-            ft = cmd.currentFlags['-ft']
-            src= currentProject(['datapath', 'src'])
-            files = os.listdir(src)
             for file in files:
                 takeType(file, ft)
         elif '-all' in cmd.currentFlags:
-            ft = cmd.currentFlags['-ft']
-            src= currentProject(['datapath', 'src'])
-            files = os.listdir(src)
             for file in files:
                 print('file: ', file)
-    elif cmd.target == '-mods':
+    elif cmd.target == 'mods':
         projectname = currentProject(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
         if cmd.all == True:
@@ -84,7 +81,7 @@ def checker(cmd):
                     if meth['method'] == cmd.cond:
                         print(meth['time'])
 
-    elif cmd.target == '-meths':
+    elif cmd.target == 'meths':
         projectname = currentProject(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
         if cmd.all == True:
@@ -114,7 +111,7 @@ def checker(cmd):
             for file in cnt:
                 print(file)
     else:
-        print('sending check command information')
+        print('not recognized target')
 
 
 

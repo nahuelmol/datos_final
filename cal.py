@@ -19,6 +19,9 @@ from abss.plotViewer import seePlot
 from abss.outputs import delOutputs
 
 def switch(cmd):
+    if cmd.h == True:
+        cmd.helper()
+        return True, 'helping'
     if cmd.rootCommand == 'apply':
         if cmd.targetType == 'dr':
             DimReduction(cmd)
@@ -27,19 +30,18 @@ def switch(cmd):
         elif cmd.targetType == 'r':
             Regression(cmd)
         else:
-            print('not recognized target type')
+            return False, 'not recognized type'
     elif cmd.rootCommand == 'change':
         res, msg = Change(cmd)
-        print(msg)
+        return True, 'done'
     elif cmd.rootCommand == 'check':
         checker(cmd)
     elif cmd.rootCommand == 'current':
         currentProject()
-    elif cmd.rootCommand == 'clean':
-        if cmd.target == 'meths':
-            story_cleaner('methods', cmd)
-        elif cmd.target == 'mods':
-            story_cleaner('models', cmd)
+    elif cmd.rootCommand == 'cl':
+        res = story_cleaner(cmd)
+        if res == False:
+            return False, 'not found target to clean'
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)
@@ -60,11 +62,12 @@ def switch(cmd):
     elif cmd.rootCommand == 'set':
         if cmd.targetType == 'data':
             setData(cmd)
-    elif cmd.rootCommand == 'visual':
-        pass
+    elif cmd.rootCommand == '-help':
+        cmd.all == True 
+        cmd.helper()
     else:
-        print('unrecognized command')
-
+        return False, 'unrecognized command'
+    return True, 'done'
 
 if __name__ == "__main__":
     command = None
@@ -74,6 +77,10 @@ if __name__ == "__main__":
         msg = 'please type a valid command'
         sys.exit(msg)
     command.setCommand()
-    command.setArgs()
-    switch(command)
+    res, msg = command.setArgs()
+    if res == True:
+        print(msg)
+    res, msg = switch(command)
+    if res:
+        print(msg)
 
