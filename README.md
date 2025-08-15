@@ -48,18 +48,32 @@ Let's create a new project called heisenberg (walter white)
 cal new p:heisenberg
 ```
 
-The following command applies the dimension reduction PCA algorithm. In addition, output file name and reference (which is the target colummn in the dataframe) are specified.
+Later, for setting an specific source data file:
+
+```
+cal set d:src
+```
+
+The following command applies the dimension reduction PCA algorithm taking the source file previously setted:
+
+```
+cal apply dr:pca -r <reference>
+```
+
+Alternatively, output filename and reference (which is the target colummn in the dataframe) can be specified in the same command:
 
 ```
 cal apply dr:<example.csv>:pca -o <pca.png> -r <reference>
 ```
 
-To check current project's methods applied
+To check current project's methods applied or models built:
 
 ```
 cal check -meths
 ```
-
+```
+cal check -mods
+```
 
 From the current project, specific methods can be checked. `w` stands for `where`
 
@@ -73,11 +87,23 @@ From the data directory, specific filetypes can be filter out by doing
 cal check file -ft csv
 ```
 
-
-Every method can be deleted on a cleaning process by typing:
+Every method and models can be deleted on a cleaning process by typing:
 
 ```
-cal clean -m pca
+cal clean -me pca
+```
+
+```
+cal clean -mo log
+```
+
+or entirely:
+
+```
+cal clean meths
+```
+```
+cal clean mods
 ```
 
 For building machine learning models, train and test data should be specified. Operator can set test file globally by doing:
@@ -101,6 +127,12 @@ or if you want to delete it all.
 
 ```
 cal del p:all
+```
+
+Also, produced plots as images can be delted:
+
+```
+cal del o:all 
 ```
 
 The operator can navigates throughout different projects by doing:
