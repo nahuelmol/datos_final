@@ -16,14 +16,9 @@ from datetime import datetime
 from data_setter import getData
 from dimreduction.dim_reduction import data_separator, add 
 from abss.dataSetting import extract_data
-from abss.fs import currentProject 
+from abss.fs import currentProject, take_n
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
 
-def take_models_n():
-    pname = currentProject(['project_name'])
-    with open('prs\{}\story.json'.format(pname), 'r') as f:
-        data    = json.load(f)
-        return (len(data['models']) + 1)
 
 def DecisionTree(cmd):
     col     = input('select column: ') #POS
@@ -79,16 +74,16 @@ def Logistic(cmd):
     accuracy = accuracy_score(y_test, predictions)
     f1score = f1_score(y_test, predictions, average='macro', zero_division=0).tolist()
 
-    n_models = take_models_n()
-    plot_files = {
-        'boundary_curve': 'log_{}_boundary_curve.png'.format(n_models),
-        'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n_models),
+    n = take_n('models', 'logistic')
+    files = {
+        'boundary_curve': 'log_{}_boundary_curve.png'.format(n),
+        'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n),
     }
-    logistic_regression_plot(X_train, y_train, X_test, y_test, model, plot_files['boundary_curve'], cmd.class_)
-    confusion_matrix_plot(cm, model.classes_, plot_files['confusion_matrix'])
+    logistic_regression_plot(X_train, y_train, X_test, y_test, model, files['boundary_curve'], cmd.class_)
+    confusion_matrix_plot(cm, model.classes_, files['confusion_matrix'])
     REPORT = {
         'model':'logistic',
-        'n_models':n_models,
+        'n':n,
         'time':str(datetime.now()),
         #'model_coef': mc,
         #'model_intercept': mi,
@@ -96,7 +91,7 @@ def Logistic(cmd):
         'classification_report': cr,
         'ac':accuracy,
         #'f1_score':str(f1_score),
-        'outputs': plot_files,
+        'outputs': files,
     }
     add('models', REPORT)
     
@@ -132,8 +127,10 @@ def KNearestNeighbors(cmd):
     accuracy = accuracy_score(y_test, predictions)
     #out= classifier.neighbors()
 
-    predictions = {
+    n = take_n('models', 'knearest_neighbors')
+    REPORT = {
         'model':'knearest_neighbors',
+        'n':n,
         'time':str(datetime.now()),
         'ac':accuracy,
         'outputs': [],
@@ -163,8 +160,10 @@ def RandomForest(data, cmd):
 
     predictions = rf_classifier.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
+    n = take_n('models', 'rand_forest')
     REPORT = {
-        'model':'random_forest',
+        'model':'rand_forest',
+        'n': n,
         'time':str(datetime.now()),
         'ac':accuracy,
         'outputs': [],
@@ -194,8 +193,10 @@ def SupportVectorClassifier(cmd):
 
     predictions = svc.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
+    n = take_n('models', 'svc')
     REPORT = {
         'model':'support_vector_classifier',
+        'n': n,
         'time':str(datetime.now()),
         'ac':accuracy,
         'outputs': [],

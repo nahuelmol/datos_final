@@ -10,7 +10,7 @@ from sklearn.decomposition import PCA, FastICA
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
 
-from abss.fs import currentProject
+from abss.fs import currentProject, take_n
 from .plotmaker import Plotter
 
 def data_separator(data, ref):
@@ -35,6 +35,7 @@ def add(what, report):
     with open(storypath, 'w') as file:
         json.dump(current, file, indent=4)
 
+
 def PCAnalysis(data, cmd):
     data, target = data_separator(data, cmd.ref)
     pcnames = []
@@ -52,17 +53,19 @@ def PCAnalysis(data, cmd):
     variance_ratio = pca.explained_variance_ratio_
     lost_information = (1-np.sum(variance_ratio))
     time = str(datetime.now())
-
-    projectname = currentProject(['project_name'])
-    chartpath   = 'prs\{}\outputs\{}'.format(projectname, cmd.output)
+    n = take_n('methods', 'pca')
+    files = {
+        'pca_basic_pcn': 'pca_{}_basic_pcn'.format(n),
+    }
     REPORT = {
         'method': 'pca',
+        'n':n,
         'time': time,
         'lost_information':lost_information,
         'variance_ratio':variance_ratio.tolist(),
-        'pca_chart_path':chartpath,
+        'outputs': files,
     }
-    Plotter(complete, 'PCA - Principal Components Analysis', chartpath, cmd.ref)
+    Plotter(complete, 'PCA - Principal Components Analysis', files['pca_basic_pcn'], cmd.ref)
     add('methods', REPORT)
 
 def ICAnalysis(data, cmd):
@@ -85,17 +88,21 @@ def ICAnalysis(data, cmd):
     white = ica.whitening_.tolist()
     time = str(datetime.now())
 
-    projectname = currentProject(['project_name'])
-    chartpath   = 'prs\{}\outputs\{}'.format(projectname,cmd.output)
-    Plotter(complete, 'ICA - Independent Components Analysis', chartpath, cmd.ref)
+    n = take_n('methods', 'ica')
+    files = {
+        'ica_basic_pcn': 'ica_{}_basic_icn'.format(n),
+    }
+    Plotter(complete, 'ICA - Independent Components Analysis', files['ica_basic_pcn'], cmd.ref)
     REPORT = {
         'method': 'ica',
+        'n':n,
         'time': time,
         'chartpath':chartpath,
         'comps':comps,
         'mixin':mixin,
         'meann':meann,
         'white':white,
+        'outputs': files,
     }
     add('methods', REPORT)
 
@@ -116,13 +123,17 @@ def TSNEanalysis(data, cmd):
     tsnes  = pd.DataFrame(x_tsne, columns=tsnenames)
     complete  = pd.concat([tsnes, target], axis=1)
 
-    projectname = currentProject(['project_name'])
-    chartpath   = 'prs\{}\outputs\{}'.format(projectname, cmd.output)
-    Plotter(complete, 'tSNE Analysis', chartpath, cmd.ref)
+    n = take_n('methods', 'tsne')
+    files = {
+        'tsne_basic_comps': 'tsne_{}_basic_comps'.format(n),
+    }
+    Plotter(complete, 'tSNE Analysis', files['tsne_basic_comps'], cmd.ref)
     REPORT = {
         'method':'tsne',
+        'n':n,
         'time': time,
         'chartpath':chartpath,
+        'outputs': files,
     }
     add('methods', REPORT)
 

@@ -6,7 +6,9 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import ConfusionMatrixDisplay
 from abss.fs import currentProject
 
-def Plotter(cs, title, filepath, ref):
+def Plotter(cs, title, filename, ref):
+    pname = currentProject(['project_name'])
+    filepath = 'prs\{}\outputs\{}'.format(pname, filename)
     #--@cs:components
     cols = [] #just column names
     for col in cs.columns:

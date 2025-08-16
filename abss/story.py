@@ -3,7 +3,7 @@ import json
 from abss.fs import currentProject
 
 def set_condition(code):
-    if code == 'lr':
+    if code == 'log':
         return True, 'logistic' 
     elif code == 'cdt':
         return True, 'classification_decision_tree'

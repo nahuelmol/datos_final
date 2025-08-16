@@ -3,6 +3,18 @@ import shutil
 import os
 from datetime import date, datetime
 
+def take_n(on, typeof):
+    pname = currentProject(['project_name'])
+    with open('prs\{}\story.json'.format(pname), 'r') as f:
+        data    = json.load(f)
+        prev    = []
+        for each in data[on]:
+            name = on[:-1]
+            if each[name] == typeof:
+                print('name: ', each[name])
+                prev.append(each)
+        return (len(prev) + 1)
+
 def outProject():
     os.remove('manifest.json')
 

@@ -3,6 +3,7 @@ import json
 import os
 
 from abss.fs import currentProject
+from abss.story import set_condition
 from data_setter import checkAvailableData, getData
 
 def printGreen(text, what):
@@ -63,39 +64,54 @@ def checker(cmd):
     elif cmd.target == 'mods':
         projectname = currentProject(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
-        if cmd.all == True:
-            data = {}
-            with open(storypath, 'r') as f:
-                data = json.load(f)
-                for meth in data['models']:
-                    print(meth['model'])
-                    if cmd.ac == True:
-                        printGreen(meth['ac'], 'ac')
+        data = {}
+        with open(storypath, 'r') as f:
+            data = json.load(f)
+        if len(data['models']) == 0:
+            return True, 'there are not methods applied'
+        for meth in data['models']:
+            if cmd.all == True:
+                print('{} - {} - {}'.format(meth['model'], meth['time'], meth['n']))
+                if cmd.ac == True:
+                    printGreen(meth['ac'], 'ac')
+            else:
+                res, code = set_condition(cmd.cond)
+                if meth['model'] == code:
+                    if cmd.unique == True:
+                        number = 0
+                        if cmd.number.isdigit():
+                            number = int(cmd.number)
+                        if meth['n'] == number:
+                            print('{}, {}, {}'.format(meth['model'], meth['n'], meth['time']))
                     else:
-                        print(meth['time'])
-
-        else:
-            with open(storypath, 'r') as f:
-                data = json.load(f)
-                for meth in data['methods']:
-                    if meth['method'] == cmd.cond:
-                        print(meth['time'])
+                        print('{}, {}, {}'.format(meth['model'], meth['n'], meth['time']))
+                        if cmd.ac == True:
+                            printGreen(meth['ac'], 'ac')
 
     elif cmd.target == 'meths':
         projectname = currentProject(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
-        if cmd.all == True:
-            with open(storypath, 'r') as f:
-                data = json.load(f)
-                for meth in data['methods']:
-                    print(meth['method'])
-                    print(meth['time'])
-        else:
-            with open(storypath, 'r') as f:
-                data = json.load(f)
-                for meth in data['methods']:
-                    if meth['method'] == cmd.cond:
-                        print(meth['time'])
+        data = {}
+        with open(storypath, 'r') as f:
+            data = json.load(f)
+        if len(data['methods']) == 0:
+            return True, 'there are not methods applied'
+        for meth in data['methods']:
+            if cmd.all == True:
+                print('{} - {} - {}'.format(meth['method'], meth['time'], meth['n']))
+            else:
+                res, code = set_condition(cmd.cond)
+                if meth['method'] == code:
+                    if cmd.unique == True:
+                        number = 0
+                        if cmd.number.isdigit():
+                            number = int(cmd.number)
+                        if meth['n'] == number:
+                            print('{}, {}, {}'.format(meth['method'], meth['n'], meth['time']))
+                    else:
+                        print('{}, {}, {}'.format(meth['method'], meth['n'], meth['time']))
+                        if cmd.ac == True:
+                            printGreen(meth['ac'], 'ac')
 
     elif cmd.target == 'tt' or cmd.target == 'tn' or cmd.target == 'src':
         ask_mani_for_data(cmd.target)

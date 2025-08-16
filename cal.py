@@ -22,7 +22,7 @@ def switch(cmd):
     if cmd.h == True:
         cmd.helper()
         return True, 'helping'
-    if cmd.rootCommand == 'apply':
+    if cmd.rootCommand == 'app':
         if cmd.targetType == 'dr':
             DimReduction(cmd)
         elif cmd.targetType == 'c':
@@ -34,7 +34,7 @@ def switch(cmd):
     elif cmd.rootCommand == 'change':
         res, msg = Change(cmd)
         return True, 'done'
-    elif cmd.rootCommand == 'check':
+    elif cmd.rootCommand == 'ch':
         checker(cmd)
     elif cmd.rootCommand == 'current':
         currentProject()

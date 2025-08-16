@@ -6,12 +6,13 @@ class Command:
         self.args   = args[1:]
         self.all    = True
         self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', 
-                                       '-rs', '-ts', 'w', '-cls', 'log']
+                                       '-rs', '-ts', 'w', '-cls', 'is']
         self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help']
         self.aloneFlags = {}
         self.changeField = ''
         self.class_ = 0
         self.currentFlags = {}
+        self.cond = ''
         self.datatarget = ''
         self.h = False
         self.manyArgs   = len(self.args)
@@ -19,6 +20,7 @@ class Command:
         self.meth   = None
         self.mod    = None
         self.ncomps = 2
+        self.number = 0
         self.random_state = 42
         self.ref        = None
         self.rootCommand = None
@@ -28,6 +30,7 @@ class Command:
         self.forced = False
         self.output = None
         self.options = []
+        self.unique = False
 
     def setReference(self, ref):
         self.ref = ref
@@ -38,32 +41,34 @@ class Command:
     def helper(self):
         if self.all == True:
             msg = """
-            cal apply
-            cal check
+            cal app
+            cal ch
             cal cl
             cal del
             """
             print(msg)
-        elif self.rootCommand == 'apply':
+        elif self.rootCommand == 'app':
             msg = """
             cal apply dr:pca -r RANK
             """
             print(msg)
-        elif self.rootCommand == 'check':
+        elif self.rootCommand == 'ch':
             msg = """
-            cal check meths    (all)
-            cal check meths    w pca
+            cal ch meths    (all)
+            cal ch meths    w pca
 
-            cal check mods     w lr
+            cal ch mods     w log
             """
             print(msg)
         elif self.rootCommand == 'cl':
             msg = """
             cal cl meths
-            cal cl meths     w pca
+            cal cl meths    w pca
+            cal cl meths    w pca is 1
 
             cal cl mods
-            cal cl mods      w lr
+            cal cl mods     w log
+            cal cl mods     w log is 1
             """
             print(msg)
         elif self.rootCommand == 'del':
@@ -72,13 +77,16 @@ class Command:
             cal del p:all
             """
             print(msg)
+        elif self.rootCommand == 'see':
+            msg = """
+            cal see w pca is 1
+            cal see w log is 1
+            """
+            print(msg)
         else:
             True, 'not command specified'
         True, 'well provided command'
 
-    def setCond(self):
-        if self.cond == 'l':
-            self.cond = 'logistic'
     def setType(self, code):
         if code == 'p':
             self.targetType = 'project'
@@ -106,23 +114,20 @@ class Command:
             self.output = self.currentFlags['-o']
         if '-n' in self.currentFlags:
             self.ncomps = self.currentFlags['-n']
-        if '-me' in self.currentFlags:
-            self.all    = False
-            self.meth   = self.currentFlags['-me']
-        if '-mo' in self.currentFlags:
-            self.all    = False
-            self.mod    = self.currentFlags['-mo']
         if '-rs' in self.currentFlags:
             self.random_state   = float(self.currentFlags['-rs'])
         if '-ts' in self.currentFlags:
             self.test_size      = float(self.currentFlags['-ts'])
         if 'w' in self.currentFlags:
             self.all = False
+            self.unique = False
             self.cond = self.currentFlags['w']
+        if 'is' in self.currentFlags:
+            self.all = False
+            self.unique = True
+            self.number = self.currentFlags['is']
         if '-cls' in self.currentFlags:
             self.class_ = int(self.currentFlags['-cls'])
-        if '-log' in self.currentFlags:
-            self.log_file = self.currentFlags['-log']
 
         if '-ac' in self.aloneFlags:
             self.ac = True
@@ -153,7 +158,7 @@ class Command:
             self.h = True
             self.all = False
             return True, 'done'
-        if self.rootCommand == 'apply':
+        if self.rootCommand == 'app':
             if self.manyArgs > 1:
                 tt = self.args[1].split(':')
                 if len(tt) == 3:
@@ -192,16 +197,13 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
                     self.flagSetting()
-                    self.setCond()
                 else:
                     self.all = True
                 self.flagSetting()
         elif self.rootCommand == 'see':
             if self.manyArgs > 1:
-                self.target = self.args[1]
-                if self.manyArgs > 2:
-                    self.options = self.args[2:]
-                    self.flagSetting()
+                self.options = self.args[1:]
+                self.flagSetting()
         elif self.rootCommand == 'sw':
             if self.manyArgs > 1:
                 res = self.args[1].split(':')
@@ -221,7 +223,7 @@ class Command:
                     self.flagSetting()
             else:
                 print('you need more arguments')
-        elif self.rootCommand == 'check':
+        elif self.rootCommand == 'ch':
             if self.manyArgs > 1:
                 self.target = self.args[1]
                 if self.manyArgs > 2:
@@ -229,18 +231,6 @@ class Command:
                     self.flagSetting() 
             else:
                 print('you need more arguments')
-        elif self.rootCommand == 'meth':
-            self.message = """
-
-                Available Analysis
-                1.PCA
-                2.ICA
-                3.TSNE
-                4.Classification problem -> Decision Tree
-                5.Classification problem -> Logistic Regression 
-
-            """
-            return self.message
         elif self.rootCommand == 'out':
             if self.manyArgs > 1:
                 print('{} not allowed'.format(self.args[1:]))
@@ -249,12 +239,12 @@ class Command:
             if sel.manyArgs > 1:
                 self.options = self.args[1:]
                 idx = 0
-                if 'p|name' in self.options:
-                    idx = cmd.options.index('p|name')
+                if 'p:name' in self.options:
+                    idx = cmd.options.index('p:name')
                     self.changeField = 'datapath'
                     self.target = cmd.options(idx + 1)
-                elif ('p|datapath') in self.options:
-                    idx = cmd.options.index('p|datapath')
+                elif ('p:datapath') in self.options:
+                    idx = cmd.options.index('p:datapath')
                     self.changeField = 'datapath'
                     self.target = cmd.options(idx + 1)
                 else:
