@@ -87,7 +87,7 @@ def Logistic(cmd):
         'time':str(datetime.now()),
         #'model_coef': mc,
         #'model_intercept': mi,
-        'confusion_matrix': cm.tolist(),
+        #'confusion_matrix': cm.tolist(),
         'classification_report': cr,
         'ac':accuracy,
         #'f1_score':str(f1_score),

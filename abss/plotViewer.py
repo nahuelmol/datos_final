@@ -49,16 +49,13 @@ def seePlot(cmd):
 
         screen_w, screen_h = pyautogui.size()
         p = 0.5 
-        max_w = int(screen_w * p)
-        max_h = int(screen_h * p)
         h, w  = img.shape[:2]
-        ratio = min(max_w / w, max_h / h)
-        new_w = int(w * ratio)
-        new_h = int(h * ratio)
+        new_h = int(screen_h * p)
+        scale_factor = new_h / h
+        new_w = int(w * scale_factor)
 
-        cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
-        
-        cv2.imshow('imagen', img)
+        resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        cv2.imshow('imagen', resized)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

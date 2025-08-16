@@ -97,7 +97,6 @@ def ICAnalysis(data, cmd):
         'method': 'ica',
         'n':n,
         'time': time,
-        'chartpath':chartpath,
         'comps':comps,
         'mixin':mixin,
         'meann':meann,
@@ -132,7 +131,6 @@ def TSNEanalysis(data, cmd):
         'method':'tsne',
         'n':n,
         'time': time,
-        'chartpath':chartpath,
         'outputs': files,
     }
     add('methods', REPORT)
