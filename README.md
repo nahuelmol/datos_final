@@ -8,11 +8,12 @@
 ### This application
 
 For the Data Laboratory final exam I had to apply PCA using the R programming language.
-This rspository contains the same project, but also a version implemented in Python and integrating other analytical methods.
+This rspository contains the same project, but also a version implemented in Python and extending it to other analytical methods.
 
-This application is CLI tool that aims for direct handling of data, its processing and the looking of its corresponding outputs wether it's a plot or reports.
+This application is a CLI tool that aims for direct handling of data, its processing and the looking of its corresponding outputs wether it's a plot or reports.
 
 ### scikit-learn
+
 The used algorithms are  included in scikit-learn, specifically using sklearn. This contains classes for building machine learning models, having functions to calcultate metrics for verifying accuracy between test data and predictions made.
 
 ### Implemented methods
@@ -66,44 +67,48 @@ Alternatively, output filename and reference (which is the target colummn in the
 cal apply dr:<example.csv>:pca -o <pca.png> -r <reference>
 ```
 
-To check current project's methods applied or models built:
+To check current project's methods applied or models built, `ch` is used (which stands for check) as follows:
 
 ```
-cal check -meths
+cal ch meths
 ```
 ```
-cal check -mods
-```
-
-From the current project, specific methods can be checked. `w` stands for `where`
-
-```
-cal check -meths w pca
+cal ch mods
 ```
 
-From the data directory, specific filetypes can be filter out by doing
+From the current project, specific methods can be checked. `w` stands for `where` conditioning a type and `is` signs an specific method.
 
 ```
-cal check file -ft csv
-```
-
-Every method and models can be deleted on a cleaning process by typing:
-
-```
-cal clean -me pca
+cal ch meths w pca
 ```
 
 ```
-cal clean -mo log
+cal ch meths w pca is 1
+```
+
+The same logic is used with models using `mods` instead of `meths`. From the data directory, specific filetypes can be filter out by doing
+
+```
+cal ch file -ft csv
+```
+
+Every method and models can be deleted on a cleaning process by typing the `cl` command that stands for clean.
+
+```
+cal cl meths w pca
+```
+
+```
+cal cl mods w log
 ```
 
 or entirely:
 
 ```
-cal clean meths
+cal cl meths
 ```
 ```
-cal clean mods
+cal cl mods
 ```
 
 For building machine learning models, train and test data should be specified. Operator can set test file globally by doing:
@@ -112,9 +117,9 @@ For building machine learning models, train and test data should be specified. O
 cal set d:tt
 ```
 
-where `tt` stands for test, `tn` for train and `src` for source. What follows is a questions, asking for file's name. Take into account that the file should be on the data directory. 
+where `tt` stands for test, `tn` for train and `src` for source. What follows is a questions, asking for target file's name. Take into account that the file should be on the `data` directory. 
 
-At the moments of buliding the model, user must choose between the setted train and test data or just splitting the source file by using `train_test_split()` function.
+At the moment of buliding the model, user must choose between the setted train and test data or just splitting the source file by using `train_test_split()` function that applies a `test_size=0.2` unless the key `-ts` is included followed by any test size required.
 
 
 Projects could be also deleted by doing:
@@ -145,7 +150,11 @@ Other commands will be added here as the project grows
 
 ### Installation
 
-This repository should be cloned in your local machine or just download it as a zip. Later unzip it at an specific directory.
+This repository should be cloned in your local machine or just download it as a zip. Later unzip it at an specific directory. Then use `pip` to all install libraries needed.
+
+```
+pip install -r requirements.txt
+```
 
 pyinstaller is used to compile the executable:
 
@@ -153,4 +162,4 @@ pyinstaller is used to compile the executable:
 pyinstaller cal.py
 ```
 
-The following is copying the path to this executable at add it to enironment variables for accessing it glo0bally. 
+The following is to paste the path to this executable in environment variables. This way the utility can be used globally. 
