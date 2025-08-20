@@ -9,8 +9,9 @@ from pandas.api.types import is_object_dtype
 from sklearn.decomposition import PCA, FastICA
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
+from abss.fs import write_csv
 
-from abss.fs import currentProject, take_n
+from abss.fs import current_project, take_n
 from .plotmaker import Plotter
 
 def data_separator(data, ref):
@@ -23,9 +24,7 @@ def data_separator(data, ref):
     return data, target
 
 def add(what, report):
-    name = ''
-    with open('manifest.json', 'r') as file:
-        name = json.load(file)['project_name']
+    name = current_project(['project_name'])
     storypath = 'prs\{}\story.json'.format(name)
     current = {}
     with open(storypath, 'r') as file:
@@ -55,7 +54,8 @@ def PCAnalysis(data, cmd):
     time = str(datetime.now())
     n = take_n('methods', 'pca')
     files = {
-        'pca_basic_pcn': 'pca_{}_basic_pcn'.format(n),
+        'pca_basic_chart_pcn': 'pca_{}_basic_pcn'.format(n),
+        'pca_pcs':'pca_{}_pcs'.format(n),
     }
     REPORT = {
         'method': 'pca',
@@ -65,7 +65,9 @@ def PCAnalysis(data, cmd):
         'variance_ratio':variance_ratio.tolist(),
         'outputs': files,
     }
-    Plotter(complete, 'PCA - Principal Components Analysis', files['pca_basic_pcn'], cmd.ref)
+    Plotter(complete, 'PCA - Principal Components Analysis', files['pca_basic_chart_pcn'], cmd.ref)
+    res, msg = write_csv(pcs, files['pca_pcs'])
+    print(msg)
     add('methods', REPORT)
 
 def ICAnalysis(data, cmd):
@@ -90,9 +92,12 @@ def ICAnalysis(data, cmd):
 
     n = take_n('methods', 'ica')
     files = {
-        'ica_basic_pcn': 'ica_{}_basic_icn'.format(n),
+        'ica_basic_chart_icn': 'ica_{}_basic_icn'.format(n),
+        'ica_ics':'ica_{}_ics'.format(n),
     }
-    Plotter(complete, 'ICA - Independent Components Analysis', files['ica_basic_pcn'], cmd.ref)
+    Plotter(complete, 'ICA - Independent Components Analysis', files['ica_basic_chart_icn'], cmd.ref)
+    res, msg = write_csv(files['ica_ics'])
+    print(msg)
     REPORT = {
         'method': 'ica',
         'n':n,
@@ -119,14 +124,17 @@ def TSNEanalysis(data, cmd):
     for i in range(cmd.ncomps):
         i += 1
         tsnenames.append(f"tsne{i}")
-    tsnes  = pd.DataFrame(x_tsne, columns=tsnenames)
-    complete  = pd.concat([tsnes, target], axis=1)
+    tsnes   = pd.DataFrame(x_tsne, columns=tsnenames)
+    complete= pd.concat([tsnes, target], axis=1)
 
     n = take_n('methods', 'tsne')
     files = {
-        'tsne_basic_comps': 'tsne_{}_basic_comps'.format(n),
+        'tsne_basic_chart_comps': 'tsne_{}_basic_comps'.format(n),
+        'tsne_comps':'tsne_{}_comps'.format(n),
     }
-    Plotter(complete, 'tSNE Analysis', files['tsne_basic_comps'], cmd.ref)
+    Plotter(complete, 'tSNE Analysis', files['tsne_basic_chart_comps'], cmd.ref)
+    res, msg = write_csv(tsnes, files['tsne_comps'])
+    print(msg)
     REPORT = {
         'method':'tsne',
         'n':n,
@@ -134,7 +142,5 @@ def TSNEanalysis(data, cmd):
         'outputs': files,
     }
     add('methods', REPORT)
-
-
 
 

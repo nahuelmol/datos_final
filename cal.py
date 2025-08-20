@@ -8,11 +8,11 @@ from dimreduction.kind import DimReduction
 from classification.kind import Classification
 from regression.kind import Regression
 
-from data_setter import checkAvailableData, getData
+from data_setter import checkAvailableData
 from abss.commands import Command
-from abss.checker import checker
 from abss.change import Change
-from abss.fs import newProject, delProject, currentProject, outProject, switchProject
+from abss.checker import checker
+from abss.fs import newProject, delProject, current_project, outProject, switchProject
 from abss.story import story_cleaner
 from abss.dataSetting import setData, delData
 from abss.plotViewer import seePlot
@@ -30,14 +30,15 @@ def switch(cmd):
         elif cmd.targetType == 'r':
             Regression(cmd)
         else:
-            return False, 'not recognized type'
+            return False, '--not recognized type'
     elif cmd.rootCommand == 'change':
         res, msg = Change(cmd)
         return True, 'done'
     elif cmd.rootCommand == 'ch':
         checker(cmd)
     elif cmd.rootCommand == 'current':
-        currentProject()
+        msg = current_project(['project_name'])
+        return True, msg
     elif cmd.rootCommand == 'cl':
         res = story_cleaner(cmd)
         if res == False:
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     if (len(sys.argv) > 0):
         command = Command(sys.argv)
     else:
-        msg = 'please type a valid command'
+        msg = 'please, be serious, type a valid command'
         sys.exit(msg)
     command.setCommand()
     res, msg = command.setArgs()

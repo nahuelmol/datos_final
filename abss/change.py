@@ -1,9 +1,9 @@
-from abss.fs import currentProject
+from abss.fs import current_project
 
 def Change(cmd):
     if cmd.changeField == '':
         return False, 'changeField must be specified'
-    old = currentProject(cmd.changeField)
+    old = current_project(cmd.changeField)
     content = ''
     with open('manifest.json', 'r') as file:
         content = file.read()

@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import ConfusionMatrixDisplay
-from abss.fs import currentProject
+from abss.fs import current_project
 
 def Plotter(cs, title, filename, ref):
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     filepath = 'prs\{}\outputs\{}'.format(pname, filename)
     #--@cs:components
     cols = [] #just column names
@@ -25,7 +25,7 @@ def Plotter(cs, title, filename, ref):
     plt.close()
 
 def logistic_regression_plot(X, y, X_test, y_test, model, filename, clase):
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     filepath = 'prs\{}\outputs\{}'.format(pname, filename)
     x_min, x_max = X_test.iloc[:, 0].min() - 1, X_test.iloc[:, 0].max() + 1
     y_min, y_max = X_test.iloc[:, 1].min() - 1, X_test.iloc[:, 1].max() + 1
@@ -55,7 +55,7 @@ def logistic_regression_plot(X, y, X_test, y_test, model, filename, clase):
     plt.close()
 
 def confusion_matrix_plot(cm, classes, filename):
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     filepath = 'prs\{}\outputs\{}'.format(pname, filename)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     disp.plot(cmap="Blues", values_format='d')

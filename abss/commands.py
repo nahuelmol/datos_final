@@ -1,4 +1,4 @@
-from abss.fs import currentProject
+from abss.fs import current_project
 
 class Command:
     def __init__(self, args):
@@ -167,7 +167,7 @@ class Command:
                     self.method = tt[2]
                 elif len(tt) == 2:
                     self.targetType = tt[0]
-                    self.target = currentProject(['datapath', 'src'])
+                    self.target = current_project(['datapath', 'src'])
                     self.method = tt[1]
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
@@ -256,7 +256,7 @@ class Command:
                 self.setType(res[0])
                 self.target = res[1]
             elif (self.manyArgs == 1):
-                self.target = currentProject()
+                self.target = current_project()
             elif (self.manyArgs > 2):
                 print('args n:',self.manyArgs)
                 print('args: ', self.args)

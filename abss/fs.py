@@ -1,10 +1,40 @@
 import json
 import shutil
 import os
+import pandas as pd
 from datetime import date, datetime
 
+def current_project(val):
+    l = len(val)
+    cnt = {}
+    with open('manifest.json', 'r') as f:
+        cnt = json.load(f)
+    if(l == 1):
+        return cnt[val[0]]
+    elif(l == 2):
+        return cnt[val[0]][val[1]]
+    else:
+        return None
+
+def write_csv(df, name):
+    pname = current_project(['project_name'])
+    path = 'prs\{}\outputs'.format(pname)
+    path = '{}\{}'.format(path, name)
+    if not (type(df) == pd.DataFrame):
+        return False, '---not a correct dataframe served'
+    if os.path.exists(path):
+        res = input('file already exists, overwrite?')
+        if res == 's':
+            df.to_csv(name)
+            return True, '----file already exists, overwritten'
+        else:
+            return False, '----file not written'
+    else:
+        df.to_csv(name)
+        return True, '----written'
+
 def take_n(on, typeof):
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     with open('prs\{}\story.json'.format(pname), 'r') as f:
         data    = json.load(f)
         prev    = []
@@ -117,22 +147,11 @@ def newProject(cmd):
             json.dump(story, f, indent=4)
 
 
-def currentProject(val):
-    l = len(val)
-    cnt = {}
-    with open('manifest.json', 'r') as f:
-        cnt = json.load(f)
-    if(l == 1):
-        return cnt[val[0]]
-    elif(l == 2):
-        return cnt[val[0]][val[1]]
-    else:
-        return None
 
 def switchProject(cmd):
     projipath= 'prs\projects.txt'
 
-    current = currentProject('project_name')
+    current = current_project('project_name')
     currentpath = 'prs\{}\manifest.json'.format(current)
     targetpath  = 'prs\{}\manifest.json'.format(cmd.target)
     if (os.path.exists(targetpath) and os.path.exists(currentpath)):

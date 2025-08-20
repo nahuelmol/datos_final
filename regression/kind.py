@@ -1,11 +1,11 @@
 import sys
 
 from .methods import LinearRegression, SupportVectorRegression, KNearestNeighbors, RidgeRegression, LinearRegression
-from data_setter import getData
+from data_setter import get_data
 
 def Regression(cmd):
-    datapath = currentProject(['datapath','src'])
-    res, data = getData(datapath)
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
     if res == False:
         print('regression failed')
         sys.exit(0)

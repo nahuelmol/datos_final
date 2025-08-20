@@ -2,7 +2,7 @@ import os
 import json
 import pandas as pd
 
-def getData(filepath):
+def get_data(filepath):
     try:
         df = pd.read_csv(filepath)
         return True, df

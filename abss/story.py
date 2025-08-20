@@ -1,6 +1,6 @@
 
 import json
-from abss.fs import currentProject
+from abss.fs import current_project
 
 def set_condition(code):
     if code == 'log':
@@ -41,7 +41,7 @@ def story_cleaner(cmd):
         res, target = set_condition(cmd.cond)
         if res == False:
             return False, None
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     storypath = 'prs\{}\story.json'.format(pname)
     survivals = []
     data = None

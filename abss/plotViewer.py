@@ -1,7 +1,9 @@
 import cv2
 import os
 import pyautogui
-from abss.fs import currentProject
+import imghdr
+
+from abss.fs import current_project
 
 def take_number(code, place):
     aux = 0
@@ -33,15 +35,28 @@ def find_plt_file(code, number):
     else:
         res, number = take_number(None, number)
 
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     for each in os.listdir('prs\{}\outputs'.format(pname)):
         name = each.split("_")
         if(int(name[1]) == number) and (name[0] == code):
             files.append(each)
+
+    outs = []
+    for file in files:
+        filepath = 'prs\{}\outputs\{}'.format(pname, file)
+        if(imghdr.what(filepath) == 'png'):
+            outs.append(1)
+        else:
+            outs.append(0)
+
+    for idx, item in enumerate(outs):
+        if item == 0:
+            files.pop(idx)
+
     return files
 
 def seePlot(cmd):
-    pname = currentProject(['project_name'])
+    pname = current_project(['project_name'])
     filenames = find_plt_file(cmd.cond, cmd.number)
     for filename in filenames:
         ppath = 'prs\{}\outputs\{}'.format(pname, filename)

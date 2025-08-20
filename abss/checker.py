@@ -2,9 +2,9 @@
 import json
 import os
 
-from abss.fs import currentProject
+from abss.fs import current_project
 from abss.story import set_condition
-from data_setter import checkAvailableData, getData
+from data_setter import checkAvailableData
 
 def printGreen(text, what):
     print(text , f"\033[32m {what} \033[0m")
@@ -53,7 +53,7 @@ def ask_mani_for_data(what):
 def checker(cmd):
     if cmd.target == 'file':
         ft = cmd.currentFlags['-ft']
-        src= currentProject(['datapath', 'src'])
+        src= current_project(['datapath', 'src'])
         files = os.listdir(src)
         if '-ft' in cmd.currentFlags:
             for file in files:
@@ -62,7 +62,7 @@ def checker(cmd):
             for file in files:
                 print('file: ', file)
     elif cmd.target == 'mods':
-        projectname = currentProject(['project_name'])
+        projectname = current_project(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
         data = {}
         with open(storypath, 'r') as f:
@@ -89,7 +89,7 @@ def checker(cmd):
                             printGreen(meth['ac'], 'ac')
 
     elif cmd.target == 'meths':
-        projectname = currentProject(['project_name'])
+        projectname = current_project(['project_name'])
         storypath = 'prs\{}\story.json'.format(projectname)
         data = {}
         with open(storypath, 'r') as f:
@@ -116,7 +116,7 @@ def checker(cmd):
     elif cmd.target == 'tt' or cmd.target == 'tn' or cmd.target == 'src':
         ask_mani_for_data(cmd.target)
     elif cmd.target == '-cur':
-        pname = currentProject(['project_name'])
+        pname = current_project(['project_name'])
         print('current project {}'.format(pname))
     elif cmd.target == '-all':
         res, cnt = checkAvailableData()

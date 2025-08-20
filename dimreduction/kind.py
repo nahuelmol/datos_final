@@ -1,12 +1,12 @@
 import sys
 
 from dimreduction.dim_reduction import PCAnalysis, ICAnalysis, TSNEanalysis
-from data_setter import getData
-from abss.fs import currentProject
+from data_setter import get_data
+from abss.fs import current_project
 
 def DimReduction(cmd):
-    datapath = currentProject(['datapath','src'])
-    res, data = getData(datapath)
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
     if res == False:
         print('data cannot be obtained')
         sys.exit(0)

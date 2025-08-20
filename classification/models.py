@@ -13,10 +13,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from datetime import datetime
 
-from data_setter import getData
+from data_setter import get_data
 from dimreduction.dim_reduction import data_separator, add 
 from abss.dataSetting import extract_data
-from abss.fs import currentProject, take_n
+from abss.fs import current_project, take_n
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
 
 
@@ -25,8 +25,8 @@ def DecisionTree(cmd):
     first   = input('select first possible response: ') #C
     second  = input('select second possible response: ')#G
 
-    datapath = currentProject(['datapath','src'])
-    res, data = getData(datapath)
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
     query   = "{}.isin(('{}', '{}'))".format(col, first, second)
     data    = data.query(query)
 
@@ -50,8 +50,8 @@ def Logistic(cmd):
     y_test  = {} 
     res = input('split original data?')
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
-        datapath = currentProject(['datapath','src'])
-        res, data = getData(datapath)
+        datapath = current_project(['datapath','src'])
+        res, data = get_data(datapath)
         data, target = data_separator(data, cmd.ref)
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
     else:
