@@ -45,11 +45,12 @@ class Command:
             cal ch
             cal cl
             cal del
+            cal set
             """
             print(msg)
         elif self.rootCommand == 'app':
             msg = """
-            cal apply dr:pca -r RANK
+            cal app dr:pca -r RANK
             """
             print(msg)
         elif self.rootCommand == 'ch':
@@ -57,6 +58,7 @@ class Command:
             cal ch meths    (all)
             cal ch meths    w pca
 
+            cal ch mods     (all)
             cal ch mods     w log
             """
             print(msg)
@@ -81,6 +83,11 @@ class Command:
             msg = """
             cal see w pca is 1
             cal see w log is 1
+            """
+            print(msg)
+        elif self.rootCommand == 'order':
+            msg = """
+            cal order meths w pca
             """
             print(msg)
         else:
@@ -120,7 +127,6 @@ class Command:
             self.test_size      = float(self.currentFlags['-ts'])
         if 'w' in self.currentFlags:
             self.all = False
-            self.unique = False
             self.cond = self.currentFlags['w']
         if 'is' in self.currentFlags:
             self.all = False
@@ -148,7 +154,6 @@ class Command:
                     self.currentFlags[flag] = self.default(flag)
                 else:
                     self.currentFlags[flag] = self.options[idx + 1]
-                    print('{}: {}'.format(flag, self.currentFlags[flag]))
             elif flag in self.availableAloneFlags:
                 self.aloneFlags[flag] = True
         self.addFlags()
@@ -263,16 +268,22 @@ class Command:
                 print('to many arguments')
             else:
                 print('misterious error')
+        elif self.rootCommand == 'order':
+            if self.manyArgs > 1:
+                self.target = self.args[1]
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting()
         elif self.rootCommand == '-help':
             if self.manyArgs > 1:
                 self.options = self.args[1:]
                 self.flagSetting()
         else:
-            return False, 'not recognized root'
-        return True, 'args setting done'
+            return False, '----not recognized root'
+        return True, '----args setting'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl']
+        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl', 'order']
         if self.rootCommand in availableCommands:
             return True, 'the command is available'
         else:

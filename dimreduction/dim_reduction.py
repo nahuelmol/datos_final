@@ -54,8 +54,8 @@ def PCAnalysis(data, cmd):
     time = str(datetime.now())
     n = take_n('methods', 'pca')
     files = {
-        'pca_basic_chart_pcn': 'pca_{}_basic_pcn'.format(n),
-        'pca_pcs':'pca_{}_pcs'.format(n),
+        'pca_basic_chart_pcn': 'pca_{}_basic_pcn.png'.format(n),
+        'pca_pcs':'pca_{}_pcs.csv'.format(n),
     }
     REPORT = {
         'method': 'pca',
@@ -66,7 +66,7 @@ def PCAnalysis(data, cmd):
         'outputs': files,
     }
     Plotter(complete, 'PCA - Principal Components Analysis', files['pca_basic_chart_pcn'], cmd.ref)
-    res, msg = write_csv(pcs, files['pca_pcs'])
+    res, msg = write_csv(data_with_pcs, files['pca_pcs'])
     print(msg)
     add('methods', REPORT)
 
@@ -92,8 +92,8 @@ def ICAnalysis(data, cmd):
 
     n = take_n('methods', 'ica')
     files = {
-        'ica_basic_chart_icn': 'ica_{}_basic_icn'.format(n),
-        'ica_ics':'ica_{}_ics'.format(n),
+        'ica_basic_chart_icn': 'ica_{}_basic_icn.png'.format(n),
+        'ica_ics':'ica_{}_ics.csv'.format(n),
     }
     Plotter(complete, 'ICA - Independent Components Analysis', files['ica_basic_chart_icn'], cmd.ref)
     res, msg = write_csv(files['ica_ics'])
@@ -129,8 +129,8 @@ def TSNEanalysis(data, cmd):
 
     n = take_n('methods', 'tsne')
     files = {
-        'tsne_basic_chart_comps': 'tsne_{}_basic_comps'.format(n),
-        'tsne_comps':'tsne_{}_comps'.format(n),
+        'tsne_basic_chart_comps': 'tsne_{}_basic_comps.png'.format(n),
+        'tsne_comps':'tsne_{}_comps.csv'.format(n),
     }
     Plotter(complete, 'tSNE Analysis', files['tsne_basic_chart_comps'], cmd.ref)
     res, msg = write_csv(tsnes, files['tsne_comps'])

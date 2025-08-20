@@ -20,7 +20,8 @@ def write_csv(df, name):
     pname = current_project(['project_name'])
     path = 'prs\{}\outputs'.format(pname)
     path = '{}\{}'.format(path, name)
-    if not (type(df) == pd.DataFrame):
+    if not isinstance(df, pd.DataFrame):
+        print('getting: {}.{}'.format(type(df).__module__, type(df).__name__))
         return False, '---not a correct dataframe served'
     if os.path.exists(path):
         res = input('file already exists, overwrite?')
@@ -30,20 +31,21 @@ def write_csv(df, name):
         else:
             return False, '----file not written'
     else:
-        df.to_csv(name)
+        df.to_csv(path)
         return True, '----written'
 
 def take_n(on, typeof):
     pname = current_project(['project_name'])
     with open('prs\{}\story.json'.format(pname), 'r') as f:
         data    = json.load(f)
-        prev    = []
+        aux     = 0
         for each in data[on]:
             name = on[:-1]
             if each[name] == typeof:
-                print('name: ', each[name])
-                prev.append(each)
-        return (len(prev) + 1)
+                n = int(each['n'])
+                if n > aux:
+                    aux = n
+        return (aux + 1)
 
 def outProject():
     os.remove('manifest.json')
@@ -61,7 +63,7 @@ def compare_projects():
             data['datetime'] = ''
             data['datapath'] = ''
             data['dependencies'] = {}
-            json.dump(data, f)
+            json.dump(data, f, indent=4)
 
 
 def delProject(cmd):

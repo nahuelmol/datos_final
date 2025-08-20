@@ -1,6 +1,28 @@
 
 import json
+import os
 from abss.fs import current_project
+
+def order(target, cmd):
+    pname = current_project(['project_name'])
+    storypath = 'prs\{}\story.json'.format(pname)
+    data = {}
+    with open(storypath, 'r') as f:
+        data = json.load(f)
+    with open(storypath, 'w') as f:
+        for idx, item in enumerate(data[target]):
+            new_n = idx + 1
+            old_n = data[target][idx]['n']
+            data[target][idx]['n'] = new_n
+            for k, v in data[target][idx]['outputs'].items():
+                old_filename = v #this is value, the filename
+                new_filename = v.replace(str(old_n), str(new_n))
+                data[target][idx]['outputs'][k] = new_filename
+                path_old = 'prs\{}\outputs\{}'.format(pname, old_filename)
+                path_new = 'prs\{}\outputs\{}'.format(pname, new_filename)
+                os.rename(path_old, path_new)
+        json.dump(data, f, indent=4)
+    print('----ordered')
 
 def set_condition(code):
     if code == 'log':
@@ -27,33 +49,56 @@ def set_condition(code):
         print('not recognized code')
         return False, None
 
+def del_file(outputs):
+    name = current_project(['project_name'])
+    for k, val in outputs.items():
+        filepath = 'prs\{}\outputs\{}'.format(name, val)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+
 def story_cleaner(cmd):
-    target  = ''
-    coll    = ''
-    to      = ''
-    if cmd.all == False:
-        if cmd.target == 'meths':
-            coll = 'methods'
-            to = 'method'
-        elif cmd.target == 'mods':
-            coll = 'models'
-            to = 'model'
-        res, target = set_condition(cmd.cond)
-        if res == False:
-            return False, None
     pname = current_project(['project_name'])
     storypath = 'prs\{}\story.json'.format(pname)
+    data = {}
     survivals = []
-    data = None
     with open(storypath, 'r') as f:
         data = json.load(f)
-        for each in data[coll]:
-            if cmd.all == True:
-                survivals = []
+    if cmd.target == 'meths':
+        if cmd.all == False:
+            res, code = set_condition(cmd.cond)
+            if cmd.unique == True:
+                for each in data['methods']:
+                    if (each['method'] == code):
+                        n = int(cmd.number)
+                        if (each['n'] != n):
+                            survivals.append(each)
+                        else:
+                            del_file(each['outputs'])
             else:
-                if each[to] != target:
-                    survivals.append(each)
-    data[coll] = survivals
+                for each in data['methods']:
+                    if (each['method'] != code):
+                        survivals.append(each)
+                    else:
+                        del_file(each['outputs'])
+        data['methods'] = survivals
+
+    elif cmd.target == 'mods':
+        if cmd.all == False:
+            res, code = set_condition(cmd.cond)
+            if cmd.unique == True:
+                    for each in data['models']:
+                        n = int(each['n'])
+                        if (each['model'] != code and n != cmd.number):
+                            survivals.append(each)
+            else:
+                for each in data['models']:
+                    if (each['model'] != code):
+                        survivals.append(each)
+        data['models'] = survivals
+    else:
+        return False, 'not available target'
     with open(storypath, 'w') as f:
         json.dump(data, f, indent=4)
+    return True, '----story cleaned'
 

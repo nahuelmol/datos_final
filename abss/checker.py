@@ -51,6 +51,8 @@ def ask_mani_for_data(what):
         print('manifest does not exists')
 
 def checker(cmd):
+    projectname = current_project(['project_name'])
+    storypath = 'prs\{}\story.json'.format(projectname)
     if cmd.target == 'file':
         ft = cmd.currentFlags['-ft']
         src= current_project(['datapath', 'src'])
@@ -62,8 +64,6 @@ def checker(cmd):
             for file in files:
                 print('file: ', file)
     elif cmd.target == 'mods':
-        projectname = current_project(['project_name'])
-        storypath = 'prs\{}\story.json'.format(projectname)
         data = {}
         with open(storypath, 'r') as f:
             data = json.load(f)
@@ -89,8 +89,6 @@ def checker(cmd):
                             printGreen(meth['ac'], 'ac')
 
     elif cmd.target == 'meths':
-        projectname = current_project(['project_name'])
-        storypath = 'prs\{}\story.json'.format(projectname)
         data = {}
         with open(storypath, 'r') as f:
             data = json.load(f)
