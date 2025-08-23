@@ -14,7 +14,8 @@ from sklearn.preprocessing import StandardScaler
 from datetime import datetime
 
 from data_setter import get_data
-from dimreduction.dim_reduction import data_separator, add 
+from dimreduction.dim_reduction import data_separator
+from abss.story import add
 from abss.dataSetting import extract_data
 from abss.fs import current_project, take_n
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot

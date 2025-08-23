@@ -7,12 +7,13 @@ class Command:
         self.all    = True
         self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', 
                                        '-rs', '-ts', 'w', '-cls', 'is']
-        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help']
+        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm']
         self.aloneFlags = {}
         self.changeField = ''
         self.class_ = 0
         self.currentFlags = {}
         self.cond = ''
+        self.corr_matrix = False
         self.datatarget = ''
         self.h = False
         self.manyArgs   = len(self.args)
@@ -71,6 +72,9 @@ class Command:
             cal cl mods
             cal cl mods     w log
             cal cl mods     w log is 1
+
+            cal cl exp      w cm
+            cal cl exp      w cm is 1
             """
             print(msg)
         elif self.rootCommand == 'del':
@@ -115,6 +119,7 @@ class Command:
             return self.output
 
     def addFlags(self):
+        #here, flags activate or deactivate command variables like all, w (where), etc
         if '-r' in self.currentFlags:
             self.ref = self.currentFlags['-r']
         if '-o' in self.currentFlags:
@@ -144,6 +149,9 @@ class Command:
         if '-h' in self.aloneFlags:
             self.h = True
             self.h_cmd = self.rootCommand
+        if 'cm' in self.aloneFlags:
+            self.all = False
+            self.corr_matrix = True
 
     def flagSetting(self):
         for flag in self.options:
@@ -204,6 +212,12 @@ class Command:
                     self.flagSetting()
                 else:
                     self.all = True
+                self.flagSetting()
+        elif self.rootCommand == 'xp':
+            if self.manyArgs == 1:
+                self.all = True
+            elif self.manyArgs > 1:
+                self.options = self.args[1:]
                 self.flagSetting()
         elif self.rootCommand == 'see':
             if self.manyArgs > 1:
@@ -283,7 +297,7 @@ class Command:
         return True, '----args setting'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl', 'order']
+        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl', 'order', 'xp']
         if self.rootCommand in availableCommands:
             return True, 'the command is available'
         else:

@@ -7,6 +7,7 @@ from sklearn.decomposition import PCA
 from dimreduction.kind import DimReduction
 from classification.kind import Classification
 from regression.kind import Regression
+from explo.kind import ExploratoryAnalysis
 
 from data_setter import checkAvailableData
 from abss.commands import Command
@@ -33,7 +34,7 @@ def switch(cmd):
             return False, '--not recognized type'
     elif cmd.rootCommand == 'change':
         res, msg = Change(cmd)
-        return True, 'done'
+        return True, msg
     elif cmd.rootCommand == 'ch':
         checker(cmd)
     elif cmd.rootCommand == 'current':
@@ -41,7 +42,7 @@ def switch(cmd):
         return True, msg
     elif cmd.rootCommand == 'cl':
         res, msg = story_cleaner(cmd)
-        print(msg)
+        return True, msg
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)
@@ -49,6 +50,9 @@ def switch(cmd):
             delData(cmd)
         if cmd.targetType == 'outputs':
             delOutputs(cmd)
+    elif cmd.rootCommand == 'xp':
+        res, msg = ExploratoryAnalysis(cmd)
+        return True, msg
     elif cmd.rootCommand == 'new':
         if cmd.targetType == 'project':
             newProject(cmd)
@@ -68,13 +72,13 @@ def switch(cmd):
         elif cmd.target == 'mods':
             order('models', cmd)
         else:
-            return False, 'unrecognized target'
+            return False, '----unrecognized target'
     elif cmd.rootCommand == '-help':
         cmd.all == True 
         cmd.helper()
     else:
-        return False, 'unrecognized command'
-    return True, 'done'
+        return False, '----unrecognized command'
+    return True, '----DONE----'
 
 if __name__ == "__main__":
     command = None

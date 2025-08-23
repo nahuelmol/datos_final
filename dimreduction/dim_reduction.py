@@ -13,6 +13,7 @@ from abss.fs import write_csv
 
 from abss.fs import current_project, take_n
 from .plotmaker import Plotter
+from abss.story import add
 
 def data_separator(data, ref):
     target = data.pop(ref)
@@ -23,16 +24,6 @@ def data_separator(data, ref):
     data = data.loc[:, ~data.columns.isin(cols_to_drop)]
     return data, target
 
-def add(what, report):
-    name = current_project(['project_name'])
-    storypath = 'prs\{}\story.json'.format(name)
-    current = {}
-    with open(storypath, 'r') as file:
-        current = json.load(file)
-        current[what].append(report)
-
-    with open(storypath, 'w') as file:
-        json.dump(current, file, indent=4)
 
 
 def PCAnalysis(data, cmd):

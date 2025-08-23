@@ -3,6 +3,17 @@ import json
 import os
 from abss.fs import current_project
 
+def add(what, report):
+    name = current_project(['project_name'])
+    storypath = 'prs\{}\story.json'.format(name)
+    current = {}
+    with open(storypath, 'r') as file:
+        current = json.load(file)
+        current[what].append(report)
+
+    with open(storypath, 'w') as file:
+        json.dump(current, file, indent=4)
+
 def order(target, cmd):
     pname = current_project(['project_name'])
     storypath = 'prs\{}\story.json'.format(pname)
@@ -45,6 +56,8 @@ def set_condition(code):
         return True, 'ica'
     elif code == 'tsne':
         return True, 'tsne'
+    elif code == 'cm':
+        return True, 'corr_matrix'
     else:
         print('not recognized code')
         return False, None
@@ -96,6 +109,19 @@ def story_cleaner(cmd):
                     if (each['model'] != code):
                         survivals.append(each)
         data['models'] = survivals
+    elif cmd.target == 'exp':
+        if cmd.all == False:
+            res, code = set_condition(cmd.cond)
+            if cmd.unique == True:
+                    for each in data['exploratory_analysis']:
+                        n = int(each['n'])
+                        if (each['metric'] != code and n != cmd.number):
+                            survivals.append(each)
+            else:
+                for each in data['exploratory_analysis']:
+                    if (each['metric'] != code):
+                        survivals.append(each)
+        data['exploratory_analysis'] = survivals
     else:
         return False, 'not available target'
     with open(storypath, 'w') as f:
