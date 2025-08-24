@@ -51,8 +51,7 @@ def ask_mani_for_data(what):
         print('manifest does not exists')
 
 def checker(cmd):
-    projectname = current_project(['project_name'])
-    storypath = 'prs\{}\story.json'.format(projectname)
+    storypath = current_project(['storypath'])
     if cmd.target == 'file':
         ft = cmd.currentFlags['-ft']
         src= current_project(['datapath', 'src'])
@@ -110,6 +109,27 @@ def checker(cmd):
                         print('{}, {}, {}'.format(meth['method'], meth['n'], meth['time']))
                         if cmd.ac == True:
                             printGreen(meth['ac'], 'ac')
+
+    elif cmd.target == 'exps':
+        data = {}
+        with open(storypath, 'r') as f:
+            data = json.load(f)
+        if len(data['exploratory_analysis']) == 0:
+            return True, 'there are not methods applied'
+        for metric in data['exploratory_analysis']:
+            if cmd.all == True:
+                print('{} - {} - {}'.format(metric['metric'], metric['time'], metric['n']))
+            else:
+                res, code = set_condition(cmd.cond)
+                if metric['metric'] == code:
+                    if cmd.unique == True:
+                        number = 0
+                        if cmd.number.isdigit():
+                            number = int(cmd.number)
+                        if metric['n'] == number:
+                            print('{}, {}, {}'.format(metric['metric'], metric['n'], metric['time']))
+                    else:
+                        print('{}, {}, {}'.format(meth['metric'], meth['n'], meth['time']))
 
     elif cmd.target == 'tt' or cmd.target == 'tn' or cmd.target == 'src':
         ask_mani_for_data(cmd.target)

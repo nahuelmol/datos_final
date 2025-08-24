@@ -93,6 +93,18 @@ class Command:
             cal see w log is 1
             """
             print(msg)
+        elif self.rootCommand == 'set':
+            msg = """
+            cal set d:src
+            cal set d:tt
+            cal set d:tn
+
+            cal set g:var
+            cal set g:lab
+
+            following, insert answer
+            """
+            print(msg)
         elif self.rootCommand == 'order':
             msg = """
             cal order meths w pca

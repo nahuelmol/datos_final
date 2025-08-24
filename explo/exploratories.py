@@ -7,6 +7,13 @@ from abss.story import add
 from abss.fs import take_n, current_project
 from datetime import datetime
 
+def plot_hist(filename):
+    pname = current_project(['project_name'])
+    filepath = 'prs\{}\outputs\{}'.format(pname, filename)
+    plt.savefig(filepath, dpi=300)
+    plt.close()
+    return True
+
 def plot(corr_matrix, filename):
     pname = current_project(['project_name'])
     filepath = 'prs\{}\outputs\{}'.format(pname, filename)
@@ -16,6 +23,7 @@ def plot(corr_matrix, filename):
     plt.title(f"Correlation Matrix", fontsize=16, fontweight='bold')
     plt.xticks(rotation=45, ha='right')
     plt.savefig(filepath, dpi=300)
+    plt.close()
     return True
 
 def correlation_matrix(df):
@@ -44,10 +52,35 @@ def categoricals(data):
     cat_cols = data.select_dtypes(['object', 'category']).columns
     print('categorical variables: {}'.format(cat_cols.tolist()))
 
-    ref = input('insert categorical variable')
-    print(data[ref].value_counts())
+    res = input('insert or take from global var? (i\\t)')
+    ref = ''
+
+    if(res == 'i'):
+        ref = input('insert it: ')
+    elif(res == 't'):
+        if(current_project(['global', 'var']) != None):
+            ref = current_project(['global', 'var'])
+        else:
+            print('global - var does not exists')
+            ref = input('insert categorical now: ')
+
     sns.countplot(x=data[ref])
-    plt.savefig('categorical.png')
+    n = take_n('exploratory_analysis', 'categos')
+    files = {
+        'categorical_plot': 'categorical_{}.png'.format(n),
+    }
+    REPORT = {
+        'metric': 'categos',
+        'n':n,
+        'time':str(datetime.now()),
+        'outputs': files,
+    }
+    res = plot_hist(files['categorical_plot'])
+    if res == True:
+        add('exploratory_analysis', REPORT)
+        return '----categorical view:done!'
+    else:
+        return '----categorical view:failed!'
 
 def dispersions(data):
     ref = input('insert variable')

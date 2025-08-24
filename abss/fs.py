@@ -5,16 +5,11 @@ import pandas as pd
 from datetime import date, datetime
 
 def current_project(val):
-    l = len(val)
-    cnt = {}
     with open('manifest.json', 'r') as f:
         cnt = json.load(f)
-    if(l == 1):
-        return cnt[val[0]]
-    elif(l == 2):
-        return cnt[val[0]][val[1]]
-    else:
-        return None
+        for key in val:
+            cnt = cnt[key]
+        return cnt
 
 def write_csv(df, name):
     pname = current_project(['project_name'])
@@ -117,6 +112,7 @@ def newProject(cmd):
             'project_name': name,
             'datetime': today,
             'datapath': data,
+            'storypath': 'prs\{}\story.json'.format(name),
             'global': {
                 'var': None,
                 'label': None,

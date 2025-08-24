@@ -10,6 +10,8 @@ def ExploratoryAnalysis(cmd):
     if cmd.all == True:
         msg = correlation_matrix(data)
         MSG = '{}\n{}'.format(MSG, msg)
+        msg = categoricals(data)
+        MSG = '{}\n{}'.format(MSG, msg)
         return True, MSG
     else:
         if cmd.corr_matrix == True:

@@ -4,8 +4,7 @@ import os
 from abss.fs import current_project
 
 def add(what, report):
-    name = current_project(['project_name'])
-    storypath = 'prs\{}\story.json'.format(name)
+    storypath = current_project(['storypath'])
     current = {}
     with open(storypath, 'r') as file:
         current = json.load(file)
@@ -15,8 +14,7 @@ def add(what, report):
         json.dump(current, file, indent=4)
 
 def order(target, cmd):
-    pname = current_project(['project_name'])
-    storypath = 'prs\{}\story.json'.format(pname)
+    storypath = current_project(['storypath'])
     data = {}
     with open(storypath, 'r') as f:
         data = json.load(f)
@@ -40,6 +38,8 @@ def set_condition(code):
         return True, 'logistic' 
     elif code == 'cdt':
         return True, 'classification_decision_tree'
+    elif code == 'cat':
+        return True, 'categos'
     elif code == 'knn':
         return True, 'classification_knearest_neigh'
     elif code == 'rf':
@@ -71,8 +71,7 @@ def del_file(outputs):
 
 
 def story_cleaner(cmd):
-    pname = current_project(['project_name'])
-    storypath = 'prs\{}\story.json'.format(pname)
+    storypath = current_project(['storypath'])
     data = {}
     survivals = []
     with open(storypath, 'r') as f:
@@ -88,6 +87,8 @@ def story_cleaner(cmd):
                             survivals.append(each)
                         else:
                             del_file(each['outputs'])
+                    else:
+                        survivals.append(each)
             else:
                 for each in data['methods']:
                     if (each['method'] != code):
@@ -100,27 +101,41 @@ def story_cleaner(cmd):
         if cmd.all == False:
             res, code = set_condition(cmd.cond)
             if cmd.unique == True:
-                    for each in data['models']:
-                        n = int(each['n'])
-                        if (each['model'] != code and n != cmd.number):
+                for each in data['models']:
+                    n = int(cmd.number)
+                    if (each['model'] == code):
+                        if(each['n'] != n):
                             survivals.append(each)
+                    else:
+                        del_file(each['outputs'])
+                else:
+                    survivals.append(each)
             else:
                 for each in data['models']:
                     if (each['model'] != code):
                         survivals.append(each)
+                    else:
+                        del_file(each['outputs'])
         data['models'] = survivals
-    elif cmd.target == 'exp':
+    elif cmd.target == 'exps':
         if cmd.all == False:
             res, code = set_condition(cmd.cond)
             if cmd.unique == True:
-                    for each in data['exploratory_analysis']:
-                        n = int(each['n'])
-                        if (each['metric'] != code and n != cmd.number):
+                for each in data['exploratory_analysis']:
+                    n = int(cmd.number)
+                    if (each['metric'] == code):
+                        if(each['n'] != n):
                             survivals.append(each)
+                        else:
+                            del_file(each['outputs'])
+                    else:
+                        survivals.append(each)
             else:
                 for each in data['exploratory_analysis']:
                     if (each['metric'] != code):
                         survivals.append(each)
+                    else:
+                        del_file(each['outputs'])
         data['exploratory_analysis'] = survivals
     else:
         return False, 'not available target'
