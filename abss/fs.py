@@ -117,6 +117,10 @@ def newProject(cmd):
             'project_name': name,
             'datetime': today,
             'datapath': data,
+            'global': {
+                'var': None,
+                'label': None,
+            },
             'dependencies':{},
     }
     project  = 'prs'

@@ -7,14 +7,17 @@ class Command:
         self.all    = True
         self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', 
                                        '-rs', '-ts', 'w', '-cls', 'is']
-        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm']
+        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm', 'cat', 'dis', 'box']
         self.aloneFlags = {}
+        self.boxplot = False
+        self.categorics = False
         self.changeField = ''
         self.class_ = 0
         self.currentFlags = {}
         self.cond = ''
         self.corr_matrix = False
         self.datatarget = ''
+        self.dispersion = False
         self.h = False
         self.manyArgs   = len(self.args)
         self.message    = ''
@@ -32,6 +35,7 @@ class Command:
         self.output = None
         self.options = []
         self.unique = False
+        self.varType = None
 
     def setReference(self, ref):
         self.ref = ref
@@ -94,6 +98,13 @@ class Command:
             cal order meths w pca
             """
             print(msg)
+        elif self.rootCommand == 'list':
+            msg = """
+            list vars
+            list vars n
+            list vars c
+            """
+            print(msg)
         else:
             True, 'not command specified'
         True, 'well provided command'
@@ -107,6 +118,8 @@ class Command:
             self.targetType = 'library'
         elif code == 'o':
             self.targetType = 'outputs'
+        elif code == 'g':
+            self.targetType = 'glovar'
         else:
             print('not available targetType: {}'.format(code))
 
@@ -152,6 +165,15 @@ class Command:
         if 'cm' in self.aloneFlags:
             self.all = False
             self.corr_matrix = True
+        if 'cat' in self.aloneFlags:
+            self.all =  False
+            self.categorics = True
+        if 'dis' in self.aloneFlags:
+            self.all = False
+            self.dispersion = True
+        if 'box' in self.aloneFlags:
+            self.all = False
+            self.boxplot = True
 
     def flagSetting(self):
         for flag in self.options:
@@ -242,6 +264,16 @@ class Command:
                     self.flagSetting()
             else:
                 print('you need more arguments')
+        elif self.rootCommand == 'list':
+            if self.manyArgs == 1:
+                print('not sufficient args')
+            elif self.manyArgs > 1:
+                self.target = self.args[1]
+                if self.manyArgs > 2:
+                    self.varType = self.args[2]
+                    if self.manyArgs > 3:
+                        self.options = self.args[3:]
+                        self.flagSetting()
         elif self.rootCommand == 'ch':
             if self.manyArgs > 1:
                 self.target = self.args[1]
@@ -297,7 +329,7 @@ class Command:
         return True, '----args setting'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl', 'order', 'xp']
+        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl', 'order', 'xp', 'list', 'set']
         if self.rootCommand in availableCommands:
             return True, 'the command is available'
         else:

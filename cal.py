@@ -9,6 +9,7 @@ from classification.kind import Classification
 from regression.kind import Regression
 from explo.kind import ExploratoryAnalysis
 
+from abss.lister import list_vars, list_labs
 from data_setter import checkAvailableData
 from abss.commands import Command
 from abss.change import Change
@@ -18,6 +19,7 @@ from abss.story import story_cleaner, order
 from abss.dataSetting import setData, delData
 from abss.plotViewer import seePlot
 from abss.outputs import delOutputs
+from abss.glovary import setGlovar
 
 def switch(cmd):
     if cmd.h == True:
@@ -50,6 +52,11 @@ def switch(cmd):
             delData(cmd)
         if cmd.targetType == 'outputs':
             delOutputs(cmd)
+    elif cmd.rootCommand == 'list':
+        if cmd.target == 'vars':
+            list_vars(cmd)
+        elif cmd.target == 'labs':
+            list_cols(cmd)
     elif cmd.rootCommand == 'xp':
         res, msg = ExploratoryAnalysis(cmd)
         return True, msg
@@ -66,6 +73,8 @@ def switch(cmd):
     elif cmd.rootCommand == 'set':
         if cmd.targetType == 'data':
             setData(cmd)
+        if cmd.targetType == 'glovar':
+            setGlovar(cmd)
     elif cmd.rootCommand == 'order':
         if cmd.target == 'meths':
             order('methods', cmd)
