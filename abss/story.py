@@ -36,10 +36,18 @@ def order(target, cmd):
 def set_condition(code):
     if code == 'log':
         return True, 'logistic' 
-    elif code == 'cdt':
-        return True, 'classification_decision_tree'
+    elif code == 'bp':
+        return True, 'boxplots'
     elif code == 'cat':
         return True, 'categos'
+    elif code == 'cdt':
+        return True, 'classification_decision_tree'
+    elif code == 'cm':
+        return True, 'corr_matrix'
+    elif code == 'dis':
+        return True, 'dispersions'
+    elif code == 'his':
+        return True, 'histos'
     elif code == 'knn':
         return True, 'classification_knearest_neigh'
     elif code == 'rf':
@@ -56,8 +64,6 @@ def set_condition(code):
         return True, 'ica'
     elif code == 'tsne':
         return True, 'tsne'
-    elif code == 'cm':
-        return True, 'corr_matrix'
     else:
         print('not recognized code')
         return False, None
@@ -68,6 +74,8 @@ def del_file(outputs):
         filepath = 'prs\{}\outputs\{}'.format(name, val)
         if os.path.exists(filepath):
             os.remove(filepath)
+        else:
+            print('{} does not exists'.format(filepath))
 
 
 def story_cleaner(cmd):
@@ -95,6 +103,9 @@ def story_cleaner(cmd):
                         survivals.append(each)
                     else:
                         del_file(each['outputs'])
+        else:
+            for each in data['methods']:
+                del_file(each['outputs'])
         data['methods'] = survivals
 
     elif cmd.target == 'mods':
@@ -116,6 +127,9 @@ def story_cleaner(cmd):
                         survivals.append(each)
                     else:
                         del_file(each['outputs'])
+        else:
+            for each in data['models']:
+                del_file(each['outputs'])
         data['models'] = survivals
     elif cmd.target == 'exps':
         if cmd.all == False:
@@ -136,6 +150,10 @@ def story_cleaner(cmd):
                         survivals.append(each)
                     else:
                         del_file(each['outputs'])
+        else:
+            print('all')
+            for each in data['exploratory_analysis']:
+                del_file(each['outputs'])
         data['exploratory_analysis'] = survivals
     else:
         return False, 'not available target'

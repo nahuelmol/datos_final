@@ -6,6 +6,8 @@ def setGlovar(cmd):
     target = ''
     if cmd.target == 'var':
         target = 'var'
+    elif cmd.target == 'hvar':
+        target = 'histo_var'
     elif cmd.target == 'lab':
         target = 'label'
     else:

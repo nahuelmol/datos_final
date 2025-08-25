@@ -1,5 +1,5 @@
 
-from explo.exploratories import correlation_matrix, boxplot, histogram, categoricals, dispersions
+from explo.exploratories import correlation_matrix, boxplots, histograms, categoricals, dispersions
 from abss.fs import current_project
 from data_setter import get_data
 
@@ -11,6 +11,12 @@ def ExploratoryAnalysis(cmd):
         msg = correlation_matrix(data)
         MSG = '{}\n{}'.format(MSG, msg)
         msg = categoricals(data)
+        MSG = '{}\n{}'.format(MSG, msg)
+        msg = boxplots(data)
+        MSG = '{}\n{}'.format(MSG, msg)
+        msg = histograms(data)
+        MSG = '{}\n{}'.format(MSG, msg)
+        msg = dispersions(data)
         MSG = '{}\n{}'.format(MSG, msg)
         return True, MSG
     else:

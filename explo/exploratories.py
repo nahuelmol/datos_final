@@ -7,22 +7,38 @@ from abss.story import add
 from abss.fs import take_n, current_project
 from datetime import datetime
 
-def plot_hist(filename):
+def plt_boxplot(X, filename):
     pname = current_project(['project_name'])
-    filepath = 'prs\{}\outputs\{}'.format(pname, filename)
-    plt.savefig(filepath, dpi=300)
+    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
+    sns.boxplot(x=X)
+    plt.savefig(fpath, dpi=300)
+    plt.close()
+
+def plot_histos(data, x, kde, filename):
+    data = data.select_dtypes(include=['number'])
+    pname = current_project(['project_name'])
+    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
+    sns.histplot(data=data, x=x, kde=kde, bins=20)
+    plt.savefig(fpath, dpi=300)
+    plt.close()
+
+def plot_hist(X, filename):
+    sns.countplot(x=X)
+    pname = current_project(['project_name'])
+    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
+    plt.savefig(fpath, dpi=300)
     plt.close()
     return True
 
 def plot(corr_matrix, filename):
     pname = current_project(['project_name'])
-    filepath = 'prs\{}\outputs\{}'.format(pname, filename)
+    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
     plt.figure(figsize=(12,8))
     sns.heatmap(corr_matrix, cmap='coolwarm', mask=mask)
     plt.title(f"Correlation Matrix", fontsize=16, fontweight='bold')
     plt.xticks(rotation=45, ha='right')
-    plt.savefig(filepath, dpi=300)
+    plt.savefig(fpath, dpi=300)
     plt.close()
     return True
 
@@ -52,19 +68,13 @@ def categoricals(data):
     cat_cols = data.select_dtypes(['object', 'category']).columns
     print('categorical variables: {}'.format(cat_cols.tolist()))
 
-    res = input('insert or take from global var? (i\\t)')
     ref = ''
+    if(current_project(['global', 'var']) != None):
+        ref = current_project(['global', 'var'])
+    else:
+        print('global - var does not exists')
+        ref = input('insert categorical now: ')
 
-    if(res == 'i'):
-        ref = input('insert it: ')
-    elif(res == 't'):
-        if(current_project(['global', 'var']) != None):
-            ref = current_project(['global', 'var'])
-        else:
-            print('global - var does not exists')
-            ref = input('insert categorical now: ')
-
-    sns.countplot(x=data[ref])
     n = take_n('exploratory_analysis', 'categos')
     files = {
         'categorical_plot': 'categorical_{}.png'.format(n),
@@ -75,7 +85,7 @@ def categoricals(data):
         'time':str(datetime.now()),
         'outputs': files,
     }
-    res = plot_hist(files['categorical_plot'])
+    res = plot_hist(data[ref], files['categorical_plot'])
     if res == True:
         add('exploratory_analysis', REPORT)
         return '----categorical view:done!'
@@ -83,11 +93,16 @@ def categoricals(data):
         return '----categorical view:failed!'
 
 def dispersions(data):
-    ref = input('insert variable')
+    ref = ''
+    if(current_project(['global', 'histo_var']) != None):
+        ref = current_project(['global', 'histo_var'])
+    else:
+        print('global - var does not exists')
+        ref = input('insert categorical now: ')
     var = data[ref].var()
     std = data[ref].std()
     mea = data[ref].mean()
-    range_ = data[ref].max() - data[ref].min
+    range_ = data[ref].max() - data[ref].min()
     var_coeff = std / mea
 
     REPORT = {
@@ -99,20 +114,53 @@ def dispersions(data):
         'mean':mea,
         'range':range_,
         'variation_coefficient':var_coeff,
+        'outputs':{},
     }
+    add('exploratory_analysis', REPORT)
+    return '----dispersions: done!'
 
-def histogram(data):
-    sns.histplot(data, kde=False, bins=20)
-    plt.savefig('histo.png')
-    sns.histplot(data, kde=True, bins=20)
-    plt.savefig('histo_kde.png')
-    sns.kdeplot(data, shade=True)
-    plt.savefig('histo_kde_shade.png')
+def histograms(data):
+    ref = ''
+    if(current_project(['global', 'histo_var']) != None):
+        ref = current_project(['global', 'histo_var'])
+    else:
+        print('global - var does not exists')
+        ref = input('insert categorical now: ')
+    n = take_n('exploratory_analysis', 'histos')
+    files   = {
+        'histo':'histo_{}.png'.format(n),
+        'histo_kde':'histo_{}_kde.png'.format(n),
+        'histo_kde_shade':'histo_{}_kde_shade.png'.format(n),
+    }
+    plot_histos(data, ref, False, files['histo'])
+    plot_histos(data, ref, True,  files['histo_kde'])
+    plot_histos(data, ref, False, files['histo_kde_shade'])
+    REPORT  = {
+        'metric':'histos',
+        'n':n,
+        'time':str(datetime.now()),
+        'outputs':files,
+    }
+    add('exploratory_analysis', REPORT) 
+    return '----histograms:done!'
 
-def boxplot(data):
-    ref = input("insert ref: ")
-    sns.boxplot(x=data[ref])
-    plt.savefig('boxplot.png')
-
-
-
+def boxplots(data):
+    ref = ''
+    if(current_project(['global', 'histo_var']) != None):
+        ref = current_project(['global', 'histo_var'])
+    else:
+        print('global - var does not exists')
+        ref = input('insert categorical now: ')
+    n = take_n('exploratory_analysis', 'boxplots')
+    files = {
+        'boxplot_basic':'boxplot_{}_basic.png'.format(n)
+    }
+    REPORT = {
+        'metric':'boxplot',
+        'n':n,
+        'time':str(datetime.now()),
+        'outputs':files,
+    }
+    plt_boxplot(data[ref], files['boxplot_basic'])
+    add('exploratory_analysis', REPORT)
+    return '----boxplots:done!'
