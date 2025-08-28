@@ -55,6 +55,26 @@ Later, for setting an specific source data file:
 cal set d:src
 ```
 
+Global variables or labels can be setted for exploratory univariate analysis like building histograms, boxplots or printing dispersion statistics.
+
+```
+cal set g:var
+```
+
+```
+cal set g:lab
+```
+
+```
+cal set g:histo_var
+```
+
+Once a data source is selected, its variables can be observed by using list. For type, n stands for numerical and c for categorical. A white space includes all variables. Once variables are listed, any can be choosen to fill the var or histo_var (which cannot be categorical) field.
+
+```
+cal list vars <type>
+```
+
 The following command applies the dimension reduction PCA algorithm taking the source file previously setted:
 
 ```
@@ -76,7 +96,7 @@ cal ch meths
 cal ch mods
 ```
 
-From the current project, specific methods can be checked. `w` stands for `where` conditioning a type and `is` signs an specific method.
+The target mods, meths and exps work under the same logic. From the current project, specific methods can be checked. `w` stands for `where` conditioning a type group and `is` signs an specific method.
 
 ```
 cal ch meths w pca
@@ -86,32 +106,23 @@ cal ch meths w pca
 cal ch meths w pca is 1
 ```
 
-The same logic is used with models using `mods` instead of `meths`. From the data directory, specific filetypes can be filter out by doing
+From the data directory, specific filetypes can be filter out by doing
 
 ```
 cal ch file -ft csv
 ```
 
-Every method and models can be deleted on a cleaning process by typing the `cl` command that stands for clean.
+Every method and models can be deleted on a cleaning process by typing the `cl` command that stands for clean. The use is the same as for `ch`. 
 
 ```
 cal cl meths w pca
 ```
 
 ```
-cal cl mods w log
+cal cl meths w pca is 1
 ```
 
-or entirely:
-
-```
-cal cl meths
-```
-```
-cal cl mods
-```
-
-For building machine learning models, train and test data should be specified. Operator can set test file globally by doing:
+For building machine learning models, train and test data should be specified or the program will use src specified. Operator can set test file globally by doing:
 
 ```
 cal set d:tt
@@ -120,7 +131,6 @@ cal set d:tt
 where `tt` stands for test, `tn` for train and `src` for source. What follows is a questions, asking for target file's name. Take into account that the file should be on the `data` directory. 
 
 At the moment of buliding the model, user must choose between the setted train and test data or just splitting the source file by using `train_test_split()` function that applies a `test_size=0.2` unless the key `-ts` is included followed by any test size required.
-
 
 Projects could be also deleted by doing:
 
