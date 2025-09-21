@@ -1,6 +1,5 @@
 from abss.fs import current_project
-from data_setter import get_data
-
+from abss.data_setter import get_data
 
 def list_vars(cmd):
     datapath = current_project(['datapath', 'src'])

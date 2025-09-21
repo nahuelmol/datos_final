@@ -1,7 +1,7 @@
 
 from explo.exploratories import correlation_matrix, boxplots, histograms, categoricals, dispersions
 from abss.fs import current_project
-from data_setter import get_data
+from abss.data_setter import get_data
 
 def ExploratoryAnalysis(cmd):
     datapath = current_project(['datapath', 'src'])

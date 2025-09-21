@@ -4,7 +4,7 @@ import os
 
 from abss.fs import current_project
 from abss.story import set_condition
-from data_setter import checkAvailableData
+from abss.data_setter import checkAvailableData
 
 def printGreen(text, what):
     print(text , f"\033[32m {what} \033[0m")

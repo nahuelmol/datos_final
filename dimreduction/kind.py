@@ -1,7 +1,7 @@
 import sys
 
 from dimreduction.dim_reduction import PCAnalysis, ICAnalysis, TSNEanalysis
-from data_setter import get_data
+from abss.data_setter import get_data
 from abss.fs import current_project
 
 def DimReduction(cmd):

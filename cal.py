@@ -10,7 +10,7 @@ from regression.kind import Regression
 from explo.kind import ExploratoryAnalysis
 
 from abss.lister import list_vars, list_labs
-from data_setter import checkAvailableData
+from abss.data_setter import checkAvailableData
 from abss.commands import Command
 from abss.change import Change
 from abss.checker import checker
