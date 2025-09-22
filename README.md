@@ -75,6 +75,12 @@ Once a data source is selected, its variables can be observed by using list. For
 cal list vars <type>
 ```
 
+For exploratory analysis xp command is used. If any type of analysis is specified it executes everyone as long as variables are setted at the manifest.json. Available types are boxplot, histograms, correlation matrix, dispersion metrics, and cateogorical variables. Use the help command to learn the code that stands for the the mentioned analysis.
+
+```
+cal xp <type>
+```
+
 The following command applies the dimension reduction PCA algorithm taking the source file previously setted:
 
 ```
