@@ -7,6 +7,13 @@ from abss.story import add
 from abss.fs import take_n, current_project
 from datetime import datetime
 
+def does_exists(ref):
+    datapath= current_project(['datapath', 'src'])
+    data    = get_data(datapath)
+    if ref in data.columns.tolist():
+        return True
+    return False
+
 def plt_boxplot(X, filename):
     pname = current_project(['project_name'])
     fpath = 'prs\{}\outputs\{}'.format(pname, filename)
@@ -66,7 +73,12 @@ def correlation_matrix(df):
 
 def categoricals(data):
     cat_cols = data.select_dtypes(['object', 'category']).columns
-    print('categorical variables: {}'.format(cat_cols.tolist()))
+    cols_len = len(cat_cols.list())
+    if cols_len == 0:
+        print('no categorical variables')
+        return '---categoricals: not posible'
+    else:
+        print('categorical variables: {}'.format(cat_cols.tolist()))
 
     ref = ''
     if(current_project(['global', 'var']) != None):
@@ -94,11 +106,11 @@ def categoricals(data):
 
 def dispersions(data):
     ref = ''
-    if(current_project(['global', 'histo_var']) != None):
-        ref = current_project(['global', 'histo_var'])
+    if(current_project(['global', 'hvar']) != None):
+        ref = current_project(['global', 'hvar'])
     else:
-        print('global - var does not exists')
-        ref = input('insert categorical now: ')
+        print('dispersions: var does not exists')
+        ref = input('dispersions: insert variable now: ')
     var = data[ref].var()
     std = data[ref].std()
     mea = data[ref].mean()
@@ -121,11 +133,11 @@ def dispersions(data):
 
 def histograms(data):
     ref = ''
-    if(current_project(['global', 'histo_var']) != None):
-        ref = current_project(['global', 'histo_var'])
+    if(current_project(['global', 'hvar']) != None):
+        ref = current_project(['global', 'hvar'])
     else:
-        print('global - var does not exists')
-        ref = input('insert categorical now: ')
+        print('histogram: var does not exists')
+        ref = input('histogram: insert variable now: ')
     n = take_n('exploratory_analysis', 'histos')
     files   = {
         'histo':'histo_{}.png'.format(n),
@@ -146,11 +158,13 @@ def histograms(data):
 
 def boxplots(data):
     ref = ''
-    if(current_project(['global', 'histo_var']) != None):
-        ref = current_project(['global', 'histo_var'])
+    if(current_project(['global', 'hvar']) != None):
+        ref = current_project(['global', 'hvar'])
     else:
-        print('global - var does not exists')
-        ref = input('insert categorical now: ')
+        print('boxlplots: var does not exists')
+        ref = input('boxplots: insert variable now: ')
+        if not does_exists(ref):
+            return '----boxplots:variable not exists'
     n = take_n('exploratory_analysis', 'boxplots')
     files = {
         'boxplot_basic':'boxplot_{}_basic.png'.format(n)

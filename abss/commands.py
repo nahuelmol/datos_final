@@ -51,6 +51,7 @@ class Command:
             cal cl
             cal del
             cal set
+            cal xp
             """
             print(msg)
         elif self.rootCommand == 'app':
@@ -77,8 +78,8 @@ class Command:
             cal cl mods     w log
             cal cl mods     w log is 1
 
-            cal cl exp      w cm
-            cal cl exp      w cm is 1
+            cal cl xp       w cm
+            cal cl xp       w cm is 1
             """
             print(msg)
         elif self.rootCommand == 'del':
@@ -186,6 +187,9 @@ class Command:
         if 'box' in self.aloneFlags:
             self.all = False
             self.boxplot = True
+        if 'hst' in self.alonFlags:
+            self.all   = False
+            self.histo = True
 
     def flagSetting(self):
         for flag in self.options:

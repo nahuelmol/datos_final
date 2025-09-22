@@ -1,7 +1,7 @@
 import sys
 
 from .methods import LinearRegression, SupportVectorRegression, KNearestNeighbors, RidgeRegression, LinearRegression
-from data_setter import get_data
+from abss.data_setter import get_data
 
 def Regression(cmd):
     datapath = current_project(['datapath','src'])

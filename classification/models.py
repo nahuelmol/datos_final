@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from datetime import datetime
 
-from data_setter import get_data
+from abss.data_setter import get_data
 from dimreduction.dim_reduction import data_separator
 from abss.story import add
 from abss.dataSetting import extract_data
