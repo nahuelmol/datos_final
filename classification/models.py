@@ -20,11 +20,60 @@ from abss.dataSetting import extract_data
 from abss.fs import current_project, take_n
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
 
+def setting(which):
+    res = input('do you want standard setting? (y/n)')
+    if (res == 'y'):
+        if (which == 'KNN'):
+            return True, 5, 'auto', 'mikowski'
+        elif (which == 'RNDF'):
+            return True, 100, 42
+        elif (which == 'DTREE'):
+            return True, 'POS', 'C', 'G'
+        elif (which == 'SVC'):
+            return True, 0.3, 42
+        else:
+            return False, 'not recognized model'
+    elif (res == 'n')
+        if (which == 'KNN'):
+            n = int(input('insert nneigh:'))
+            a = input('insert algorithm:')
+            m = input('insert metric:')
+            return True, n, a, m
+        elif (which == 'RNDF'):
+            nestm = int(input('insert n estimators: '))
+            ranst = int(input('insert random state:'))
+            return True, nestm, ranst
+        elif (which == 'DTREE'):
+            col     = input('select column: ') #POS
+            first   = input('select first possible response: ') #C
+            second  = input('select second possible response: ')#G
+            return True, col, first, second
+        elif (which == 'SVC'):
+            ts = float(input('insert ts:'))
+            rs = int(input('insert rs:'))
+            return True, ts, rs
+        else:
+            return False, 'not recognized model'
+    else:
+        return False, 'not valid response'
+
+
+def split_asker():
+    res = input('split original data?')
+    if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
+        datapath = current_project(['datapath','src'])
+        res, data = get_data(datapath)
+        data, target = data_separator(data, cmd.ref)
+        return X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
+    else:
+        res, result = extract_data(cmd.ref)
+        return X_train, X_test, y_train, y_test = result
+
 
 def DecisionTree(cmd):
-    col     = input('select column: ') #POS
-    first   = input('select first possible response: ') #C
-    second  = input('select second possible response: ')#G
+    res, col, first, second = setting('DTREE')
+    if res == False:
+        print('setting problem')
 
     datapath = current_project(['datapath','src'])
     res, data = get_data(datapath)
@@ -45,19 +94,8 @@ def DecisionTree(cmd):
     add('model', REPORT)
 
 def Logistic(cmd):
-    X_train = {}
-    X_test  = {}
-    y_train = {}
-    y_test  = {} 
-    res = input('split original data?')
-    if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
-        datapath = current_project(['datapath','src'])
-        res, data = get_data(datapath)
-        data, target = data_separator(data, cmd.ref)
-        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
-    else:
-        res, result = extract_data(cmd.ref)
-        X_train, X_test, y_train, y_test = result
+    X_train, X_test, y_train, y_test = split_asker()
+
     skyler = StandardScaler()
     X_train_scaled = skyler.fit_transform(X_train)
     X_test_scaled = skyler.transform(X_test)
@@ -98,29 +136,17 @@ def Logistic(cmd):
     
 
 def KNearestNeighbors(cmd):
-    nneigh = 5
-    algorithm = 'auto'
-    metric = 'minkowski'
-    X_train = {}
-    X_test  = {}
-    y_train = {}
-    y_test  = {} 
-    res = input('split original data?')
-    if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
-        datapath = currentProject(['datapath','src'])
-        filepath = '{}\{}'.format(datapath, cmd.target)
-        res, data = getData(filepath)
-        data, target = data_separator(data, cmd.ref)
-        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
-    else:
-        X_train, X_test, y_train, y_test = extract_data(cmd.ref)
+    X_train, X_test, y_train, y_test = split_asker()
+    res, nneigh, algorithm, metric = setting('KNN')
+    if res == False:
+        print('setting problem')
 
     n_models = take_models_n()
     plot_files = {
         'boundary_curve': 'log_{}_boundary_curve.png'.format(n_models),
         'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n_models),
     }
-    neigh = KNeighborsClassifier(n_neighbors=nneigh)
+    neigh = KNeighborsClassifier(n_neighbors=nneigh, algorithm=algorithm, metric=metric)
     classifier = neigh.fit(X_train, y_train)
     
     predictions  = classifier.predict(X_test)
@@ -140,22 +166,12 @@ def KNearestNeighbors(cmd):
 
 
 def RandomForest(data, cmd):
-    X_train = {}
-    X_test  = {}
-    y_train = {}
-    y_test  = {} 
-    res = input('split original data?')
-    if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
-        datapath = currentProject(['datapath','src'])
-        filepath = '{}\{}'.format(datapath, cmd.target)
-        res, data = getData(filepath)
-        data, target = data_separator(data, cmd.ref)
-        X_train, X_test, y_train, y_test = train_test_split(data, target, random_state=42)
-    else:
-        X_train, X_test, y_train, y_test = extract_data(cmd.ref)
 
-    nestm = int(input('insert n estimators')) #100
-    ranst = int(input('insert random state')) #42
+    X_train, X_test, y_train, y_test = split_asker()
+    res, nestm, ranst = setting('RndF')
+    if res == False:
+        print('setting problem')
+
     rf_classifier = RandomForestClassifier(n_estimators=nestm, random_state=ranst)
     rf_classifier.fit(X_train, y_train)
 
@@ -173,21 +189,10 @@ def RandomForest(data, cmd):
 
 def SupportVectorClassifier(cmd):
     data, target = data_separator(data, cmd.ref)
-    ts = 0.3
-    rs = 42
-    X_train = {}
-    X_test  = {}
-    y_train = {}
-    y_test  = {} 
-    res = input('split original data?')
-    if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
-        datapath = currentProject(['datapath','src'])
-        filepath = '{}\{}'.format(datapath, cmd.target)
-        res, data = getData(filepath)
-        data, target = data_separator(data, cmd.ref)
-        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=ts, random_state=rs)
-    else:
-        X_train, X_test, y_train, y_test = extract_data(cmd.ref)
+    X_train, X_test, y_train, y_test = split_asker()
+    res, ts, rs = setting('SVC')
+    if res == False:
+        print('setting problem')
 
     svc = SVC(kernel='rbf', C=1, gamma='scale')
     svc.fit(X_train, y_train)
