@@ -84,13 +84,19 @@ cal xp <type>
 The following command applies the dimension reduction PCA algorithm taking the source file previously setted:
 
 ```
-cal apply dr:pca -r <reference>
+cal app dr:pca -r <reference>
 ```
 
 Alternatively, output filename and reference (which is the target colummn in the dataframe) can be specified in the same command:
 
 ```
-cal apply dr:<example.csv>:pca -o <pca.png> -r <reference>
+cal app dr:<example.csv>:pca -o <pca.png> -r <reference>
+```
+
+For classification with Logistic models:
+
+```
+cal app c:l -r ph
 ```
 
 To check current project's methods applied or models built, `ch` is used (which stands for check) as follows:

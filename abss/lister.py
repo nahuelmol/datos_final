@@ -5,7 +5,7 @@ def list_vars(cmd):
     datapath = current_project(['datapath', 'src'])
     res, data = get_data(datapath)
     if cmd.varType == 'n':
-        for col in data.select_dtypes(include="number").columns:
+        for col in data.select_dtypes(include=["number"]).columns:
             print(col)
     elif cmd.varType == 'c':
         for col in data.select_dtypes(include=["object", "category"]).columns:

@@ -1,5 +1,6 @@
 
 import pandas as pd
+import numpy as np
 import json
 
 from sklearn.svm import SVC
@@ -11,6 +12,7 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.metrics import confusion_matrix, roc_auc_score, f1_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
 from datetime import datetime
 
 from abss.data_setter import get_data
@@ -31,9 +33,11 @@ def setting(which):
             return True, 'POS', 'C', 'G'
         elif (which == 'SVC'):
             return True, 0.3, 42
+        elif (which == 'LOG'):
+            return True, 1000
         else:
             return False, 'not recognized model'
-    elif (res == 'n')
+    elif (res == 'n'):
         if (which == 'KNN'):
             n = int(input('insert nneigh:'))
             a = input('insert algorithm:')
@@ -52,23 +56,27 @@ def setting(which):
             ts = float(input('insert ts:'))
             rs = int(input('insert rs:'))
             return True, ts, rs
+        elif (which == 'LOG'):
+            max_iter = int(input('insert max iter: '))
+            return True, max_iter
         else:
             return False, 'not recognized model'
     else:
         return False, 'not valid response'
 
 
-def split_asker():
+def split_asker(cmd):
     res = input('split original data?')
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
         datapath = current_project(['datapath','src'])
         res, data = get_data(datapath)
         data, target = data_separator(data, cmd.ref)
-        return X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
+        return X_train, X_test, y_train, y_test
     else:
         res, result = extract_data(cmd.ref)
-        return X_train, X_test, y_train, y_test = result
-
+        X_train, X_test, y_train, y_test = result
+        return X_train, X_test, y_train, y_test
 
 def DecisionTree(cmd):
     res, col, first, second = setting('DTREE')
@@ -83,7 +91,7 @@ def DecisionTree(cmd):
     data, target = data_separator(data, cmd.ref)
     TREE = DecisionTreeClassifier(max_depth=1).fit(data, target) #finds the bias
     predictions = TREE.predict(data)
-    predictions[3]
+    #predictions[3]
 
     ac = accuracy_score(target, predictions)
     REPORT = {
@@ -93,13 +101,33 @@ def DecisionTree(cmd):
     }
     add('model', REPORT)
 
+def check_to_impute(X):
+    if (np.isnan(X).any() == False) and (np.isinf(X).any() == False):
+        return X
+    else:
+        where = np.where(np.isnan(X))[0]
+        print('NaN: {}\nidx: {}'.format(np.isnan(X).any(), where))
+        print('infinite:', np.isinf(X).any())
+        print("cleaning")
+        imputer = SimpleImputer(strategy='mean') #median, most_frequent
+        X = imputer.fit_transform(X)
+        return X
+
 def Logistic(cmd):
-    X_train, X_test, y_train, y_test = split_asker()
+    X_train, X_test, y_train, y_test = split_asker(cmd)
+    res, max_iter = setting('LOG')
+    if res == False:
+        print("setting problem")
 
     skyler = StandardScaler()
+
     X_train_scaled = skyler.fit_transform(X_train)
     X_test_scaled = skyler.transform(X_test)
-    model = LogisticRegression(max_iter=1000).fit(X_train_scaled, y_train)
+    
+    X_train_imputed = check_to_impute(X_train_scaled)
+    
+
+    model = LogisticRegression(max_iter=max_iter).fit(X_train_scaled, y_train)
     predictions = model.predict(X_test_scaled) #making predictions over new X values (X_test)
     
     #rocaucscore = roc_auc_score(y_test, probs, multi_class='ovr')
@@ -136,7 +164,7 @@ def Logistic(cmd):
     
 
 def KNearestNeighbors(cmd):
-    X_train, X_test, y_train, y_test = split_asker()
+    X_train, X_test, y_train, y_test = split_asker(cmd)
     res, nneigh, algorithm, metric = setting('KNN')
     if res == False:
         print('setting problem')
@@ -166,8 +194,7 @@ def KNearestNeighbors(cmd):
 
 
 def RandomForest(data, cmd):
-
-    X_train, X_test, y_train, y_test = split_asker()
+    X_train, X_test, y_train, y_test = split_asker(cmd)
     res, nestm, ranst = setting('RndF')
     if res == False:
         print('setting problem')
@@ -189,7 +216,7 @@ def RandomForest(data, cmd):
 
 def SupportVectorClassifier(cmd):
     data, target = data_separator(data, cmd.ref)
-    X_train, X_test, y_train, y_test = split_asker()
+    X_train, X_test, y_train, y_test = split_asker(cmd)
     res, ts, rs = setting('SVC')
     if res == False:
         print('setting problem')

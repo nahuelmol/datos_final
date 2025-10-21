@@ -187,7 +187,7 @@ class Command:
         if 'box' in self.aloneFlags:
             self.all = False
             self.boxplot = True
-        if 'hst' in self.alonFlags:
+        if 'hst' in self.aloneFlags:
             self.all   = False
             self.histo = True
 
