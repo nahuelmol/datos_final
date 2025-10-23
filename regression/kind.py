@@ -9,15 +9,15 @@ def Regression(cmd):
     if res == False:
         print('regression failed')
         sys.exit(0)
-    if cmd.method == 'SVR':
+    if cmd.method == 'svr':
         SupportVectorRegression(data, ref)
-    elif (cmd.method == 'knneighbors'):
+    elif (cmd.method == 'knn'):
         KNearestNeighbors(data, ref)
-    elif (cmd.method == 'decisiontree'):
+    elif (cmd.method == 'dt'):
         DecisionTree(data, ref)
-    elif (cmd.method == 'ridgeregression'):
+    elif (cmd.method == 'rr'):
         RidgeRegression(data, ref)
-    elif (cmd.method == 'linearregression'):
+    elif (cmd.method == 'lr'):
         LinearRegression(data, ref)
     else:
         return False

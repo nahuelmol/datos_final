@@ -25,7 +25,6 @@ def data_separator(data, ref):
     return data, target
 
 
-
 def PCAnalysis(data, cmd):
     data, target = data_separator(data, cmd.ref)
     pcnames = []

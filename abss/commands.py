@@ -46,6 +46,8 @@ class Command:
     def helper(self):
         if self.all == True:
             msg = """
+            These are the main root commands:
+
             cal app
             cal ch
             cal cl
@@ -56,7 +58,22 @@ class Command:
             print(msg)
         elif self.rootCommand == 'app':
             msg = """
-            cal app dr:pca -r RANK
+            reference can be previously specified, or now too
+            
+            cal app dr:pca -r <target feature>
+            cal app dr:ica -r <target feature>
+            cal app dr:tsne -r <target feature>
+
+            cal app c:l -r <categorical>
+            cal app c:dt -r <target>
+            cal app c:knn
+            cal app c:svm
+
+            cal app r:dt
+            cal app r:knn
+            cal app r:svr
+            cal app r:rr
+            cal app r:lr
             """
             print(msg)
         elif self.rootCommand == 'ch':
@@ -84,7 +101,7 @@ class Command:
             print(msg)
         elif self.rootCommand == 'del':
             msg = """
-            cal del p:heisenberg
+            cal del p:<project name>
             cal del p:all
             """
             print(msg)
@@ -113,9 +130,9 @@ class Command:
             print(msg)
         elif self.rootCommand == 'list':
             msg = """
-            list vars
-            list vars n
-            list vars c
+            cal list vars
+            cal list vars n
+            cal list vars c
             """
             print(msg)
         else:

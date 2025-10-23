@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from datetime import datetime
+from pandas.api.types import is_numeric_dtype
 
 from abss.data_setter import get_data
 from dimreduction.dim_reduction import data_separator
@@ -21,6 +22,18 @@ from abss.story import add
 from abss.dataSetting import extract_data
 from abss.fs import current_project, take_n
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
+
+def check_to_impute(X):
+    if (np.isnan(X).any() == False) and (np.isinf(X).any() == False):
+        return X
+    else:
+        where = np.where(np.isnan(X))[0]
+        print('NaN: {}\nidx: {}'.format(np.isnan(X).any(), where))
+        print('infinite:', np.isinf(X).any())
+        print("cleaning")
+        imputer = SimpleImputer(strategy='mean') #median, most_frequent
+        X = imputer.fit_transform(X)
+        return X
 
 def setting(which):
     res = input('do you want standard setting? (y/n)')
@@ -30,9 +43,9 @@ def setting(which):
         elif (which == 'RNDF'):
             return True, 100, 42
         elif (which == 'DTREE'):
-            return True, 'POS', 'C', 'G'
+            return True, 'POS', 'C', 'G', 1
         elif (which == 'SVC'):
-            return True, 0.3, 42
+            return True, 0.3, 42, 'rbf', 1, 'scale'
         elif (which == 'LOG'):
             return True, 1000
         else:
@@ -51,11 +64,15 @@ def setting(which):
             col     = input('select column: ') #POS
             first   = input('select first possible response: ') #C
             second  = input('select second possible response: ')#G
-            return True, col, first, second
+            max_depth = int(input('select max depth: ')) #1
+            return True, col, first, second, max_depth
         elif (which == 'SVC'):
             ts = float(input('insert ts:'))
             rs = int(input('insert rs:'))
-            return True, ts, rs
+            kernel = input('insert kernel: ')
+            C = int(input('insert C:'))
+            gamma = input('insert gamma')
+            return True, ts, rs, kernel, C, gamma
         elif (which == 'LOG'):
             max_iter = int(input('insert max iter: '))
             return True, max_iter
@@ -72,14 +89,14 @@ def split_asker(cmd):
         res, data = get_data(datapath)
         data, target = data_separator(data, cmd.ref)
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
-        return X_train, X_test, y_train, y_test
+        return True, X_train, X_test, y_train, y_test
     else:
         res, result = extract_data(cmd.ref)
         X_train, X_test, y_train, y_test = result
-        return X_train, X_test, y_train, y_test
+        return True, X_train, X_test, y_train, y_test
 
 def DecisionTree(cmd):
-    res, col, first, second = setting('DTREE')
+    res, col, first, second, max_depth = setting('DTREE')
     if res == False:
         print('setting problem')
 
@@ -89,7 +106,7 @@ def DecisionTree(cmd):
     data    = data.query(query)
 
     data, target = data_separator(data, cmd.ref)
-    TREE = DecisionTreeClassifier(max_depth=1).fit(data, target) #finds the bias
+    TREE = DecisionTreeClassifier(max_depth=max_depth).fit(data, target) #finds the bias
     predictions = TREE.predict(data)
     #predictions[3]
 
@@ -101,17 +118,6 @@ def DecisionTree(cmd):
     }
     add('model', REPORT)
 
-def check_to_impute(X):
-    if (np.isnan(X).any() == False) and (np.isinf(X).any() == False):
-        return X
-    else:
-        where = np.where(np.isnan(X))[0]
-        print('NaN: {}\nidx: {}'.format(np.isnan(X).any(), where))
-        print('infinite:', np.isinf(X).any())
-        print("cleaning")
-        imputer = SimpleImputer(strategy='mean') #median, most_frequent
-        X = imputer.fit_transform(X)
-        return X
 
 def Logistic(cmd):
     X_train, X_test, y_train, y_test = split_asker(cmd)
@@ -123,9 +129,7 @@ def Logistic(cmd):
 
     X_train_scaled = skyler.fit_transform(X_train)
     X_test_scaled = skyler.transform(X_test)
-    
     X_train_imputed = check_to_impute(X_train_scaled)
-    
 
     model = LogisticRegression(max_iter=max_iter).fit(X_train_scaled, y_train)
     predictions = model.predict(X_test_scaled) #making predictions over new X values (X_test)
@@ -217,11 +221,11 @@ def RandomForest(data, cmd):
 def SupportVectorClassifier(cmd):
     data, target = data_separator(data, cmd.ref)
     X_train, X_test, y_train, y_test = split_asker(cmd)
-    res, ts, rs = setting('SVC')
+    res, ts, rs, kernel, C, gamma = setting('SVC')
     if res == False:
         print('setting problem')
 
-    svc = SVC(kernel='rbf', C=1, gamma='scale')
+    svc = SVC(kernel=kernel, C=C, gamma=gamma)
     svc.fit(X_train, y_train)
 
     predictions = svc.predict(X_test)
