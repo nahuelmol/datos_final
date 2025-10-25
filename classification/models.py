@@ -23,6 +23,17 @@ from abss.dataSetting import extract_data
 from abss.fs import current_project, take_n
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
 
+def check_var_type(data, ref):
+    if is_numeric_dtype(data[ref]):
+        new_ft = input('insert other feature: ')
+        return data[new_ft]
+    elif is_categorical_dtype(data[ref]):
+        return data[ref]
+    else:
+        print('not recognized variable type:')
+        new_ft = input('insert feature with recognizable type: ')
+        return data[new_ft]
+
 def check_to_impute(X):
     if (np.isnan(X).any() == False) and (np.isinf(X).any() == False):
         return X
@@ -87,6 +98,7 @@ def split_asker(cmd):
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
         datapath = current_project(['datapath','src'])
         res, data = get_data(datapath)
+        cmd.ref = check_var_type(data, cmd.ref)
         data, target = data_separator(data, cmd.ref)
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
         return True, X_train, X_test, y_train, y_test
