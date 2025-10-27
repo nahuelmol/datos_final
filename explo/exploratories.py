@@ -1,11 +1,11 @@
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 from abss.story import add
 from abss.fs import take_n, current_project
 from datetime import datetime
+from explo.plots import Plot
 
 def does_exists(ref):
     datapath= current_project(['datapath', 'src'])
@@ -14,45 +14,7 @@ def does_exists(ref):
         return True
     return False
 
-def plt_boxplot(X, filename):
-    pname = current_project(['project_name'])
-    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
-    sns.boxplot(x=X)
-    plt.savefig(fpath, dpi=300)
-    plt.close()
-
-def plot_histos(data, x, kde, filename):
-    data = data.select_dtypes(include=['number'])
-    pname = current_project(['project_name'])
-    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
-    sns.histplot(data=data, x=x, kde=kde, bins=20)
-    plt.savefig(fpath, dpi=300)
-    plt.close()
-
-def plot_hist(X, filename):
-    sns.countplot(x=X)
-    pname = current_project(['project_name'])
-    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
-    plt.savefig(fpath, dpi=300)
-    plt.close()
-    return True
-
-def plot(corr_matrix, filename):
-    pname = current_project(['project_name'])
-    fpath = 'prs\{}\outputs\{}'.format(pname, filename)
-    mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-    plt.figure(figsize=(12,8))
-    sns.heatmap(corr_matrix, cmap='coolwarm', mask=mask)
-    plt.title(f"Correlation Matrix", fontsize=16, fontweight='bold')
-    plt.xticks(rotation=45, ha='right')
-    plt.savefig(fpath, dpi=300)
-    plt.close()
-    return True
-
 def correlation_matrix(df):
-    numerical = df.select_dtypes(include=['number']).copy()
-    corr_matrix = numerical.corr()
-
     n = take_n('exploratory_analysis', 'corr_matrix')
     files = {
         'corr_matrix_plot': 'corr_matrix_{}.png'.format(n),
@@ -63,7 +25,8 @@ def correlation_matrix(df):
         'time':str(datetime.now()),
         'outputs': files,
     }
-    res = plot(corr_matrix, files['corr_matrix_plot'])
+    PLOT = Plot(files['corr_matrix_plot'], df)
+    res  = PLOT.corr_plot()
     if res == True:
         add('exploratory_analysis', REPORT)
         return '----correlation matrix:done!'
@@ -97,7 +60,8 @@ def categoricals(data):
         'time':str(datetime.now()),
         'outputs': files,
     }
-    res = plot_hist(data[ref], files['categorical_plot'])
+    PLOT = Plot(files['categorical_plot'], data[ref])
+    res  = PLOT.hist()
     if res == True:
         add('exploratory_analysis', REPORT)
         return '----categorical view:done!'
@@ -144,9 +108,13 @@ def histograms(data):
         'histo_kde':'histo_{}_kde.png'.format(n),
         'histo_kde_shade':'histo_{}_kde_shade.png'.format(n),
     }
-    plot_histos(data, ref, False, files['histo'])
-    plot_histos(data, ref, True,  files['histo_kde'])
-    plot_histos(data, ref, False, files['histo_kde_shade'])
+    PLOT = Plot(file['histo'], data)
+    PLOT = Plot(file['histo_kde'], data)
+    PLOT = Plot(file['histo_kde_shade'], data)
+    PLOT.histos(ref, False)
+    PLOT.histos(ref, True)
+    PLOT.histos(ref, False)
+
     REPORT  = {
         'metric':'histos',
         'n':n,
@@ -175,6 +143,7 @@ def boxplots(data):
         'time':str(datetime.now()),
         'outputs':files,
     }
-    plt_boxplot(data[ref], files['boxplot_basic'])
+    PLOT = Plot(file['boxplot_basic'], data[ref])
+    PLOT.boxplot()
     add('exploratory_analysis', REPORT)
     return '----boxplots:done!'

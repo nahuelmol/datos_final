@@ -130,7 +130,6 @@ def DecisionTree(cmd):
     }
     add('model', REPORT)
 
-
 def Logistic(cmd):
     X_train, X_test, y_train, y_test = split_asker(cmd)
     res, max_iter = setting('LOG')
