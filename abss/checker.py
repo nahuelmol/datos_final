@@ -9,6 +9,7 @@ from abss.data_setter import checkAvailableData
 def printGreen(text, what):
     print(text , f"\033[32m {what} \033[0m")
     print(f"\033[32m {text}\033[0m")
+
 def takeType(file, ft):
     if not os.path.exists('{}/manifest.json'.format(os.getcwd())):
         return True, 'not existent project'
@@ -136,16 +137,17 @@ def checker(cmd):
     elif cmd.target == '-cur':
         pname = current_project(['project_name'])
         print('current project {}'.format(pname))
+        return True, '----done----curr----'
     elif cmd.target == '-all':
         res, cnt = checkAvailableData()
         if res == False:
-            print("not available data")
-            sys.exit(0)
-        else:
-            for file in cnt:
-                print(file)
+            return False, 'not available data'
+        for file in cnt:
+            print(file)
     else:
-        print('not recognized target')
+        msg = 'not recognized target'
+        return False, msg
+    return True, '----done----'
 
 
 

@@ -35,7 +35,8 @@ def switch(cmd):
         res, msg = Change(cmd)
         return True, msg
     elif cmd.rootCommand == 'ch':
-        checker(cmd)
+        res, msg = checker(cmd)
+        return True, msg
     elif cmd.rootCommand == 'current':
         msg = current_project(['project_name'])
         return True, msg
@@ -45,33 +46,53 @@ def switch(cmd):
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)
-        if cmd.targetType == 'data':
+        elif cmd.targetType == 'data':
             delData(cmd)
-        if cmd.targetType == 'outputs':
+        elif cmd.targetType == 'outputs':
             delOutputs(cmd)
+        else:
+            return False, '----del:unknown target type'
+        msg = '----del:{}:done'.format(cmd.targetType)
+        return True, msg
+
     elif cmd.rootCommand == 'list':
         if cmd.target == 'vars':
             list_vars(cmd)
         elif cmd.target == 'labs':
             list_cols(cmd)
+        else:
+            return False, '----list:unknown target'
+        msg = '----list:{}:done'.format(cmd.target)
+        return True, msg
     elif cmd.rootCommand == 'xp':
         res, msg = ExploratoryAnalysis(cmd)
         return True, msg
     elif cmd.rootCommand == 'new':
         if cmd.targetType == 'project':
             newProject(cmd)
+            return True, '----new:project:done'
     elif cmd.rootCommand == 'out':
         outProject()
+        return True, '----out:project:done'
     elif cmd.rootCommand == 'see':
         seePlot(cmd)
+        return True, '----see:project:done'
     elif cmd.rootCommand == 'sw':
         if cmd.targetType == 'project':
             switchProject(cmd)
+        else:
+            return False, '----switch:unknown'
+        msg = '----switch:{}:done'.format(cmd.targetType)
+        return True, msg
     elif cmd.rootCommand == 'set':
         if cmd.targetType == 'data':
             setData(cmd)
-        if cmd.targetType == 'glovar':
+        elif cmd.targetType == 'glovar':
             setGlovar(cmd)
+        else:
+            return False, '----set:unknown'
+        msg = '----set:{}:done'.format(cmd.targetType)
+        return True, msg
     elif cmd.rootCommand == 'order':
         if cmd.target == 'meths':
             order('methods', cmd)
@@ -79,12 +100,15 @@ def switch(cmd):
             order('models', cmd)
         else:
             return False, '----unrecognized target'
+        msg = '----order:{}:done'.format(cmd.target)
+        return True, msg
     elif cmd.rootCommand == '-help':
         cmd.all == True 
         cmd.helper()
+        return True, 'helping'
     else:
-        return False, '----unrecognized command'
-    return True, '----DONE----'
+        return False, '----command:unrecognized'
+    return True, '----PROCESS:DONE----'
 
 if __name__ == "__main__":
     command = None
@@ -98,6 +122,5 @@ if __name__ == "__main__":
     if res == True:
         print(msg)
     res, msg = switch(command)
-    if res:
-        print(msg)
+    print(msg)
 
