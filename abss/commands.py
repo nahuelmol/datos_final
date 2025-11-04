@@ -54,6 +54,7 @@ class Command:
             cal del
             cal set
             cal xp
+            cal current
             """
             print(msg)
         elif self.rootCommand == 'app':

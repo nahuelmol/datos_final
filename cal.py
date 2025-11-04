@@ -2,15 +2,12 @@ import sys
 import pandas as pd
 import numpy as np
 
-from sklearn.decomposition import PCA
-
 from dimreduction.kind import DimReduction
 from classification.kind import Classification
 from regression.kind import Regression
 from explo.kind import ExploratoryAnalysis
 
 from abss.lister import list_vars, list_labs
-from abss.data_setter import checkAvailableData
 from abss.commands import Command
 from abss.change import Change
 from abss.checker import checker
