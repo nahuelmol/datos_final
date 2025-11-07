@@ -51,6 +51,45 @@ def ask_mani_for_data(what):
     else:
         print('manifest does not exists')
 
+def memocheck(cmd):
+    data = {}
+    it = ''
+    which = ''
+    with open(storypath, 'r') as f:
+        data = json.load(f)
+    if cmd.target == 'mods':
+        which = 'models'
+        it = 'model'
+    elif cmd.target == 'meths':
+        which = 'methods'
+        it = 'method'
+    elif cmd.target == 'exps':
+        which = 'exploratory_analysis'
+        it = 'metric'
+    else:
+        return False, 'wrong target'
+    if len(data[which]) == 0:
+        return False, 'there are not methods applied'
+
+    for each in data[which]:
+        if cmd.all == True:
+            print('{} - {} - {}'.format(each[it], each['time'], each['n']))
+            if cmd.ac == True:
+                printGreen(each['ac'], 'ac')
+        else:
+            res, code = set_condition(cmd.cond)
+            if each[it] == code:
+                if cmd.unique == True:
+                    number = 0
+                    if cmd.number.isdigit():
+                        number = int(cmd.number)
+                    if each['n'] == number:
+                        print('{}, {}, {}'.format(each[it], each['n'], each['time']))
+                else:
+                    print('{}, {}, {}'.format(each[it], each['n'], each['time']))
+                    if cmd.ac == True:
+                        printGreen(each['ac'], 'ac')
+
 def checker(cmd):
     storypath = current_project(['storypath'])
     if cmd.target == 'file':
@@ -64,73 +103,22 @@ def checker(cmd):
             for file in files:
                 print('file: ', file)
     elif cmd.target == 'mods':
-        data = {}
-        with open(storypath, 'r') as f:
-            data = json.load(f)
-        if len(data['models']) == 0:
-            return True, 'there are not methods applied'
-        for meth in data['models']:
-            if cmd.all == True:
-                print('{} - {} - {}'.format(meth['model'], meth['time'], meth['n']))
-                if cmd.ac == True:
-                    printGreen(meth['ac'], 'ac')
-            else:
-                res, code = set_condition(cmd.cond)
-                if meth['model'] == code:
-                    if cmd.unique == True:
-                        number = 0
-                        if cmd.number.isdigit():
-                            number = int(cmd.number)
-                        if meth['n'] == number:
-                            print('{}, {}, {}'.format(meth['model'], meth['n'], meth['time']))
-                    else:
-                        print('{}, {}, {}'.format(meth['model'], meth['n'], meth['time']))
-                        if cmd.ac == True:
-                            printGreen(meth['ac'], 'ac')
+        res, msg = memocheck(cmd)
+        if res == False:
+            print(msg)
+        return True, '----done----mods'
 
     elif cmd.target == 'meths':
-        data = {}
-        with open(storypath, 'r') as f:
-            data = json.load(f)
-        if len(data['methods']) == 0:
-            return True, 'there are not methods applied'
-        for meth in data['methods']:
-            if cmd.all == True:
-                print('{} - {} - {}'.format(meth['method'], meth['time'], meth['n']))
-            else:
-                res, code = set_condition(cmd.cond)
-                if meth['method'] == code:
-                    if cmd.unique == True:
-                        number = 0
-                        if cmd.number.isdigit():
-                            number = int(cmd.number)
-                        if meth['n'] == number:
-                            print('{}, {}, {}'.format(meth['method'], meth['n'], meth['time']))
-                    else:
-                        print('{}, {}, {}'.format(meth['method'], meth['n'], meth['time']))
-                        if cmd.ac == True:
-                            printGreen(meth['ac'], 'ac')
+        res, msg = memocheck(cmd)
+        if res == False:
+            print(msg)
+        return True, '----done----meths'
 
     elif cmd.target == 'exps':
-        data = {}
-        with open(storypath, 'r') as f:
-            data = json.load(f)
-        if len(data['exploratory_analysis']) == 0:
-            return True, 'there are not methods applied'
-        for metric in data['exploratory_analysis']:
-            if cmd.all == True:
-                print('{} - {} - {}'.format(metric['metric'], metric['time'], metric['n']))
-            else:
-                res, code = set_condition(cmd.cond)
-                if metric['metric'] == code:
-                    if cmd.unique == True:
-                        number = 0
-                        if cmd.number.isdigit():
-                            number = int(cmd.number)
-                        if metric['n'] == number:
-                            print('{}, {}, {}'.format(metric['metric'], metric['n'], metric['time']))
-                    else:
-                        print('{}, {}, {}'.format(meth['metric'], meth['n'], meth['time']))
+        res, msg = memocheck(cmd)
+        if res == False:
+            print(msg)
+        return True, '----done----exps'
 
     elif cmd.target == 'tt' or cmd.target == 'tn' or cmd.target == 'src':
         ask_mani_for_data(cmd.target)
