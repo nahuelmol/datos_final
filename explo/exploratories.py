@@ -4,14 +4,17 @@ import numpy as np
 
 from abss.story import add
 from abss.fs import take_n, current_project
+from abss.data_setter import get_data
+
 from datetime import datetime
 from explo.plots import Plot
 
 def does_exists(ref):
     datapath= current_project(['datapath', 'src'])
-    data    = get_data(datapath)
-    if ref in data.columns.tolist():
-        return True
+    res, data    = get_data(datapath)
+    if res == True:
+        if ref in data.columns.tolist():
+            return True
     return False
 
 def correlation_matrix(df):
@@ -35,13 +38,15 @@ def correlation_matrix(df):
 
 
 def categoricals(data):
-    cat_cols = data.select_dtypes(['object', 'category']).columns
-    cols_len = len(cat_cols.list())
-    if cols_len == 0:
+    cat_cols = data.select_dtypes(['object', 'category']).columns.tolist()
+    if (len(cat_cols) == 0):
         print('no categorical variables')
         return '---categoricals: not posible'
     else:
-        print('categorical variables: {}'.format(cat_cols.tolist()))
+        listed = ''
+        for i in cat_cols:
+            listed = '{} {}'.format(i, listed)
+        print('categorical variables: {}'.format(listed))
 
     ref = ''
     if(current_project(['global', 'var']) != None):
@@ -108,9 +113,9 @@ def histograms(data):
         'histo_kde':'histo_{}_kde.png'.format(n),
         'histo_kde_shade':'histo_{}_kde_shade.png'.format(n),
     }
-    PLOT = Plot(file['histo'], data)
-    PLOT = Plot(file['histo_kde'], data)
-    PLOT = Plot(file['histo_kde_shade'], data)
+    PLOT = Plot(files['histo'], data)
+    PLOT = Plot(files['histo_kde'], data)
+    PLOT = Plot(files['histo_kde_shade'], data)
     PLOT.histos(ref, False)
     PLOT.histos(ref, True)
     PLOT.histos(ref, False)
@@ -143,7 +148,7 @@ def boxplots(data):
         'time':str(datetime.now()),
         'outputs':files,
     }
-    PLOT = Plot(file['boxplot_basic'], data[ref])
+    PLOT = Plot(files['boxplot_basic'], data[ref])
     PLOT.boxplot()
     add('exploratory_analysis', REPORT)
     return '----boxplots:done!'

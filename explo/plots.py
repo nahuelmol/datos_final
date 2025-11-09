@@ -3,6 +3,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
+from abss.fs import current_project
+
 class Plot:
     def __init__(self, filename, data):
         self.pname = current_project(['project_name'])
@@ -15,7 +17,7 @@ class Plot:
         plt.close()
 
     def histos(self, ref, kde):
-        data = data.select_dtypes(include=['number'])
+        self.data = self.data.select_dtypes(include=['number'])
         sns.histplot(data=self.data, x=ref, kde=kde, bins=20)
         plt.savefig(self.fpath, dpi=300)
         plt.close()
@@ -23,7 +25,7 @@ class Plot:
     def hist(self):
         sns.countplot(x=self.data)
         pname = current_project(['project_name'])
-        plt.savefig(sefl.fpath, dpi=300)
+        plt.savefig(self.fpath, dpi=300)
         plt.close()
 
     def corr_plot(self):

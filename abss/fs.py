@@ -168,5 +168,3 @@ def switchProject(cmd):
         shutil.copy('manifest.json', currentpath)
         shutil.copy(targetpath, 'manifest.json')
 
-
-
