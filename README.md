@@ -75,11 +75,15 @@ Once a data source is selected, its variables can be observed by using list. For
 cal list vars <type>
 ```
 
+### Exploratory analysis
+
 For exploratory analysis xp command is used. If any type of analysis is specified it executes everyone as long as variables are setted at the manifest.json. Available types are boxplot, histograms, correlation matrix, dispersion metrics, and cateogorical variables. Use the help command to learn the code that stands for the the mentioned analysis.
 
 ```
 cal xp <type>
 ```
+
+### Dimension reduction algorithms
 
 The following command applies the dimension reduction PCA algorithm taking the source file previously setted:
 
@@ -93,11 +97,15 @@ Alternatively, output filename and reference (which is the target colummn in the
 cal app dr:<example.csv>:pca -o <pca.png> -r <reference>
 ```
 
+### Classification models
+
 For classification with Logistic models:
 
 ```
 cal app c:l -r ph
 ```
+
+### Checking
 
 To check current project's methods applied or models built, `ch` is used (which stands for check) as follows:
 
@@ -124,6 +132,8 @@ From the data directory, specific filetypes can be filter out by doing
 cal ch file -ft csv
 ```
 
+### Cleaning
+
 Every method and models can be deleted on a cleaning process by typing the `cl` command that stands for clean. The use is the same as for `ch`. 
 
 ```
@@ -134,6 +144,8 @@ cal cl meths w pca
 cal cl meths w pca is 1
 ```
 
+### Setting datasets
+
 For building machine learning models, train and test data should be specified or the program will use src specified. Operator can set test file globally by doing:
 
 ```
@@ -143,6 +155,8 @@ cal set d:tt
 where `tt` stands for test, `tn` for train and `src` for source. What follows is a questions, asking for target file's name. Take into account that the file should be on the `data` directory. 
 
 At the moment of buliding the model, user must choose between the setted train and test data or just splitting the source file by using `train_test_split()` function that applies a `test_size=0.2` unless the key `-ts` is included followed by any test size required.
+
+### Projects management
 
 Projects could be also deleted by doing:
 
