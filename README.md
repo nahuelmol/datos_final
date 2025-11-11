@@ -99,15 +99,23 @@ cal app dr:<example.csv>:pca -o <pca.png> -r <reference>
 
 ### Classification models
 
-For classification with Logistic models:
+For classification using Logistic model:
 
 ```
-cal app c:l -r ph
+cal app c:l -r <reference>
+```
+
+### Regression models
+
+This is analogous to the previous one:
+
+```
+cal app r:svr -r <reference>
 ```
 
 ### Checking
 
-To check current project's methods applied or models built, `ch` is used (which stands for check) as follows:
+To check the applied current project's methods or the models built, `ch` is used (which stands for check) as follows:
 
 ```
 cal ch meths
