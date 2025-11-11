@@ -17,11 +17,13 @@ from datetime import datetime
 from pandas.api.types import is_numeric_dtype
 
 from abss.data_setter import get_data
-from dimreduction.dim_reduction import data_separator
 from abss.story import add
 from abss.dataSetting import extract_data
 from abss.fs import current_project, take_n
+from abss.setter import setting
+
 from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
+from dimreduction.dim_reduction import data_separator
 
 def check_var_type(data, ref):
     if is_numeric_dtype(data[ref]):
@@ -45,52 +47,6 @@ def check_to_impute(X):
         imputer = SimpleImputer(strategy='mean') #median, most_frequent
         X = imputer.fit_transform(X)
         return X
-
-def setting(which):
-    res = input('do you want standard setting? (y/n)')
-    if (res == 'y'):
-        if (which == 'KNN'):
-            return True, 5, 'auto', 'mikowski'
-        elif (which == 'RNDF'):
-            return True, 100, 42
-        elif (which == 'DTREE'):
-            return True, 'POS', 'C', 'G', 1
-        elif (which == 'SVC'):
-            return True, 0.3, 42, 'rbf', 1, 'scale'
-        elif (which == 'LOG'):
-            return True, 1000
-        else:
-            return False, 'not recognized model'
-    elif (res == 'n'):
-        if (which == 'KNN'):
-            n = int(input('insert nneigh:'))
-            a = input('insert algorithm:')
-            m = input('insert metric:')
-            return True, n, a, m
-        elif (which == 'RNDF'):
-            nestm = int(input('insert n estimators: '))
-            ranst = int(input('insert random state:'))
-            return True, nestm, ranst
-        elif (which == 'DTREE'):
-            col     = input('select column: ') #POS
-            first   = input('select first possible response: ') #C
-            second  = input('select second possible response: ')#G
-            max_depth = int(input('select max depth: ')) #1
-            return True, col, first, second, max_depth
-        elif (which == 'SVC'):
-            ts = float(input('insert ts:'))
-            rs = int(input('insert rs:'))
-            kernel = input('insert kernel: ')
-            C = int(input('insert C:'))
-            gamma = input('insert gamma')
-            return True, ts, rs, kernel, C, gamma
-        elif (which == 'LOG'):
-            max_iter = int(input('insert max iter: '))
-            return True, max_iter
-        else:
-            return False, 'not recognized model'
-    else:
-        return False, 'not valid response'
 
 
 def split_asker(cmd):

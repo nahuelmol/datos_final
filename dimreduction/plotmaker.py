@@ -14,7 +14,7 @@ def Plotter(cs, title, filename, ref):
     for col in cs.columns:
         cols.append(col)
     plt.figure(figsize=(8,6))
-    plt.scatter(cs[cols[0]], cs[cols[1]], c=cs[ref], cmap='viridis', edgecolor='k')
+    plt.scatter(cs[cols[0]], cs[cols[1]], c='r', cmap='viridis', edgecolor='k')
     plt.xlabel(cols[0])
     plt.ylabel(cols[1])
     plt.title(title)

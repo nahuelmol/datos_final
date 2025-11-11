@@ -7,6 +7,8 @@ from sklearn.linear_model import Ridge, LinearRegression
 
 import numpy as np
 
+from abss.setter import setting
+
 def CleanData(data):
     cols_to_drop = []
     for col in data.columns:
@@ -16,21 +18,10 @@ def CleanData(data):
     return X
 
 def SupportVectorRegression(data, ref):
-    y = data.pop('ref')
+    y = data.pop(ref)
     X = CleanData(data)
+    kernel, tsize, ranst, gamma, epsilon, C = setting('SVR')
 
-    tsize = 0.2
-    ranst = 42
-    gamma = 0.1
-    epsilon = .1
-    C = 100
-    response = input('customized parameters?')
-    if (response == 's'):
-        tsize = float(input('insert test size: '))
-        ranst = int(input('insert random state: '))
-        gamma = float(input('insert gamma: '))
-        epsilon = float(input('insert epsilon: '))
-        C       = int(input('inser C: '))
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=tsize, random_state=ranst)
 
     svr_rbf = SVR(kernel='rbf', C=C, gamma=gamma, epsilon=epsilon)
@@ -45,6 +36,7 @@ def SupportVectorRegression(data, ref):
 def KNearestNeighbors(data, ref):
     y = data.pop(ref)
     X = CleanData(data)
+    nn, weights, ts, ranst = setting('KNNR')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     knn_regressor = KNeighborsRegressor(n_neighbors=3, weights='distance')
@@ -59,10 +51,7 @@ def KNearestNeighbors(data, ref):
 def DecisionTree(data, ref):
     y = data.pop(ref)
     X = CleanData(data)
-    depth = 2
-    response = input('default depth?')
-    if(response == 's'):
-        depth = int(input('insert depth: '))
+    depth = setting('DTree')
     regr = DecisionTreeRegressor(max_depth=depth)
     regr.fit(X, y)
 
@@ -74,10 +63,8 @@ def DecisionTree(data, ref):
 def RidgeRegression(data, ref):
     y = data.pop(ref)
     X = CleanData(data)
-    response = input('default?')
-    alpha = 1.0
-    if response == 's':
-        alpha = float(input('insert alpha'))
+    alpha, ts, ranst = setting('RR')
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     ridge_model = Ridge(alpha=alpha)
     ridge_model.fit(X_train, y_train)
@@ -89,6 +76,7 @@ def RidgeRegression(data, ref):
 def LinearRegression(data, ref):
     y = data.pop(ref)
     X = CleanData(data)
+    ts, ranst = setting('LR')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     model = LinearRegression()
