@@ -22,7 +22,7 @@ def setting(which):
         elif (which == 'RR'):
             return True, 1.0
         elif (which == 'LR'):
-            reutnr True, 0.2, 42
+            return True, 0.2, 42
         else:
             return False, 'not recognized model'
     elif (res == 'n'):

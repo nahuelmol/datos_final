@@ -3,6 +3,12 @@ import os
 import pandas as pd
 import numpy as np
 
+def availableFile(path):
+    if os.path.exists(path):
+        return True
+    else:
+        return False
+
 def check_in_depth(file, sep):
     seps = ['\t', ',', ';']
     prev = 0
@@ -100,10 +106,14 @@ def setData(cmd):
         path = 'data\{}'.format(path)
         cnt['datapath']['train'].append(path)
     elif cmd.target == 'src':
-        print('gimme a source data file')
-        file = input(':')
+        file = input('insert filename:')
         path = '{}\data\{}'.format(os.getcwd(), file)
-        cnt['datapath']['src'] = path
+        res = availableFile(path)
+        if res == True:
+            cnt['datapath']['src'] = path
+            print('----done!')
+        else:
+            print('----error in src')
     else:
         print('not valid target')
     with open('manifest.json', 'w') as f:
