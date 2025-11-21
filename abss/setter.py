@@ -14,7 +14,7 @@ def setting(which):
         elif (which == 'LOG'):
             return True, 1000
         elif (which == 'SVR'):
-            return True, 'rbf', 0.2, 42, 0.1, .1
+            return True, 'rbf', 0.2, 42, 0.1, 0.1, 10
         elif (which == 'KNNR'):
             return True, 3, 'distance', 0.2, 42
         elif (which == 'DTree'):

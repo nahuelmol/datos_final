@@ -84,7 +84,7 @@ def DecisionTree(cmd):
             'time':str(datetime.now()),
             'ac':ac,
     }
-    add('model', REPORT)
+    add('models', REPORT)
 
 def Logistic(cmd):
     X_train, X_test, y_train, y_test = split_asker(cmd)

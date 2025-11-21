@@ -8,6 +8,9 @@ from sklearn.linear_model import Ridge, LinearRegression
 import numpy as np
 
 from abss.setter import setting
+from abss.story import add
+from abss.fs import current_project
+from abss.data_setter import get_data
 
 def CleanData(data):
     cols_to_drop = []
@@ -17,26 +20,32 @@ def CleanData(data):
     X = data.loc[:, ~data.columns.isin(cols_to_drop)]
     return X
 
-def SupportVectorRegression(data, ref):
-    y = data.pop(ref)
+def SupportVectorRegression(cmd):
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
+    y = data.pop(cmd.ref)
     X = CleanData(data)
-    kernel, tsize, ranst, gamma, epsilon, C = setting('SVR')
+    res, kernel, tsize, ranst, gamma, epsilon, C = setting('SVR')
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=tsize, random_state=ranst)
 
-    svr_rbf = SVR(kernel='rbf', C=C, gamma=gamma, epsilon=epsilon)
+    svr_rbf = SVR(kernel=kernel, C=C, gamma=gamma, epsilon=epsilon)
     svr_rbf.fit(X_train, y_train)
     y_pred = svr_rbf.predict(X_test)
 
     mse = mean_squared_error(y_test, y_pred)
     REPORT = {
+        'model':'svr',
         'mse':mse,
     }
+    add('models', REPORT)
 
-def KNearestNeighbors(data, ref):
-    y = data.pop(ref)
+def KNearestNeighbors(cmd):
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
+    y = data.pop(cmd.ref)
     X = CleanData(data)
-    nn, weights, ts, ranst = setting('KNNR')
+    res, nn, weights, ts, ranst = setting('KNNR')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     knn_regressor = KNeighborsRegressor(n_neighbors=3, weights='distance')
@@ -45,38 +54,50 @@ def KNearestNeighbors(data, ref):
     new_data = np.array([[5.5]])
     prediction = knn_regressor.predict(new_data)
     REPORT = {
+        'model':'knn_r',
         'preds':prediction,
     }
+    add('models', REPORT)
 
-def DecisionTree(data, ref):
-    y = data.pop(ref)
+def DecisionTree(cmd):
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
+    y = data.pop(cmd.ref)
     X = CleanData(data)
-    depth = setting('DTree')
+    res, depth = setting('DTree')
     regr = DecisionTreeRegressor(max_depth=depth)
     regr.fit(X, y)
 
     prediction = regr.predict([[2, 3]])
     REPORT = {
+        'model':'dtree_r',
         'preds':prediction,
     }
+    add('models', REPORT)
 
-def RidgeRegression(data, ref):
-    y = data.pop(ref)
+def RidgeRegression(cmd):
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
+    y = data.pop(cmd.ref)
     X = CleanData(data)
-    alpha, ts, ranst = setting('RR')
+    res, alpha, ts, ranst = setting('RR')
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     ridge_model = Ridge(alpha=alpha)
     ridge_model.fit(X_train, y_train)
     predictions = ridge_model.predict(X_test)
     REPORT = {
-            'preds':predictions,
+        'model':'ridger',
+        'preds':predictions,
     }
+    add('models', REPORT)
 
-def LinearRegression(data, ref):
-    y = data.pop(ref)
+def LinearRegression(cmd):
+    datapath = current_project(['datapath','src'])
+    res, data = get_data(datapath)
+    y = data.pop(cmd.ref)
     X = CleanData(data)
-    ts, ranst = setting('LR')
+    res, ts, ranst = setting('LR')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     model = LinearRegression()
@@ -84,6 +105,7 @@ def LinearRegression(data, ref):
     y_pred = model.predict(X_test)
 
     REPORT = {
+        'model':'lin_r',
         'coeffs':model.coef_,
         'interc':model.intercept_,
     }
@@ -96,3 +118,5 @@ def LinearRegression(data, ref):
     plt.legend()
     filename = 'linearRegression'
     plt.savefig(filename, dpi=300, bbox_inches='tight')
+
+    add('models', REPORT)

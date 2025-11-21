@@ -55,6 +55,7 @@ def memocheck(cmd):
     data = {}
     it = ''
     which = ''
+    storypath = current_project(['storypath'])
     with open(storypath, 'r') as f:
         data = json.load(f)
     if cmd.target == 'mods':
@@ -76,6 +77,7 @@ def memocheck(cmd):
             print('{} - {} - {}'.format(each[it], each['time'], each['n']))
             if cmd.ac == True:
                 printGreen(each['ac'], 'ac')
+            return True, '--done--'
         else:
             res, code = set_condition(cmd.cond)
             if each[it] == code:
@@ -89,6 +91,7 @@ def memocheck(cmd):
                     print('{}, {}, {}'.format(each[it], each['n'], each['time']))
                     if cmd.ac == True:
                         printGreen(each['ac'], 'ac')
+            return True, '--done--'
 
 def checker(cmd):
     storypath = current_project(['storypath'])
