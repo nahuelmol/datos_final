@@ -9,8 +9,9 @@ import numpy as np
 
 from abss.setter import setting
 from abss.story import add
-from abss.fs import current_project
 from abss.data_setter import get_data
+from abss.fs import current_project, take_n
+from regression.plotmaker import vectors_plot
 
 def CleanData(data):
     cols_to_drop = []
@@ -34,6 +35,11 @@ def SupportVectorRegression(cmd):
     y_pred = svr_rbf.predict(X_test)
 
     mse = mean_squared_error(y_test, y_pred)
+    n = take_n('models', 'logistic')
+    files = {
+        'vectors': 'svr_vector_{}.png'.format(n),
+    }
+    vectors_plot(X_train, y_train, files['vectors'], svr_rbf)
     REPORT = {
         'model':'svr',
         'mse':mse,
