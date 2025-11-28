@@ -6,12 +6,20 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.linear_model import Ridge, LinearRegression
 
 import numpy as np
+import json
 
 from abss.setter import setting
 from abss.story import add
 from abss.data_setter import get_data
 from abss.fs import current_project, take_n
-from regression.plotmaker import vectors_plot
+from regression.plotmaker import vectors_plot, ridge_r_plot, dtree_plot, knnr_plot, linear_plot
+
+class NumpyArrayEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
 
 def CleanData(data):
     cols_to_drop = []
@@ -35,7 +43,7 @@ def SupportVectorRegression(cmd):
     y_pred = svr_rbf.predict(X_test)
 
     mse = mean_squared_error(y_test, y_pred)
-    n = take_n('models', 'logistic')
+    n = take_n('models', 'svr')
     files = {
         'vectors': 'svr_vector_{}.png'.format(n),
     }
@@ -52,16 +60,20 @@ def KNearestNeighbors(cmd):
     y = data.pop(cmd.ref)
     X = CleanData(data)
     res, nn, weights, ts, ranst = setting('KNNR')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ts, random_state=ranst)
 
-    knn_regressor = KNeighborsRegressor(n_neighbors=3, weights='distance')
-    knn_regressor.fit(X_train, y_train)
+    model = KNeighborsRegressor(n_neighbors=nn, weights=weights)
+    model.fit(X_train, y_train)
 
-    new_data = np.array([[5.5]])
-    prediction = knn_regressor.predict(new_data)
+    pred = model.predict(X_test)
+    n = take_n('models', 'knn_r')
+    files = {
+        'knnr':'knnr_{}'.format(n),
+    }
+    knnr_plot(X_train, y_train, files['knnr'], model)
     REPORT = {
         'model':'knn_r',
-        'preds':prediction,
+        'preds':pred,
     }
     add('models', REPORT)
 
@@ -71,13 +83,18 @@ def DecisionTree(cmd):
     y = data.pop(cmd.ref)
     X = CleanData(data)
     res, depth = setting('DTree')
-    regr = DecisionTreeRegressor(max_depth=depth)
-    regr.fit(X, y)
+    model = DecisionTreeRegressor(max_depth=depth)
+    model.fit(X, y)
+    pred = model.predict(X_test)
 
-    prediction = regr.predict([[2, 3]])
+    n = take_n('models', 'dtree_r')
+    files = {
+        'dtree':'dtree_plot_{}'.format(n)
+    }
+    dtree_plot(X_train, y_train, files['dtree'], model)
     REPORT = {
         'model':'dtree_r',
-        'preds':prediction,
+        'preds':pred,
     }
     add('models', REPORT)
 
@@ -88,13 +105,25 @@ def RidgeRegression(cmd):
     X = CleanData(data)
     res, alpha, ts, ranst = setting('RR')
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    ridge_model = Ridge(alpha=alpha)
-    ridge_model.fit(X_train, y_train)
-    predictions = ridge_model.predict(X_test)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ts, random_state=ranst)
+    model = Ridge(alpha=alpha)
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+
+    n = take_n('models', 'ridge_r')
+    files = {
+        'basic':'basic_ridge_{}'.format(n)
+    }
+    ridge_r_plot(pred, X_train, y_train, files['basic'], model)
+    s_pred = json.dumps(pred, cls=NumpyArrayEncoder)
+    s_coef = json.dumps(model.coef_, cls=NumpyArrayEncoder)
+    s_intr = json.dumps(model.intercept_, cls=NumpyArrayEncoder)
+
     REPORT = {
-        'model':'ridger',
-        'preds':predictions,
+        'model':'ridge_r',
+        'preds':s_pred,
+        'coeff':s_coef,
+        'intercept':s_intr,
     }
     add('models', REPORT)
 
@@ -104,25 +133,21 @@ def LinearRegression(cmd):
     y = data.pop(cmd.ref)
     X = CleanData(data)
     res, ts, ranst = setting('LR')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     model = LinearRegression()
     model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    pred = model.predict(X_test)
 
+    n = take_n('models', 'lin_r')
+    files = {
+        'basic':'basic_linear_{}'.format(n)
+    }
+    linear_plot(X_train, y_train, files['basic'], model)
     REPORT = {
         'model':'lin_r',
         'coeffs':model.coef_,
         'interc':model.intercept_,
     }
-
-    plt.scatter(X_test, y_test, color='black', label='Actual data')
-    plt.plot(X_test, y_pred, color='blue', linewidth=3, label='Linear Regression')
-    plt.xlabel('Feature')
-    plt.ylabel('Target')
-    plt.title('Scikit-learn Linear Regression')
-    plt.legend()
-    filename = 'linearRegression'
-    plt.savefig(filename, dpi=300, bbox_inches='tight')
 
     add('models', REPORT)

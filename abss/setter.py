@@ -20,7 +20,7 @@ def setting(which):
         elif (which == 'DTree'):
             return True, 2
         elif (which == 'RR'):
-            return True, 1.0
+            return True, 1.0, 0.2, 42
         elif (which == 'LR'):
             return True, 0.2, 42
         else:

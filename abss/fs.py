@@ -53,7 +53,7 @@ def take_n(on, typeof):
 def outProject():
     os.remove('manifest.json')
 
-def compare_projects():
+def compare_projects(cmd):
     cleanManifest = False
     data = {}
     with open('manifest.json', 'r') as f:
@@ -93,7 +93,7 @@ def delProject(cmd):
     with open(projipath, 'w') as f:
         f.write(projectscnt)
     shutil.rmtree(projepath)
-    compare_projects()
+    compare_projects(cmd)
     return True, 'project deleted'
 
 def newProject(cmd):
