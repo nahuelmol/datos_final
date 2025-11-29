@@ -1,6 +1,6 @@
 import sys
 
-from .methods import LinearRegression, SupportVectorRegression, KNearestNeighbors, RidgeRegression, LinearRegression
+from .methods import LinRegression, SupportVectorRegression, KNearestNeighbors, RidgeRegression, LinearRegression
 
 def Regression(cmd):
     if cmd.method == 'svr':
@@ -12,7 +12,7 @@ def Regression(cmd):
     elif (cmd.method == 'rr'):
         RidgeRegression(cmd)
     elif (cmd.method == 'lr'):
-        LinearRegression(cmd)
+        LinRegression(cmd)
     else:
         return False
     return True

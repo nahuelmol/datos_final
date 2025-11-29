@@ -22,7 +22,7 @@ from abss.dataSetting import extract_data
 from abss.fs import current_project, take_n
 from abss.setter import setting
 
-from dimreduction.plotmaker import logistic_regression_plot, confusion_matrix_plot
+from classification.plotmaker import logistic_regression_plot, confusion_matrix_plot
 from dimreduction.dim_reduction import data_separator
 
 def check_var_type(data, ref):
