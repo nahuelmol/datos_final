@@ -4,3 +4,4 @@ prs
 __pycache__
 manifest.json
 data
+*.png

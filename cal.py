@@ -6,6 +6,7 @@ from dimreduction.kind import DimReduction
 from classification.kind import Classification
 from regression.kind import Regression
 from explo.kind import ExploratoryAnalysis
+from approximation.kind import Approximation
 
 from abss.lister import list_vars, list_labs
 from abss.commands import Command
@@ -29,6 +30,8 @@ def switch(cmd):
             Classification(cmd)
         elif cmd.targetType == 'r':
             Regression(cmd)
+        elif cmd.targetType == 'a':
+            Approximation(cmd)
         else:
             return False, '--not recognized type'
     elif cmd.rootCommand == 'change':

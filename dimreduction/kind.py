@@ -6,7 +6,7 @@ from abss.fs import current_project
 
 def DimReduction(cmd):
     datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
+    res, data = get_data(datapath, ',')
     if res == False:
         print('data cannot be obtained')
         sys.exit(0)

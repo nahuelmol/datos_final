@@ -1,6 +1,5 @@
 
 from classification.models import DecisionTree, Logistic, KNearestNeighbors, SupportVectorClassifier
-from abss.fs import current_project
 
 def Classification(cmd):
     if cmd.method == 'dt':

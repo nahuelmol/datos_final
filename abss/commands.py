@@ -75,6 +75,11 @@ class Command:
             cal app r:svr
             cal app r:rr
             cal app r:lr
+
+            cal app a:l
+            cal app a:t
+            cal app a:c
+
             """
             print(msg)
         elif self.rootCommand == 'ch':

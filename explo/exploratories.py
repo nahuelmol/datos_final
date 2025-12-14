@@ -11,7 +11,7 @@ from explo.plots import Plot
 
 def does_exists(ref):
     datapath= current_project(['datapath', 'src'])
-    res, data    = get_data(datapath)
+    res, data    = get_data(datapath, ',')
     if res == True:
         if ref in data.columns.tolist():
             return True

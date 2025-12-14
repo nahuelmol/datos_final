@@ -5,7 +5,7 @@ from abss.data_setter import get_data
 
 def ExploratoryAnalysis(cmd):
     datapath = current_project(['datapath', 'src'])
-    res, data = get_data(datapath)
+    res, data = get_data(datapath, ',')
     MSG = ''
     if cmd.all == True:
         msg = correlation_matrix(data)

@@ -2,9 +2,9 @@ import os
 import json
 import pandas as pd
 
-def get_data(filepath):
+def get_data(filepath, sep):
     try:
-        df = pd.read_csv(filepath)
+        df = pd.read_csv(filepath, sep)
         return True, df
     except:
         print('err')

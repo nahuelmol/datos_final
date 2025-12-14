@@ -53,7 +53,7 @@ def split_asker(cmd):
     res = input('split original data?')
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
         datapath = current_project(['datapath','src'])
-        res, data = get_data(datapath)
+        res, data = get_data(datapath, ',')
         cmd.ref = check_var_type(data, cmd.ref)
         data, target = data_separator(data, cmd.ref)
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
@@ -69,7 +69,7 @@ def DecisionTree(cmd):
         print('setting problem')
 
     datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
+    res, data = get_data(datapath, ',')
     query   = "{}.isin(('{}', '{}'))".format(col, first, second)
     data    = data.query(query)
 
