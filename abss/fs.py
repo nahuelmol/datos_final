@@ -137,6 +137,7 @@ def newProject(cmd):
                     'exploratory_analysis':[],
                     'methods':[],
                     'models':[],
+                    'polyis':[],
             }
             json.dump(story, f, indent=4)
     else:

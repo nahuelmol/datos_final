@@ -4,71 +4,131 @@ import matplotlib.pyplot as plt
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
+from datetime import datetime
 
-from abss.fs import current_project
+from abss.fs import current_project, take_n
 from abss.data_setter import get_data
 
-def Lagrange(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath, '\t')
+class Polynomial:
+    def __init__(self, cmd):
+        datapath = current_project(['datapath','src'])
+        res, data = get_data(datapath, '\t')
 
-    x   = data['Pro.']
-    ip  = data['Ip'] * data['XI']
-    op  = data['Op'] * data['XO']
+        self.x      = data['Pro.']
+        self.ip     = data['Ip'] * data['XI']
+        self.op     = data['Op'] * data['XO']
+        self.x_trained = np.linspace(min(self.x), max(self.x), 500)
 
-    poly_ip = lagrange(x, ip)
-    poly_op = lagrange(x, op)
-    x_trained = np.linspace(min(x), max(x), 500)
-    output_ip = poly_ip(x_trained)
-    output_op = poly_op(x_trained)
+        self.poly_type = cmd.method
+        self.poly_ip = None 
+        self.poly_op = None 
+        self.output_ip = None
+        self.output_op = None
+        self.n = None
+        self.REPORT = {}
+        self.filename = None
 
-    plt.figure()
-    plt.plot(x, ip, 'o', label='Data')
-    plt.plot(x, op, 'o', label='Data')
-    plt.plot(x_trained, output_ip, '-', label='Lagrange ip')
-    plt.plot(x_trained, output_op, '-', label='Lagrange op')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.savefig('output.png', bbox_inches='tight', dpi=300)
-    plt.close()
+    def build_poly(self):
+        if(self.poly_type == 'l'):
+            self.poly_name = 'lagrange'
+        elif (self.poly_type == 'c'):
+            self.poly_name = 'chebyshev'
+        elif (self.poly_type == 't'):
+            self.poly_name = 'talor'
+        self.n = take_n('polys', self.poly_name)
+        if self.poly_type == 'l':
+            self.Lagrange()
+            self.output_ip = self.poly_ip(self.x_trained)
+            self.output_op = self.poly_op(self.x_trained)
+            return True
+        elif self.poly_type == 'c':
+            self.Chebyshev()
+            self.output_ip = self.poly_ip(self.x_trained)
+            self.output_op = self.poly_op(self.x_trained)
+            return True
+        elif self.poly_type == 't':
+            self.Taylor()
+            self.output_ip = self.poly_ip(self.x_trained)
+            self.output_op = self.poly_op(self.x_trained)
+            return True
+        else:
+            print('not recognized poly')
+            return False
 
-def Taylor(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath, '\t')
-    x_0 = 0
-    grade = 4
-    x   = data['Pro.']
-    ip  = data['Ip'] * data['XI']
-    op  = data['Op'] * data['XO']
-    poly_ip = approximate_taylor_polynomial(ip, x_0, grade, scale=1.0)
-    poly_op = approximate_taylor_polynomial(op, x_0, grade, scale=1.0)
+    def Lagrange(self):
+        self.poly_ip = lagrange(self.x, self.ip)
+        self.poly_op = lagrange(self.x, self.op)
 
-    x_vals = np.linspace(min(x), max(x), 400)
-    plt.plot(x_vals, f(x_vals), label='f(x)=sin(x)')
-    plt.plot(x_vals, poly(x_vals), label='Taylor')
-    plt.title('Taylor approximation')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+        files = {
+            'basic': 'scatter_lagrange_{}.png'.format(self.n),
+        }
+        self.REPORT = {
+            'polys':'taylor',
+            'n':self.n,
+            'time':str(datetime.now()),
+            'outputs': files,
+        }
+        self.filename = files
 
-def Chebyshev(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath, '\t')
-    data['Ip_val']    = data['Ip'] * data['XI']
-    data['Op_val']    = data['Op'] * data['XO']
 
-    x = data['Pro.']
-    y = data['Ip_val']
-    T2 = chebyt(2)
-    x_axis = np.linspace(min(x),max(x),500)
-    y = T2(x)
+    def Taylor(self):
+        x_0 = 0
+        grade = 4
+        self.poly_ip = approximate_taylor_polynomial(self.ip, x_0, grade, scale=1.0)
+        self.poly_op = approximate_taylor_polynomial(self.op, x_0, grade, scale=1.0)
 
-    filepath = filename
-    plt.plot(x, y, label='Chebyshev')
-    plt.title('Chebyshev approximation')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig(filepath, dpi=300)
-    plt.close()
+        files = {
+            'basic': 'scatter_taylor_{}.png'.format(self.n),
+        }
+        self.REPORT = {
+            'polys':'taylor',
+            'n':self.n,
+            'time':str(datetime.now()),
+            'outputs': files,
+        }
+        self.filename = files
 
+    def Chebyshev(sefl):
+        T2 = chebyt(2)
+        y = T2(self.x_trained)
+
+        files = {
+            'basic': 'scatter_taylor_{}.png'.format(self.n),
+        }
+        self.REPORT = {
+            'polys':'chebyshev',
+            'n':self.n,
+            'time':str(datetime.now()),
+            'outputs': files,
+        }
+        self.filename = files
+
+    def basic_plot(self):
+        plt.figure()
+        plt.plot(self.x, self.ip, 'o', label='Data')
+        plt.plot(self.x, self.op, 'o', label='Data')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.savefig(self.filename['basic'], bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def polys_plot(self):
+        plt.figure()
+        plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
+        plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.savefig(self.filename['basic'], bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def complete_plot(self):
+        plt.figure()
+        plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
+        plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
+        plt.plot(self.x, self.ip, 'o', label='Data')
+        plt.plot(self.x, self.op, 'o', label='Data')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.savefig(self.filename['basic'], bbox_inches='tight', dpi=300)
+        plt.close()
 
