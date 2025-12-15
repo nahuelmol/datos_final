@@ -13,11 +13,15 @@ class Polynomial:
     def __init__(self, cmd):
         datapath = current_project(['datapath','src'])
         res, data = get_data(datapath, '\t')
+        filename = datapath.split('\\')[-1]
 
+        self.Stats  = data['St.']
+        self.nprofile  = filename[3]
         self.x      = data['Pro.']
         self.ip     = data['Ip'] * data['XI']
         self.op     = data['Op'] * data['XO']
         self.x_trained = np.linspace(min(self.x), max(self.x), 500)
+        self.nrows = data.shape[0]
 
         self.poly_type = cmd.method
         self.poly_ip = None 
@@ -102,6 +106,34 @@ class Polynomial:
             'outputs': files,
         }
         self.filename = files
+
+    def add_locs(self):
+        path    = "data/Ubicacion_slingram_camp2.dat"
+        nfirst  = self.Stats.iloc[0]
+        nlastt  = self.Stats.iloc[-1]
+        n       = nlastt - (nfirst - 1)
+        data    = np.zeros((n, 2))
+        i = 0
+        with open(path, 'r') as f:
+            for line in f:
+                if(i != 0):
+                    mylist = line.split(" ")
+                    data[i-1, 0] = mylist[0]
+                    data[i-1, 1] = mylist[1]
+                if(i == n):
+                    break
+                i = i + 1
+
+        df      = pd.DataFrame(data, columns=['Lon', 'Lat'])
+        ready   = pd.DataFrame({
+            'St.': self.Stats,
+            'Ip':  self.ip,
+            'Op':  self.op,
+            'Lat': df['Lat'],
+            'Lon': df['Lon']
+        })
+        output_name = "Profile {}".format(self.nprofile)
+        ready.to_csv(output_name, index=False)
 
     def basic_plot(self):
         plt.figure()
