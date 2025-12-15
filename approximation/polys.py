@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
+import os
 import matplotlib.pyplot as plt
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
 from datetime import datetime
+from pathlib import Path
 
 from abss.fs import current_project, take_n
 from abss.data_setter import get_data
@@ -107,33 +109,63 @@ class Polynomial:
         }
         self.filename = files
 
+    def create_locs(self):
+        loc_path = "data/locations.dat"
+        if(os.path.exists(loc_path)):
+            return True
+        path    = "data/Ubicacion_slingram_camp2.dat"
+        lat = []
+        lon = []
+        i   = 0
+        with open(path, 'r') as f:
+            for line in f:
+                if(i != 0):
+                    mylist = line.split(" ")
+                    lat.append(mylist[0])
+                    lon.append(mylist[1])
+                i = i+1
+        lat = pd.Series(lat)
+        lon = pd.Series(lon)
+        ready   = pd.DataFrame({
+            'Lat': lat,
+            'Lon': lon
+        })
+        ready.to_csv('data/locations.dat', index=False)
+    
     def add_locs(self):
         path    = "data/Ubicacion_slingram_camp2.dat"
         nfirst  = self.Stats.iloc[0]
         nlastt  = self.Stats.iloc[-1]
         n       = nlastt - (nfirst - 1)
         data    = np.zeros((n, 2))
-        i = 0
-        with open(path, 'r') as f:
-            for line in f:
-                if(i != 0):
-                    mylist = line.split(" ")
-                    data[i-1, 0] = mylist[0]
-                    data[i-1, 1] = mylist[1]
-                if(i == n):
-                    break
-                i = i + 1
+        locs    = pd.read_csv("data/locations.dat")
 
-        df      = pd.DataFrame(data, columns=['Lon', 'Lat'])
+        framed_locs = locs[nfirst:nlastt]
         ready   = pd.DataFrame({
             'St.': self.Stats,
             'Ip':  self.ip,
             'Op':  self.op,
-            'Lat': df['Lat'],
-            'Lon': df['Lon']
+            'Lat': framed_locs['Lat'],
+            'Lon': framed_locs['Lon']
         })
-        output_name = "Profile {}".format(self.nprofile)
+        output_name = "data/Profile {}".format(self.nprofile)
         ready.to_csv(output_name, index=False)
+
+    def build_grid(self):
+        p = Path("data")
+        profs = list(p.rglob(f'Profile*'))
+        locs = pd.read_csv("data/locations.dat")
+        n = locs.shape[0]
+        #a = np.zeros(n, 5)
+        my_pds = []
+        for prof in profs:
+            df = pd.read_csv(prof)
+            my_pds.append(df)
+        comb = pd.concat(my_pds, ignore_index=True)
+        print(comb)
+
+
+        #"data/Profile {}".format(i)
 
     def basic_plot(self):
         plt.figure()
