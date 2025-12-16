@@ -192,6 +192,26 @@ cal switch p:pinkman
 
 Other commands will be added here as the project grows
 
+### Plotting with gnuplot
+
+Located in the "data" directory, enter the gnuplot assitant:
+
+```
+gnuplot
+```
+
+Then enter the following commands:
+
+```
+set xlabel "Longitud"
+set ylabel "Latitud"
+set zlabel "IP"
+
+set datafile separato ','
+
+splot "Grid" using 5:4:2 with points pt 7 ps 1 notitle
+```
+
 ### Installation
 
 This repository should be cloned in your local machine or just download it as a zip. Later unzip it at an specific directory. Then use `pip` to all install libraries needed.
