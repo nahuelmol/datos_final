@@ -17,13 +17,16 @@ class Polynomial:
         res, data = get_data(datapath, '\t')
         filename = datapath.split('\\')[-1]
 
-        self.Stats  = data['St.']
-        self.nprofile  = filename[3]
-        self.x      = data['Pro.']
-        self.ip     = data['Ip'] * data['XI']
-        self.op     = data['Op'] * data['XO']
-        self.x_trained = np.linspace(min(self.x), max(self.x), 500)
-        self.nrows = data.shape[0]
+        self.Stats      = data['St.']
+        self.nprofile   = filename[3]
+        self.x          = data['Pro.']
+        self.ip         = data['Ip'] * data['XI']
+        self.op         = data['Op'] * data['XO']
+        self.x_trained  = np.linspace(min(self.x), max(self.x), 500)
+        self.nrows      = data.shape[0]
+
+        self.ip.name    = 'IP'
+        self.op.name    = 'OP'
 
         self.poly_type = cmd.method
         self.poly_ip = None 
@@ -75,7 +78,6 @@ class Polynomial:
             'outputs': files,
         }
         self.filename = files
-
 
     def Taylor(self):
         x_0 = 0
@@ -133,21 +135,16 @@ class Polynomial:
         ready.to_csv('data/locations.dat', index=False)
     
     def add_locs(self):
-        path    = "data/Ubicacion_slingram_camp2.dat"
         nfirst  = self.Stats.iloc[0]
-        nlastt  = self.Stats.iloc[-1]
-        n       = nlastt - (nfirst - 1)
-        data    = np.zeros((n, 2))
+        nlastt  = (self.Stats.iloc[-1] + 1)
         locs    = pd.read_csv("data/locations.dat")
 
-        framed_locs = locs[nfirst:nlastt]
-        ready   = pd.DataFrame({
-            'St.': self.Stats,
-            'Ip':  self.ip,
-            'Op':  self.op,
-            'Lat': framed_locs['Lat'],
-            'Lon': framed_locs['Lon']
-        })
+        framed_locs = locs.iloc[nfirst:nlastt]
+        lat     = framed_locs['Lat'].reset_index()
+        lon     = framed_locs['Lon'].reset_index()
+
+        ready = pd.concat([self.Stats, self.ip, self.op, lat['Lat'], lon['Lon']], axis=1)
+        print(ready)
         output_name = "data/Profile {}".format(self.nprofile)
         ready.to_csv(output_name, index=False)
 
@@ -162,10 +159,8 @@ class Polynomial:
             df = pd.read_csv(prof)
             my_pds.append(df)
         comb = pd.concat(my_pds, ignore_index=True)
-        print(comb)
-
-
-        #"data/Profile {}".format(i)
+        output_name = "data/Grid"
+        comb.to_csv(output_name, index=False)
 
     def basic_plot(self):
         plt.figure()
