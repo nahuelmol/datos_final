@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import math
 import matplotlib.pyplot as plt
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
@@ -17,6 +18,11 @@ class Polynomial:
         res, data = get_data(datapath, '\t')
         filename = datapath.split('\\')[-1]
 
+        self.mhu        = 0.00000125
+        self.s          = 40
+        self.w          = 2 * math.pi * 3600
+        self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
+
         self.Stats      = data['St.']
         self.nprofile   = filename[3]
         self.x          = data['Pro.']
@@ -25,6 +31,10 @@ class Polynomial:
         self.x_trained  = np.linspace(min(self.x), max(self.x), 500)
         self.nrows      = data.shape[0]
 
+        module = np.sqrt(self.ip.pow(2) + self.op.pow(2))
+        self.rest_ap    = self.cte_rest / module 
+
+        self.rest_ap.name = 'RA'
         self.ip.name    = 'IP'
         self.op.name    = 'OP'
 
@@ -143,8 +153,7 @@ class Polynomial:
         lat     = framed_locs['Lat'].reset_index()
         lon     = framed_locs['Lon'].reset_index()
 
-        ready = pd.concat([self.Stats, self.ip, self.op, lat['Lat'], lon['Lon']], axis=1)
-        print(ready)
+        ready = pd.concat([self.Stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
         output_name = "data/Profile {}".format(self.nprofile)
         ready.to_csv(output_name, index=False)
 

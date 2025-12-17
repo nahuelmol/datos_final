@@ -9,7 +9,7 @@ def Approximation(cmd):
     #POLY.basic_plot()
     #POLY.polys_plot()
     #POLY.create_locs()
-    #POLY.add_locs()
+    POLY.add_locs()
     POLY.build_grid()
     return res 
 
