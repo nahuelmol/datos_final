@@ -192,6 +192,40 @@ cal switch p:pinkman
 
 Other commands will be added here as the project grows
 
+### Plotting with gnuplot
+
+Located in the "data" directory, enter the gnuplot assitant:
+
+```
+gnuplot
+```
+
+Then enter the following commands:
+
+```
+set xlabel "Longitud"
+set ylabel "Latitud"
+set zlabel "REa"
+set datafile separato ','
+```
+
+Later, a 3D scatter plot can be built:
+
+```
+splot "Grid" using 5:4:2 with points pt 7 ps 1 notitle
+```
+
+And also, a surface plot:
+
+```
+set hidden 3d
+set pm3d at s
+set view 60, 30
+set dgrid3d 50, 50, 2
+splot "Grid" using 6:5:4 with pm3d
+```
+
+
 ### Installation
 
 This repository should be cloned in your local machine or just download it as a zip. Later unzip it at an specific directory. Then use `pip` to all install libraries needed.
