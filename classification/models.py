@@ -76,7 +76,6 @@ def DecisionTree(cmd):
     data, target = data_separator(data, cmd.ref)
     TREE = DecisionTreeClassifier(max_depth=max_depth).fit(data, target) #finds the bias
     predictions = TREE.predict(data)
-    #predictions[3]
 
     ac = accuracy_score(target, predictions)
     REPORT = {
@@ -101,10 +100,6 @@ def Logistic(cmd):
     model = LogisticRegression(max_iter=max_iter).fit(X_train_scaled, y_train)
     predictions = model.predict(X_test_scaled) #making predictions over new X values (X_test)
     
-    #rocaucscore = roc_auc_score(y_test, probs, multi_class='ovr')
-    #model2 = LogisticRegression().fit(data, target)
-    #model2.predict_proba(data)
-
     mc = model.coef_.tolist()
     mi = model.intercept_.tolist()
     cm = confusion_matrix(y_test, predictions)

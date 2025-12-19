@@ -80,9 +80,11 @@ class Polynomial:
 
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
+            'polys': 'polys_lagrange_{}.png'.format(self.n),
+            'complete': 'complete_lagrange_{}.png'.format(self.n),
         }
         self.REPORT = {
-            'polys':'taylor',
+            'polys':'lagrange',
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -172,21 +174,25 @@ class Polynomial:
         comb.to_csv(output_name, index=False)
 
     def basic_plot(self):
+        pname = current_project(['project_name'])
+        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['basic'])
         plt.figure()
         plt.plot(self.x, self.ip, 'o', label='Data')
         plt.plot(self.x, self.op, 'o', label='Data')
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.savefig(self.filename['basic'], bbox_inches='tight', dpi=300)
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
     def polys_plot(self):
+        pname = current_project(['project_name'])
+        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['polys'])
         plt.figure()
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.savefig(self.filename['basic'], bbox_inches='tight', dpi=300)
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
     def complete_plot(self):
@@ -197,6 +203,6 @@ class Polynomial:
         plt.plot(self.x, self.op, 'o', label='Data')
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.savefig(self.filename['basic'], bbox_inches='tight', dpi=300)
+        plt.savefig(self.filename['complete'], bbox_inches='tight', dpi=300)
         plt.close()
 
