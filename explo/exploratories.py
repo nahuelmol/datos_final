@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from abss.story import add
-from abss.fs import take_n, current_project
+from abss.fs import taken, current_project
 from abss.data_setter import get_data
 
 from datetime import datetime
@@ -18,7 +18,7 @@ def does_exists(ref):
     return False
 
 def correlation_matrix(df):
-    n = take_n('exploratory_analysis', 'corr_matrix')
+    n = taken('exploratory_analysis', 'corr_matrix')
     files = {
         'corr_matrix_plot': 'corr_matrix_{}.png'.format(n),
     }
@@ -55,7 +55,7 @@ def categoricals(data):
         print('global - var does not exists')
         ref = input('insert categorical now: ')
 
-    n = take_n('exploratory_analysis', 'categos')
+    n = taken('exploratory_analysis', 'categos')
     files = {
         'categorical_plot': 'categorical_{}.png'.format(n),
     }
@@ -107,7 +107,7 @@ def histograms(data):
     else:
         print('histogram: var does not exists')
         ref = input('histogram: insert variable now: ')
-    n = take_n('exploratory_analysis', 'histos')
+    n = taken('exploratory_analysis', 'histos')
     files   = {
         'histo':'histo_{}.png'.format(n),
         'histo_kde':'histo_{}_kde.png'.format(n),
@@ -138,7 +138,7 @@ def boxplots(data):
         ref = input('boxplots: insert variable now: ')
         if not does_exists(ref):
             return '----boxplots:variable not exists'
-    n = take_n('exploratory_analysis', 'boxplots')
+    n = taken('exploratory_analysis', 'boxplots')
     files = {
         'boxplot_basic':'boxplot_{}_basic.png'.format(n)
     }

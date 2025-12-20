@@ -19,7 +19,7 @@ from pandas.api.types import is_numeric_dtype
 from abss.data_setter import get_data
 from abss.story import add
 from abss.dataSetting import extract_data
-from abss.fs import current_project, take_n
+from abss.fs import current_project, taken
 from abss.setter import setting
 
 from classification.plotmaker import logistic_regression_plot, confusion_matrix_plot
@@ -107,7 +107,7 @@ def Logistic(cmd):
     accuracy = accuracy_score(y_test, predictions)
     f1score = f1_score(y_test, predictions, average='macro', zero_division=0).tolist()
 
-    n = take_n('models', 'logistic')
+    n = taken('models', 'logistic')
     files = {
         'boundary_curve': 'log_{}_boundary_curve.png'.format(n),
         'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n),
@@ -147,7 +147,7 @@ def KNearestNeighbors(cmd):
     accuracy = accuracy_score(y_test, predictions)
     #out= classifier.neighbors()
 
-    n = take_n('models', 'knearest_neighbors')
+    n = taken('models', 'knearest_neighbors')
     REPORT = {
         'model':'knearest_neighbors',
         'n':n,
@@ -169,7 +169,7 @@ def RandomForest(data, cmd):
 
     predictions = rf_classifier.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
-    n = take_n('models', 'rand_forest')
+    n = taken('models', 'rand_forest')
     REPORT = {
         'model':'rand_forest',
         'n': n,
@@ -191,7 +191,7 @@ def SupportVectorClassifier(cmd):
 
     predictions = svc.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
-    n = take_n('models', 'svc')
+    n = taken('models', 'svc')
     REPORT = {
         'model':'support_vector_classifier',
         'n': n,

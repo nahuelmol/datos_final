@@ -1,10 +1,10 @@
 
-from approximation.polys import Polynomial
+from approximation.polys import Polymaker
 from abss.fs import current_project
 from abss.story import add
 
 def Approximation(cmd):
-    POLY = Polynomial(cmd)
+    POLY = Polymaker(cmd)
     res = POLY.build_poly()
     POLY.basic_plot()
     POLY.polys_plot()

@@ -29,21 +29,26 @@ def write_csv(df, name):
         df.to_csv(path)
         return True, '----written'
 
-def return_each(plural):
+def single(plural):
     if plural == 'methods':
         return 'method'
     elif plural == 'models':
         return 'model'
     elif plural == 'exploratory_analysis':
         return 'metric'
+    elif plural == 'polys':
+        return 'poly'
+    else:
+        print('not recognized plural')
+        return None
 
-def take_n(on, typeof):
+def taken(on, typeof):
     pname = current_project(['project_name'])
     with open('prs\{}\story.json'.format(pname), 'r') as f:
         data    = json.load(f)
         aux     = 0
         for each in data[on]:
-            name = return_each(on)
+            name = single(on)
             if each[name] == typeof:
                 n = int(each['n'])
                 if n > aux:

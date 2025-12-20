@@ -11,7 +11,7 @@ from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
 from abss.fs import write_csv
 
-from abss.fs import current_project, take_n
+from abss.fs import current_project, taken
 from .plotmaker import Plotter
 from abss.story import add
 
@@ -42,7 +42,7 @@ def PCAnalysis(data, cmd):
     variance_ratio = pca.explained_variance_ratio_
     lost_information = (1-np.sum(variance_ratio))
     time = str(datetime.now())
-    n = take_n('methods', 'pca')
+    n = taken('methods', 'pca')
     files = {
         'pca_basic_chart_pcn': 'pca_{}_basic_pcn.png'.format(n),
         'pca_pcs':'pca_{}_pcs.csv'.format(n),
@@ -80,7 +80,7 @@ def ICAnalysis(data, cmd):
     white = ica.whitening_.tolist()
     time = str(datetime.now())
 
-    n = take_n('methods', 'ica')
+    n = taken('methods', 'ica')
     files = {
         'ica_basic_chart_icn': 'ica_{}_basic_icn.png'.format(n),
         'ica_ics':'ica_{}_ics.csv'.format(n),
@@ -117,7 +117,7 @@ def TSNEanalysis(data, cmd):
     tsnes   = pd.DataFrame(x_tsne, columns=tsnenames)
     complete= pd.concat([tsnes, target], axis=1)
 
-    n = take_n('methods', 'tsne')
+    n = taken('methods', 'tsne')
     files = {
         'tsne_basic_chart_comps': 'tsne_{}_basic_comps.png'.format(n),
         'tsne_comps':'tsne_{}_comps.csv'.format(n),

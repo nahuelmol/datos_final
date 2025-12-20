@@ -11,7 +11,7 @@ import json
 from abss.setter import setting
 from abss.story import add
 from abss.data_setter import get_data
-from abss.fs import current_project, take_n
+from abss.fs import current_project, taken
 from regression.plotmaker import Plot
 
 class NumpyArrayEncoder(json.JSONEncoder):
@@ -42,7 +42,7 @@ def SupportVectorRegression(cmd):
     y_pred = svr.predict(X_test)
 
     mse = mean_squared_error(y_test, y_pred)
-    n = take_n('models', 'svr')
+    n = taken('models', 'svr')
     files = {
         'vectors': 'svr_vector_{}.png'.format(n),
     }
@@ -68,7 +68,7 @@ def KNearestNeighbors(cmd):
     model.fit(X_train, y_train)
 
     pred = model.predict(X_test)
-    n = take_n('models', 'knn_r')
+    n = taken('models', 'knn_r')
     files = {
         'knnr':'knnr_{}'.format(n),
     }
@@ -92,7 +92,7 @@ def DecisionTree(cmd):
     model.fit(X, y)
     pred = model.predict(X_test)
 
-    n = take_n('models', 'dtree_r')
+    n = taken('models', 'dtree_r')
     files = {
         'dtree':'dtree_plot_{}'.format(n)
     }
@@ -118,7 +118,7 @@ def RidgeRegression(cmd):
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
 
-    n = take_n('models', 'ridge_r')
+    n = taken('models', 'ridge_r')
     files = {
         'basic':'basic_ridge_{}'.format(n)
     }
@@ -150,7 +150,7 @@ def LinRegression(cmd):
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
 
-    n = take_n('models', 'lin_r')
+    n = taken('models', 'lin_r')
     files = {
         'basic':'basic_linear_{}'.format(n)
     }

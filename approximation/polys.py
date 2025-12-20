@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
+from numpy.polynomial.polynomial import Polynomial
 from datetime import datetime
 from pathlib import Path
 
-from abss.fs import current_project, take_n
+from abss.fs import current_project, taken
 from abss.data_setter import get_data
 
-class Polynomial:
+class Polymaker:
     def __init__(self, cmd):
         datapath = current_project(['datapath','src'])
         res, data = get_data(datapath, '\t')
@@ -38,41 +39,38 @@ class Polynomial:
         self.ip.name    = 'IP'
         self.op.name    = 'OP'
 
-        self.poly_type = cmd.method
-        self.poly_ip = None 
-        self.poly_op = None 
-        self.output_ip = None
-        self.output_op = None
-        self.n = None
-        self.REPORT = {}
-        self.filename = None
+        self.poly_type  = cmd.method
+        self.poly_ip    = None 
+        self.poly_op    = None 
+        self.output_ip  = None
+        self.output_op  = None
+        self.coeffs_ip  = None
+        self.coeffs_op  = None
+        self.n          = None
+        self.REPORT     = {}
+        self.filename   = {}
 
     def build_poly(self):
-        if(self.poly_type == 'l'):
-            self.poly_name = 'lagrange'
-        elif (self.poly_type == 'c'):
-            self.poly_name = 'chebyshev'
-        elif (self.poly_type == 't'):
-            self.poly_name = 'talor'
-        self.n = take_n('polys', self.poly_name)
         if self.poly_type == 'l':
+            self.poly_name = 'lagrange'
+            self.n = taken('polys', self.poly_name)
             self.Lagrange()
-            self.output_ip = self.poly_ip(self.x_trained)
-            self.output_op = self.poly_op(self.x_trained)
-            return True
         elif self.poly_type == 'c':
+            self.poly_name = 'chebyshev'
+            self.n = taken('polys', self.poly_name)
             self.Chebyshev()
-            self.output_ip = self.poly_ip(self.x_trained)
-            self.output_op = self.poly_op(self.x_trained)
-            return True
         elif self.poly_type == 't':
+            self.poly_name = 'taylor'
+            self.n = taken('polys', self.poly_name)
             self.Taylor()
-            self.output_ip = self.poly_ip(self.x_trained)
-            self.output_op = self.poly_op(self.x_trained)
-            return True
         else:
             print('not recognized poly')
             return False
+        self.output_ip  = self.poly_ip(self.x_trained)
+        self.output_op  = self.poly_op(self.x_trained)
+        self.coeffs_ip  = self.poly_ip.coeffs
+        self.coeffs_op  = self.poly_op.coeffs
+        return True
 
     def Lagrange(self):
         self.poly_ip = lagrange(self.x, self.ip)
@@ -84,7 +82,7 @@ class Polynomial:
             'complete': 'complete_lagrange_{}.png'.format(self.n),
         }
         self.REPORT = {
-            'polys':'lagrange',
+            'poly':'lagrange',
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -101,7 +99,7 @@ class Polynomial:
             'basic': 'scatter_taylor_{}.png'.format(self.n),
         }
         self.REPORT = {
-            'polys':'taylor',
+            'poly':'taylor',
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -116,7 +114,7 @@ class Polynomial:
             'basic': 'scatter_taylor_{}.png'.format(self.n),
         }
         self.REPORT = {
-            'polys':'chebyshev',
+            'poly':'chebyshev',
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -164,7 +162,6 @@ class Polynomial:
         profs = list(p.rglob(f'Profile*'))
         locs = pd.read_csv("data/locations.dat")
         n = locs.shape[0]
-        #a = np.zeros(n, 5)
         my_pds = []
         for prof in profs:
             df = pd.read_csv(prof)
@@ -188,8 +185,11 @@ class Polynomial:
         pname = current_project(['project_name'])
         filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['polys'])
         plt.figure()
+        #plt.plot(self.x_trained, Polynomial(self.coeffs_ip[::-1])(self.x_trained), label='Polynomial Ip')
+        #plt.plot(self.x_trained, Polynomial(self.coeffs_op[::-1])(self.x_trained), label='Polynomial Op')
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
+        plt.ylim(-1, 1000)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
