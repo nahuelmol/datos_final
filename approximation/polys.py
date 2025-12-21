@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
 from numpy.polynomial.polynomial import Polynomial
+from numpy.polynomial import chebyshev as cheby
 from datetime import datetime
 from pathlib import Path
 
@@ -76,6 +77,8 @@ class Polymaker:
         self.poly_ip = lagrange(self.x, self.ip)
         self.poly_op = lagrange(self.x, self.op)
 
+        print(type(self.poly_ip))
+
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
             'polys': 'polys_lagrange_{}.png'.format(self.n),
@@ -106,12 +109,20 @@ class Polymaker:
         }
         self.filename = files
 
-    def Chebyshev(sefl):
-        T2 = chebyt(2)
-        y = T2(self.x_trained)
+    def Chebyshev(self):
+        grade = 20 
+        #T2 = chebyt(grade)
+        #y = T2(self.x_trained)
+        self.coeffs_ip  = cheby.chebfit(self.x, self.ip, grade)
+        self.coeffs_op  = cheby.chebfit(self.x, self.op, grade)
+        cheb2poly_ip    = cheby.cheb2poly(self.coeffs_ip)
+        cheb2poly_op    = cheby.cheb2poly(self.coeffs_op)
+        self.poly_ip    = np.poly1d(cheb2poly_ip[::-1])
+        self.poly_op    = np.poly1d(cheb2poly_op[::-1])
 
         files = {
-            'basic': 'scatter_taylor_{}.png'.format(self.n),
+            'basic': 'scatter_chebyshev_{}.png'.format(self.n),
+            'polys': 'polys_chebyshev_{}.png'.format(self.n),
         }
         self.REPORT = {
             'poly':'chebyshev',
@@ -189,7 +200,7 @@ class Polymaker:
         #plt.plot(self.x_trained, Polynomial(self.coeffs_op[::-1])(self.x_trained), label='Polynomial Op')
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
-        plt.ylim(-1, 1000)
+        plt.ylim(-1, 80)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
