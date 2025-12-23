@@ -67,6 +67,9 @@ def memocheck(cmd):
     elif cmd.target == 'exps':
         which = 'exploratory_analysis'
         it = 'metric'
+    elif cmd.target == 'pols':
+        which = 'polys'
+        it = 'poly'
     else:
         return False, 'wrong target'
     if len(data[which]) == 0:

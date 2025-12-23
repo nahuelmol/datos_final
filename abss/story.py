@@ -64,6 +64,12 @@ def set_condition(code):
         return True, 'ica'
     elif code == 'tsne':
         return True, 'tsne'
+    elif code == 'lag':
+        return True, 'lagrange'
+    elif code == 'che':
+        return True, 'chebyshev'
+    elif code == 'tay':
+        return True, 'taylor'
     else:
         print('not recognized code')
         return False, None
@@ -117,10 +123,10 @@ def story_cleaner(cmd):
                     if (each['model'] == code):
                         if(each['n'] != n):
                             survivals.append(each)
+                        else:
+                            del_file(each['outputs'])
                     else:
-                        del_file(each['outputs'])
-                else:
-                    survivals.append(each)
+                        survivals.append(each)
             else:
                 for each in data['models']:
                     if (each['model'] != code):
@@ -155,6 +161,32 @@ def story_cleaner(cmd):
             for each in data['exploratory_analysis']:
                 del_file(each['outputs'])
         data['exploratory_analysis'] = survivals
+    elif cmd.target == 'pols':
+        if cmd.all == False:
+            res, code = set_condition(cmd.cond)
+            if cmd.unique == True:
+                for each in data['polys']:
+                    n = int(cmd.number)
+                    if (each['poly'] == code):
+                        if(each['n'] != n):
+                            survivals.append(each)
+                        else:
+                            del_file(each['outputs'])
+                    else:
+                        survivals.append(each)
+            else:
+                for each in data['polys']:
+                    if (each['poly'] != code):
+                        survivals.append(each)
+                    else:
+                        del_file(each['outputs'])
+                else:
+                    survivals.append(each)
+        else:
+            print('all')
+            for each in data['polys']:
+                del_file(each['outputs'])
+        data['polys'] = survivals
     else:
         return False, 'not available target'
     with open(storypath, 'w') as f:

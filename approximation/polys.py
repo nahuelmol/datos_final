@@ -77,8 +77,6 @@ class Polymaker:
         self.poly_ip = lagrange(self.x, self.ip)
         self.poly_op = lagrange(self.x, self.op)
 
-        print(type(self.poly_ip))
-
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
             'polys': 'polys_lagrange_{}.png'.format(self.n),
@@ -93,13 +91,15 @@ class Polymaker:
         self.filename = files
 
     def Taylor(self):
-        x_0 = 0
+        x_0 = 0.0
         grade = 4
-        self.poly_ip = approximate_taylor_polynomial(self.ip, x_0, grade, scale=1.0)
-        self.poly_op = approximate_taylor_polynomial(self.op, x_0, grade, scale=1.0)
+        scale = 1.0
+        self.poly_ip = approximate_taylor_polynomial(self.ip, x_0, grade, scale=scale)
+        self.poly_op = approximate_taylor_polynomial(self.op, x_0, grade, scale=scale)
 
         files = {
             'basic': 'scatter_taylor_{}.png'.format(self.n),
+            'polys': 'polys_taylor_{}.png'.format(self.n),
         }
         self.REPORT = {
             'poly':'taylor',
@@ -111,8 +111,6 @@ class Polymaker:
 
     def Chebyshev(self):
         grade = 20 
-        #T2 = chebyt(grade)
-        #y = T2(self.x_trained)
         self.coeffs_ip  = cheby.chebfit(self.x, self.ip, grade)
         self.coeffs_op  = cheby.chebfit(self.x, self.op, grade)
         cheb2poly_ip    = cheby.cheb2poly(self.coeffs_ip)
