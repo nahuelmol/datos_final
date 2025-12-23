@@ -8,13 +8,20 @@
 ### This application
 
 For the Data Laboratory final exam I had to apply PCA using the R programming language.
-This rspository contains the same project, but also a version implemented in Python and extending it to other analytical methods.
+This rspository contains the same project, but also a version implemented in Python and extending by adding other analytical methods.
 
-This application is a CLI tool that aims for direct handling of data, its processing and the looking of its corresponding outputs wether it's a plot or reports.
+This application is a CLI tool that aims for:
+* handling raw data
+* data cleaning
+* data processing
+* data visualization through plots or data-file outputs
 
-### scikit-learn
+### Libraries used
 
-The used algorithms are  included in scikit-learn, specifically using sklearn. This contains classes for building machine learning models, having functions to calcultate metrics for verifying accuracy between test data and predictions made.
+* Sklearn: provides machine learning algorithms making possible to build classification and regression models, implementing unsupervised techniques.
+* Scipy: provides scientific algorithms needed for statistics and signal processing. It makes possible to build polynomials that better fits a set of values.
+* Numpy: introduce multi dimensional arrays and a set of mathematical functions to operate on these ndarrays.
+* Pandas: allows to work with external data files in python which becomes very powerful at combining it with numpy functionalities.
 
 ### Implemented methods
 
@@ -39,7 +46,10 @@ For now, the following methods were implemented:
 * K-nearest neighbor regressor
 * Support vector regressor
 
-They are all provided by the sklearn module.
+### Polynomial algorithms
+* Lagrange
+* Chebyshev
+* Taylor (in progress)
 
 ### Common commands
 
@@ -119,12 +129,12 @@ To check the applied current project's methods or the models built, `ch` is used
 
 ```
 cal ch meths
-```
-```
 cal ch mods
+cal ch exps
+cal ch pols
 ```
 
-The target mods, meths and exps work under the same logic. From the current project, specific methods can be checked. `w` stands for `where` conditioning a type group and `is` signs an specific method.
+The target mods, meths, exps and pols work under the same logic. From the current project, specific methods can be checked. `w` stands for `where` conditioning a type group and `is` signs an specific method.
 
 ```
 cal ch meths w pca
