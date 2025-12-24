@@ -6,8 +6,9 @@ from abss.story import add
 def Approximation(cmd):
     POLY = Polymaker(cmd)
     res = POLY.build_poly()
-    POLY.basic_plot()
-    POLY.polys_plot()
+    #POLY.basic_plot()
+    #POLY.polys_plot()
+    POLY.complete_plot()
     POLY.create_locs()
     POLY.add_locs()
     POLY.build_grid()

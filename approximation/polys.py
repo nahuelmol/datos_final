@@ -74,8 +74,10 @@ class Polymaker:
         return True
 
     def Lagrange(self):
-        self.poly_ip = lagrange(self.x, self.ip)
-        self.poly_op = lagrange(self.x, self.op)
+        self.coeffs_ip  = np.polyfit(self.x, self.ip, 20)
+        self.coeffs_op  = np.polyfit(self.x, self.op, 20)
+        self.poly_ip    = np.poly1d(self.coeffs_ip)
+        self.poly_op    = np.poly1d(self.coeffs_op)
 
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
@@ -99,7 +101,7 @@ class Polymaker:
 
         files = {
             'basic': 'scatter_taylor_{}.png'.format(self.n),
-            'polys': 'polys_taylor_{}.png'.format(self.n),
+            'polys': 'polys__{}.png'.format(self.n),
         }
         self.REPORT = {
             'poly':'taylor',
@@ -121,6 +123,7 @@ class Polymaker:
         files = {
             'basic': 'scatter_chebyshev_{}.png'.format(self.n),
             'polys': 'polys_chebyshev_{}.png'.format(self.n),
+            'complete':'complete_chebyshev_{}.png'.format(self.n),
         }
         self.REPORT = {
             'poly':'chebyshev',
@@ -198,20 +201,25 @@ class Polymaker:
         #plt.plot(self.x_trained, Polynomial(self.coeffs_op[::-1])(self.x_trained), label='Polynomial Op')
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
-        plt.ylim(-1, 80)
+        plt.ylim(-80, 80)
         plt.xlabel('x')
         plt.ylabel('y')
+        plt.legend()
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
     def complete_plot(self):
+        pname = current_project(['project_name'])
+        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['complete'])
         plt.figure()
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
-        plt.plot(self.x, self.ip, 'o', label='Data')
-        plt.plot(self.x, self.op, 'o', label='Data')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.savefig(self.filename['complete'], bbox_inches='tight', dpi=300)
+        plt.plot(self.x, self.ip, 'o', label='Data ip')
+        plt.plot(self.x, self.op, 'o', label='Data op')
+        plt.ylim(-80, 80)
+        plt.xlabel('x(prog)')
+        plt.ylabel('y(cond)')
+        plt.legend()
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 

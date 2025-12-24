@@ -131,6 +131,7 @@ def checker(cmd):
         if res == False:
             print(msg)
         return True, '----done----pols'
+
     elif cmd.target == 'tt' or cmd.target == 'tn' or cmd.target == 'src':
         ask_mani_for_data(cmd.target)
     elif cmd.target == '-cur':
