@@ -2,27 +2,44 @@
 
 def setting(which):
     res = input('standard setting? (y/n)')
+    response = {}
     if (res == 'y'):
         if (which == 'KNN'):
             return True, 5, 'auto', 'mikowski'
         elif (which == 'RNDF'):
             return True, 100, 42
-        elif (which == 'DTREE'):
+        elif (which == 'dtree'):
             return True, 'POS', 'C', 'G', 1
         elif (which == 'SVC'):
             return True, 0.3, 42, 'rbf', 1, 'scale'
         elif (which == 'LOG'):
             return True, 1000
-        elif (which == 'SVR'):
-            return True, 'rbf', 0.2, 42, 0.1, 0.1, 10
-        elif (which == 'KNNR'):
-            return True, 3, 'distance', 0.2, 42
-        elif (which == 'DTree'):
-            return True, 2
-        elif (which == 'RR'):
-            return True, 1.0, 0.2, 42
-        elif (which == 'LR'):
-            return True, 0.2, 42
+        elif (which == 'svr'):
+            response['kernel']  = 'rbf' 
+            response['ts']      = 0.2
+            response['ranst']   = 42
+            response['gamma']   = 0.1
+            response['epsilon'] = 0.1
+            response['C']       = 10
+            return True, response
+        elif (which == 'knn_r'):
+            response['nn']      = 3
+            response['weights'] = 'distance', 
+            response['ts' ]     = 0.2
+            response['ranst']   = 42
+            return True, response
+        elif (which == 'dt'):
+            response['depth'] = 2
+            return True, response
+        elif (which == 'rr'):
+            response['alpha'] = 1.0
+            response['ts'] = 0.2
+            response['ranst'] = 42
+            return True, response
+        elif (which == 'lr'):
+            response['ts'] = 0.2
+            respnose['ranst'] = 42
+            return True, response
         else:
             return False, 'not recognized model'
     elif (res == 'n'):

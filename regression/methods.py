@@ -28,144 +28,132 @@ def CleanData(data):
     X = data.loc[:, ~data.columns.isin(cols_to_drop)]
     return X
 
-def SupportVectorRegression(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
-    y = data.pop(cmd.ref)
-    X = CleanData(data)
-    res, kernel, tsize, ranst, gamma, epsilon, C = setting('SVR')
+class Regressor:
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.REPORT = None
+        self.n      = None
+        self.reg    = cmd.method
+        if cmd.method == 'svr':
+            self.REPORT['model'] = 'svr',
+            self.n = taken('models', 'svr')
+            self.SupportVector()
+        elif (cmd.method == 'knn'):
+            self.REPORT['model'] = 'knn_r',
+            self.n = taken('models', 'knn_r')
+            self.KNNeighbors()
+        elif (cmd.method == 'dt'):
+            self.REPORT['model'] = 'dtree_r',
+            self.n = taken('models', 'dtree_r')
+            self.DTree()
+        elif (cmd.method == 'rr'):
+            self.REPORT['model'] = 'ridge_r',
+            self.n = taken('models', 'ridge_r')
+            self.Ridge()
+        elif (cmd.method == 'lr'):
+            self.REPORT['model'] = 'lin_r',
+            self.n = taken('models', 'lin_r')
+            self.Linear()
+        else:
+            print('unrecognized regression code')
+            return False
+        self.REPORT['n'] = self.n
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=tsize, random_state=ranst)
+        self.X_train    = None
+        self.X_test     = None
+        self.y_train    = None
+        self.y_test     = None
 
-    svr = SVR(kernel=kernel, C=C, gamma=gamma, epsilon=epsilon)
-    svr.fit(X_train, y_train)
-    y_pred = svr.predict(X_test)
+        self.model      = None
+        self.preds      = None
+        self.mse        = None
 
-    mse = mean_squared_error(y_test, y_pred)
-    n = taken('models', 'svr')
-    files = {
-        'vectors': 'svr_vector_{}.png'.format(n),
-    }
-    PLOT = Plot(X_train, y_train, files['vectors'], svr)
-    PLOT.svr()
-    REPORT = {
-        'model':'svr',
-        'n':n,
-        'mse':mse,
-        'outputs':files,
-    }
-    add('models', REPORT)
+        self.state      = None
+        self.SETTING    = None
 
-def KNearestNeighbors(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
-    y = data.pop(cmd.ref)
-    X = CleanData(data)
-    res, nn, weights, ts, ranst = setting('KNNR')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ts, random_state=ranst)
+    def build(self):
+        datapath = current_project(['datapath','src'])
+        res, self.data = get_data(datapath)
+        self.y = data.pop(cmd.ref)
+        self.X = CleanData(data)
+        self.state, self.SETTING = setting(self.reg)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, 
+                                                                self.y, 
+                                                                test_size=self.SETTING['ts'], 
+                                                                random_state=self.SETTING['ranst'])
+        self.preds = self.model.predict(self.X_test)
+        self.mse = mean_squared_error(self.y_test, self.preds)
+        self.REPORT['mse'] = mse
 
-    model = KNeighborsRegressor(n_neighbors=nn, weights=weights)
-    model.fit(X_train, y_train)
+    def SupportVector(self):
+        self.model = SVR(kernel=self.SETTING['kernel'], 
+                         C=self.SETTING['C'], 
+                         gamma=self.SETTING['gamma'], 
+                         epsilon=self.SETTING['epsilon'])
+        self.model.fit(self.X_train, self.y_train)
 
-    pred = model.predict(X_test)
-    n = taken('models', 'knn_r')
-    files = {
-        'knnr':'knnr_{}'.format(n),
-    }
-    PLOT = Plot(X_train, y_train, files['knnr'], model)
-    PLOT.knnr()
-    REPORT = {
-        'model':'knn_r',
-        'n':n,
-        'preds':pred,
-        'outputs':files,
-    }
-    add('models', REPORT)
+        files = {
+            'vectors': 'svr_vector_{}.png'.format(self.n),
+        }
+        PLOT = Plot(self.X_train, self.y_train, files['vectors'], self.model)
+        PLOT.svr()
+        self.REPORT['outputs'] = files
 
-def DecisionTree(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
-    y = data.pop(cmd.ref)
-    X = CleanData(data)
-    res, depth = setting('DTree')
-    model = DecisionTreeRegressor(max_depth=depth)
-    model.fit(X, y)
-    pred = model.predict(X_test)
+    def KNNeighbors(self):
+        self.model = KNeighborsRegressor(
+                n_neighbors=self.SETTING['nn'], 
+                weights=self.SETTING['weights'])
+        self.model.fit(self.X_train, self.y_train)
 
-    n = taken('models', 'dtree_r')
-    files = {
-        'dtree':'dtree_plot_{}'.format(n)
-    }
-    PLOT = Plot(X_train, y_train, files['dtree'], model)
-    PLOT.dtree()
-    REPORT = {
-        'model':'dtree_r',
-        'n':n,
-        'preds':pred,
-        'outputs':files,
-    }
-    add('models', REPORT)
+        files = {
+            'knnr':'knnr_{}'.format(n),
+        }
+        PLOT = Plot(self.X_train, self.y_train, files['knnr'], self.model)
+        PLOT.knnr()
+        self.REPORT['outputs'] = files
 
-def RidgeRegression(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
-    y = data.pop(cmd.ref)
-    X = CleanData(data)
-    res, alpha, ts, ranst = setting('RR')
+    def DTree(self):
+        self.model = DTree(max_depth=self.SETTING['depth'])
+        self.model.fit(self.X, self.y)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ts, random_state=ranst)
-    model = Ridge(alpha=alpha)
-    model.fit(X_train, y_train)
-    pred = model.predict(X_test)
+        files = {
+            'dtree':'dtree_plot_{}'.format(self.n)
+        }
+        PLOT = Plot(self.X_train, self.y_train, files['dtree'], self.model)
+        PLOT.dtree()
+        self.REPORT['outputs'] = files
 
-    n = taken('models', 'ridge_r')
-    files = {
-        'basic':'basic_ridge_{}'.format(n)
-    }
-    PLOT = Plot(X_train, y_train, files['basic'], model)
-    PLOT.ridge()
-    s_pred = json.dumps(pred, cls=NumpyArrayEncoder)
-    s_coef = json.dumps(model.coef_, cls=NumpyArrayEncoder)
-    s_intr = json.dumps(model.intercept_, cls=NumpyArrayEncoder)
+    def Ridge(self):
+        self.model = Ridge(alpha=self.SETTING['alpha'])
+        self.model.fit(self.X_train, self.y_train)
 
-    REPORT = {
-        'model':'ridge_r',
-        'n':n,
-        'preds':s_pred,
-        'coeff':s_coef,
-        'intercept':s_intr,
-        'outputs':files,
-    }
-    add('models', REPORT)
+        files = {
+            'basic':'basic_ridge_{}'.format(self.n)
+        }
+        PLOT = Plot(self.X_train, self.y_train, files['basic'], self.model)
+        PLOT.ridge()
+        #s_pred = json.dumps(self.preds, cls=NumpyArrayEncoder)
+        #s_coef = json.dumps(self.model.coef_, cls=NumpyArrayEncoder)
+        #s_intr = json.dumps(self.model.intercept_, cls=NumpyArrayEncoder)
 
-def LinRegression(cmd):
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath)
-    y = data.pop(cmd.ref)
-    X = CleanData(data)
-    res, ts, ranst = setting('LR')
+        #self.REPORT['preds'] = s_pred
+        #self.REPORT['coeff'] = s_coef
+        #self.REPORT['intercept'] = s_intr
+        self.REPORT['outputs'] = files
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ts, random_state=ranst)
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-    pred = model.predict(X_test)
+    def Linear(cmd):
+        self.model = LinearRegression()
+        self.model.fit(self.X_train, self.y_train)
 
-    n = taken('models', 'lin_r')
-    files = {
-        'basic':'basic_linear_{}'.format(n)
-    }
-    PLOT = Plot(X_train, y_train, files['basic'], model)
-    PLOT.linear()
+        files = {
+            'basic':'basic_linear_{}'.format(self.n)
+        }
+        PLOT = Plot(X_train, y_train, files['basic'], self.model)
+        PLOT.linear()
 
-    s_coef = json.dumps(model.coef_, cls=NumpyArrayEncoder)
-    s_intr = json.dumps(model.intercept_, cls=NumpyArrayEncoder)
+        #s_coef = json.dumps(self.model.coef_, cls=NumpyArrayEncoder)
+        #s_intr = json.dumps(self.model.intercept_, cls=NumpyArrayEncoder)
 
-    REPORT = {
-        'model':'lin_r',
-        'n':n,
-        'coeffs':s_coef,
-        'interc':s_intr,
-        'outputs':files,
-    }
-
-    add('models', REPORT)
+        #self.REPORT['coeffs'] = s_coef
+        #self.REPORT['interc'] = s_intr
+        self.REPORT['outputs'] = files

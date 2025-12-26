@@ -66,7 +66,14 @@ def split_asker(cmd):
 class Classifier:
     def __init__(self, cmd):
         self.cmd = cmd
-        self.classification_type = cmd.method 
+        if cmd.method == 'dt':
+            self.classification = 'Tree'
+        elif (cmd.method == 'l'):
+            self.classification = 'Logistic' 
+        elif (cmd.method == 'knn'):
+            self.classification = 'KNN' 
+        elif (cmd.method == 'svm'):
+            self.classification = 'SVC' 
 
         datapath = current_project(['datapath','src'])
         res, self.data = get_data(datapath, ',')
