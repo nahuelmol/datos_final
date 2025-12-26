@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from abss.fs import current_project
 
-def logistic_regression_plot(X, y, X_test, y_test, model, filename, clase):
+def log_plot(X, y, X_test, y_test, model, filename, clase):
     pname = current_project(['project_name'])
     filepath = 'prs\{}\outputs\{}'.format(pname, filename)
     x_min, x_max = X_test.iloc[:, 0].min() - 1, X_test.iloc[:, 0].max() + 1
@@ -35,7 +35,7 @@ def logistic_regression_plot(X, y, X_test, y_test, model, filename, clase):
     plt.savefig(filepath, dpi=300)
     plt.close()
 
-def confusion_matrix_plot(cm, classes, filename):
+def cmx_plot(cm, classes, filename):
     pname = current_project(['project_name'])
     filepath = 'prs\{}\outputs\{}'.format(pname, filename)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)

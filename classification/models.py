@@ -22,7 +22,7 @@ from abss.dataSetting import extract_data
 from abss.fs import current_project, taken
 from abss.setter import setting
 
-from classification.plotmaker import logistic_regression_plot, confusion_matrix_plot
+from classification.plotmaker import log_plot, cmx_plot 
 from dimreduction.dim_reduction import data_separator
 
 def check_var_type(data, ref):
@@ -63,140 +63,140 @@ def split_asker(cmd):
         X_train, X_test, y_train, y_test = result
         return True, X_train, X_test, y_train, y_test
 
-def DecisionTree(cmd):
-    res, col, first, second, max_depth = setting('DTREE')
-    if res == False:
-        print('setting problem')
+class Classifier:
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.classification_type = cmd.method 
 
-    datapath = current_project(['datapath','src'])
-    res, data = get_data(datapath, ',')
-    query   = "{}.isin(('{}', '{}'))".format(col, first, second)
-    data    = data.query(query)
+        datapath = current_project(['datapath','src'])
+        res, self.data = get_data(datapath, ',')
 
-    data, target = data_separator(data, cmd.ref)
-    TREE = DecisionTreeClassifier(max_depth=max_depth).fit(data, target) #finds the bias
-    predictions = TREE.predict(data)
+        self.classifier = None
+        self.target     = None
+        self.n          = None
+        self.accur      = None
+        self.files      = None
 
-    ac = accuracy_score(target, predictions)
-    REPORT = {
-            'method':'decisionTree',
-            'time':str(datetime.now()),
-            'ac':ac,
-    }
-    add('models', REPORT)
+        self.X_train    = None
+        self.X_test     = None
+        self.y_train    = None
+        self.y_test     = None
 
-def Logistic(cmd):
-    X_train, X_test, y_train, y_test = split_asker(cmd)
-    res, max_iter = setting('LOG')
-    if res == False:
-        print("setting problem")
+        self.X_train_scaled = None
+        self.X_test_scaled  = None
 
-    skyler = StandardScaler()
+    def build(self):
+        self.X_train, self.X_test, self.y_train, self.y_test = split_asker(cmd)
+        if (self.classification == 'Logistic'):
+            self.REPORT['method']   = 'logistic'
+            self.n = taken('models', 'logistic')
+            self.Logistic(cmd)
+        elif (self.classification == 'Tree'):
+            self.REPORT['method']   = 'decisionTree'
+            self.n = taken('models', 'decisionTree')
+            self.DecisionTree(cmd)
+        elif (self.classification == 'SVC'):
+            self.REPORT['method']   = 'svc'
+            self.n = taken('models', 'svc')
+            self.SupportVector(cmd)
+        elif (self.classification == 'KNN'):
+            self.REPORT['method']   = 'knearest_neighbors'
+            self.n = taken('models', 'knearest_neighbors')
+            self.KNearestNeighbors(cmd)
+        elif (self.classification == 'RandomForest'):
+            self.REPORT['method']   = 'rand_forest'
+            self.n = taken('models', 'rand_forest')
+            self.RandomForest(cmd)
+        else:
+            print('not recognized classification algorithm')
+        preds = classifier.predict(self.data)
+        self.accur = accuracy_score(self.target, preds)
+        self.REPORT['ac']       = self.accur
+        self.REPORT['time']     = str(datetime.now())
+        self.REPORT['outputs']  = self.files
 
-    X_train_scaled = skyler.fit_transform(X_train)
-    X_test_scaled = skyler.transform(X_test)
-    X_train_imputed = check_to_impute(X_train_scaled)
+    def DecisionTree(self):
+        res, col, first, second, max_depth = setting('DTREE')
+        if res == False:
+            print('setting problem')
 
-    model = LogisticRegression(max_iter=max_iter).fit(X_train_scaled, y_train)
-    predictions = model.predict(X_test_scaled) #making predictions over new X values (X_test)
+        query   = "{}.isin(('{}', '{}'))".format(col, first, second)
+        data    = data.query(query)
+
+        self.data, self.target = data_separator(data, self.cmd.ref)
+        self.classifier = DecisionTreeClassifier(max_depth=max_depth)
+        self.classifier.fit(self.data, self.target)
+        self.files = {}
+
+    def Logistic(self):
+        X_train, X_test, y_train, y_test = split_asker(cmd)
+        res, max_iter = setting('LOG')
+        if res == False:
+            print("setting problem")
+
+        skyler = StandardScaler()
+        self.X_train_scaled = skyler.fit_transform(X_train)
+        self.data = skyler.transform(X_test) #X_test_scaled 
+        X_train_imputed = check_to_impute(self.X_train_scaled)
+
+        classifier = LogisticRegression(max_iter=max_iter)
+        classifier.fit(self.X_train_scaled, y_train)
     
-    mc = model.coef_.tolist()
-    mi = model.intercept_.tolist()
-    cm = confusion_matrix(y_test, predictions)
-    cr = classification_report(y_test, predictions, zero_division=0)
-    accuracy = accuracy_score(y_test, predictions)
-    f1score = f1_score(y_test, predictions, average='macro', zero_division=0).tolist()
+        mc = classifier.coef_.tolist()
+        mi = classifier.intercept_.tolist()
+        cm = confusion_matrix(y_test, preds)
+        cr = classification_report(y_test, preds, zero_division=0)
+        #f1score = f1_score(y_test, predictions, average='macro', zero_division=0).tolist()
 
-    n = taken('models', 'logistic')
-    files = {
-        'boundary_curve': 'log_{}_boundary_curve.png'.format(n),
-        'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n),
-    }
-    logistic_regression_plot(X_train, y_train, X_test, y_test, model, files['boundary_curve'], cmd.class_)
-    confusion_matrix_plot(cm, model.classes_, files['confusion_matrix'])
-    REPORT = {
-        'model':'logistic',
-        'n':n,
-        'time':str(datetime.now()),
+        files = {
+            'boundary_curve': 'log_{}_boundary_curve.png'.format(self.n),
+            'confusion_matrix': 'log_{}_confusion_matrix.png'.format(self.n),
+        }
+        log_plot(self.X_train, self.y_train, self.X_test, self.y_test, classifier, files['boundary_curve'], cmd.class_)
+        cmx_plot(cm, classifier.classes_, files['confusion_matrix'])
         #'model_coef': mc,
         #'model_intercept': mi,
         #'confusion_matrix': cm.tolist(),
-        'classification_report': cr,
-        'ac':accuracy,
         #'f1_score':str(f1_score),
-        'outputs': files,
-    }
-    add('models', REPORT)
+        self.REPORT['classification_report'] = cr
+        self.REPORT['outputs'] = files
 
-def KNearestNeighbors(cmd):
-    X_train, X_test, y_train, y_test = split_asker(cmd)
-    res, nneigh, algorithm, metric = setting('KNN')
-    if res == False:
-        print('setting problem')
+    def KNearestNeighbors(cmd):
+        res, nneigh, algorithm, metric = setting('KNN')
+        if res == False:
+            print('setting problem')
 
-    n_models = take_models_n()
-    plot_files = {
-        'boundary_curve': 'log_{}_boundary_curve.png'.format(n_models),
-        'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n_models),
-    }
-    neigh = KNeighborsClassifier(n_neighbors=nneigh, algorithm=algorithm, metric=metric)
-    classifier = neigh.fit(X_train, y_train)
+        n_models = take_models_n()
+        files = {
+            'boundary_curve': 'log_{}_boundary_curve.png'.format(n_models),
+            'confusion_matrix': 'log_{}_confusion_matrix.png'.format(n_models),
+        }
+        classifier = KNeighborsClassifier(n_neighbors=nneigh, algorithm=algorithm, metric=metric)
+        classifier.fit(X_train, y_train)
     
-    predictions  = classifier.predict(X_test)
-    proba = classifier.predict_proba(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    #out= classifier.neighbors()
+        preds = classifier.predict(X_test)
+        #proba = classifier.predict_proba(X_test)
+        self.accur = accuracy_score(y_test, preds)
+        self.REPORT['outputs'] = files
 
-    n = taken('models', 'knearest_neighbors')
-    REPORT = {
-        'model':'knearest_neighbors',
-        'n':n,
-        'time':str(datetime.now()),
-        'ac':accuracy,
-        'outputs': [],
-    }
-    add_model('models', REPORT)
+    def RandomForest(data, cmd):
+        res, nestm, ranst = setting('RndF')
+        if res == False:
+            print('setting problem')
 
+        classifier = RandomForestClassifier(n_estimators=nestm, random_state=ranst)
+        classifier.fit(self.X_train, self.y_train)
 
-def RandomForest(data, cmd):
-    X_train, X_test, y_train, y_test = split_asker(cmd)
-    res, nestm, ranst = setting('RndF')
-    if res == False:
-        print('setting problem')
+        self.REPORT['outputs'] = {}
 
-    rf_classifier = RandomForestClassifier(n_estimators=nestm, random_state=ranst)
-    rf_classifier.fit(X_train, y_train)
+    def SupportVector(cmd):
+        data, target = data_separator(data, cmd.ref)
+        X_train, X_test, y_train, y_test = split_asker(cmd)
+        res, ts, rs, kernel, C, gamma = setting('SVC')
+        if res == False:
+            print('setting problem')
 
-    predictions = rf_classifier.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    n = taken('models', 'rand_forest')
-    REPORT = {
-        'model':'rand_forest',
-        'n': n,
-        'time':str(datetime.now()),
-        'ac':accuracy,
-        'outputs': [],
-    }
-    add('models', REPORT)
+        classifier = SVC(kernel=kernel, C=C, gamma=gamma)
+        classifier.fit(X_train, y_train)
 
-def SupportVectorClassifier(cmd):
-    data, target = data_separator(data, cmd.ref)
-    X_train, X_test, y_train, y_test = split_asker(cmd)
-    res, ts, rs, kernel, C, gamma = setting('SVC')
-    if res == False:
-        print('setting problem')
-
-    svc = SVC(kernel=kernel, C=C, gamma=gamma)
-    svc.fit(X_train, y_train)
-
-    predictions = svc.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    n = taken('models', 'svc')
-    REPORT = {
-        'model':'support_vector_classifier',
-        'n': n,
-        'time':str(datetime.now()),
-        'ac':accuracy,
-        'outputs': [],
-    }
-    add('models', REPORT)
+        self.REPORT['outputs'] = {}
