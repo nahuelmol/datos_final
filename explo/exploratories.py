@@ -17,138 +17,182 @@ def does_exists(ref):
             return True
     return False
 
-def correlation_matrix(df):
-    n = taken('exploratory_analysis', 'corr_matrix')
-    files = {
-        'corr_matrix_plot': 'corr_matrix_{}.png'.format(n),
-    }
-    REPORT = {
-        'metric': 'corr_matrix',
-        'n':n,
-        'time':str(datetime.now()),
-        'outputs': files,
-    }
-    PLOT = Plot(files['corr_matrix_plot'], df)
-    res  = PLOT.corr_plot()
-    if res == True:
-        add('exploratory_analysis', REPORT)
-        return '----correlation matrix:done!'
-    else:
-        return '----correlation matrix:failed!'
+class Explorer:
+    def __init__(self, data, cmd):
+        self.data   = data
+        self.cmd    = cmd
+        self.MSG    = ''
+        self.message = None
 
+        if cmd.all == True:
+            self.correlation_matrix(data)
+            self.n = taken('exploratory_analysis', 'histos')
+            self.REPORT['metric'] = 'histos'
+            self.MSG = '{}\n{}'.format(self.MSG, self.message)
 
-def categoricals(data):
-    cat_cols = data.select_dtypes(['object', 'category']).columns.tolist()
-    if (len(cat_cols) == 0):
-        print('no categorical variables')
-        return '---categoricals: not posible'
-    else:
-        listed = ''
-        for i in cat_cols:
-            listed = '{} {}'.format(i, listed)
-        print('categorical variables: {}'.format(listed))
+            self.categoricals(data)
+            self.n = taken('exploratory_analysis', 'categos')
+            self.REPORT['metric'] = 'categos'
+            self.MSG = '{}\n{}'.format(self.MSG, self.message)
 
-    ref = ''
-    if(current_project(['global', 'var']) != None):
-        ref = current_project(['global', 'var'])
-    else:
-        print('global - var does not exists')
-        ref = input('insert categorical now: ')
+            self.boxplots(self.data)
+            self.n = taken('exploratory_analysis', 'boxplot')
+            self.REPORT['metric'] = 'boxplot'
+            self.MSG = '{}\n{}'.format(self.MSG, self.message)
 
-    n = taken('exploratory_analysis', 'categos')
-    files = {
-        'categorical_plot': 'categorical_{}.png'.format(n),
-    }
-    REPORT = {
-        'metric': 'categos',
-        'n':n,
-        'time':str(datetime.now()),
-        'outputs': files,
-    }
-    PLOT = Plot(files['categorical_plot'], data[ref])
-    res  = PLOT.hist()
-    if res == True:
-        add('exploratory_analysis', REPORT)
-        return '----categorical view:done!'
-    else:
-        return '----categorical view:failed!'
+            self.histograms(self.data)
+            self.n = taken('exploratory_analysis', 'histos')
+            self.REPORT['metric'] = 'histos'
+            self.MSG = '{}\n{}'.format(self.MSG, self.message)
 
-def dispersions(data):
-    ref = ''
-    if(current_project(['global', 'hvar']) != None):
-        ref = current_project(['global', 'hvar'])
-    else:
-        print('dispersions: var does not exists')
-        ref = input('dispersions: insert variable now: ')
-    var = data[ref].var()
-    std = data[ref].std()
-    mea = data[ref].mean()
-    range_ = data[ref].max() - data[ref].min()
-    var_coeff = std / mea
+            msg = dispersions(data)
+            self.n = taken('exploratory_analysis', 'dispersion')
+            self.REPORT['metric'] = 'dispersion'
+            self.MSG = '{}\n{}'.format(self.MSG, self.message)
+            return True, self.MSG
+        else:
 
-    REPORT = {
-        'metric':'dispersion',
-        'time':str(datetime.now()),
-        'ref':ref,
-        'variance':var,
-        'deviation':std,
-        'mean':mea,
-        'range':range_,
-        'variation_coefficient':var_coeff,
-        'outputs':{},
-    }
-    add('exploratory_analysis', REPORT)
-    return '----dispersions: done!'
+            if self.cmd.corr_matrix == True:
+                self.correlation_matrix(self.data)
+                self.n = taken('exploratory_analysis', 'corr_matrix')
+                self.REPORT['metric'] = 'corr_matrix'
+                self.MSG = '{}\n{}'.format(self.MSG, self.message)
+            else:
+                msg = '----correlation matrix: not required'
 
-def histograms(data):
-    ref = ''
-    if(current_project(['global', 'hvar']) != None):
-        ref = current_project(['global', 'hvar'])
-    else:
-        print('histogram: var does not exists')
-        ref = input('histogram: insert variable now: ')
-    n = taken('exploratory_analysis', 'histos')
-    files   = {
-        'histo':'histo_{}.png'.format(n),
-        'histo_kde':'histo_{}_kde.png'.format(n),
-        'histo_kde_shade':'histo_{}_kde_shade.png'.format(n),
-    }
-    PLOT = Plot(files['histo'], data)
-    PLOT = Plot(files['histo_kde'], data)
-    PLOT = Plot(files['histo_kde_shade'], data)
-    PLOT.histos(ref, False)
-    PLOT.histos(ref, True)
-    PLOT.histos(ref, False)
+            if cmd.histo == True:
+                self.histograms(data)
+                self.n = taken('exploratory_analysis', 'histos')
+                self.REPORT['metric'] = 'histos'
+                self.MSG = '{}\n{}'.format(self.MSG, self.message)
+            else:
+                self.MSG = '{}\n{}'.format(self.MSG, '----histogram: not required')
+            
+            if cmd.boxplot == True:
+                self.boxplots(self.data)
+                self.n = taken('exploratory_analysis', 'boxplot')
+                self.REPORT['metric'] = 'boxplot'
+                self.MSG = '{}\n{}'.format(self.MSG, self.message)
+            else:
+                self.MSG = '{}\n{}'.format(self.MSG, '----boxplot: not required')
 
-    REPORT  = {
-        'metric':'histos',
-        'n':n,
-        'time':str(datetime.now()),
-        'outputs':files,
-    }
-    add('exploratory_analysis', REPORT) 
-    return '----histograms:done!'
+            if cmd.categorics == True:
+                self.categoricals(self.data)
+                self.n = taken('exploratory_analysis', 'categos')
+                self.REPORT['metric'] = 'categos'
+                self.MSG = '{}\n{}'.format(self.MSG, self.message)
+            else:
+                self.MSG = '{}\n{}'.format(MSG, '----categorical: not required')
 
-def boxplots(data):
-    ref = ''
-    if(current_project(['global', 'hvar']) != None):
-        ref = current_project(['global', 'hvar'])
-    else:
-        print('boxlplots: var does not exists')
-        ref = input('boxplots: insert variable now: ')
-        if not does_exists(ref):
-            return '----boxplots:variable not exists'
-    n = taken('exploratory_analysis', 'boxplots')
-    files = {
-        'boxplot_basic':'boxplot_{}_basic.png'.format(n)
-    }
-    REPORT = {
-        'metric':'boxplot',
-        'n':n,
-        'time':str(datetime.now()),
-        'outputs':files,
-    }
-    PLOT = Plot(files['boxplot_basic'], data[ref])
-    PLOT.boxplot()
-    add('exploratory_analysis', REPORT)
-    return '----boxplots:done!'
+            if cmd.dispersion == True:
+                self.dispersions(self.data)
+                self.n = taken('exploratory_analysis', 'dispersion')
+                self.REPORT['metric'] = 'dispersion'
+                self.MSG = '{}\n{}'.format(self.MSG, self.message)
+            else:
+                self.MSG = '{}\n{}'.format(self.MSG, '----dispersion: not required')
+
+        self.REPORT['n']    = self.n
+        self.REPORT['time'] = str(datetime.now()),
+
+    def correlation_matrix(self):
+        files = {
+            'corr_matrix_plot': 'corr_matrix_{}.png'.format(self.n),
+        }
+        self.REPORT['outputs'] = files
+        }
+        PLOT = Plot(files['corr_matrix_plot'], df)
+        res  = PLOT.corr_plot()
+        if res == True:
+            self.message = '----correlation matrix:done!'
+        else:
+            self.message = '----correlation matrix:failed!'
+
+    def categoricals(self):
+        cat_cols = data.select_dtypes(['object', 'category']).columns.tolist()
+        if (len(cat_cols) == 0):
+            print('no categorical variables')
+            self.message = '---categoricals: not posible'
+        else:
+            listed = ''
+            for i in cat_cols:
+                listed = '{} {}'.format(i, listed)
+            print('categorical variables: {}'.format(listed))
+
+        ref = ''
+        if(current_project(['global', 'var']) != None):
+            ref = current_project(['global', 'var'])
+        else:
+            print('global - var does not exists')
+            ref = input('insert categorical now: ')
+
+        files = {
+            'categorical_plot': 'categorical_{}.png'.format(self.n),
+        }
+        self.REPORT['outputs'] = files
+        PLOT = Plot(files['categorical_plot'], data[ref])
+        res  = PLOT.hist()
+        if res == True:
+            self.message = '----categorical view:done!'
+        else:
+            self.message = '----categorical view:failed!'
+
+    def dispersions(self):
+        ref = ''
+        if(current_project(['global', 'hvar']) != None):
+            ref = current_project(['global', 'hvar'])
+        else:
+            print('dispersions: var does not exists')
+            ref = input('dispersions: insert variable now: ')
+        var = data[ref].var()
+        std = data[ref].std()
+        mea = data[ref].mean()
+        range_ = data[ref].max() - data[ref].min()
+        var_coeff = std / mea
+
+        self.REPORT['variance'] = var
+        self.REPORT['deviation'] = std
+        self.REPORT['mean'] = mea
+        self.REPORT['range'] = range_
+        self.REPORT['variation_coefficient'] = var_coeff
+        self.REPORT['outputs'] = {}
+        self.message = '----dispersions: done!'
+
+    def histograms(self):
+        ref = ''
+        if(current_project(['global', 'hvar']) != None):
+            ref = current_project(['global', 'hvar'])
+        else:
+            print('histogram: var does not exists')
+            ref = input('histogram: insert variable now: ')
+        files   = {
+            'histo':'histo_{}.png'.format(self.n),
+            'histo_kde':'histo_{}_kde.png'.format(self.n),
+            'histo_kde_shade':'histo_{}_kde_shade.png'.format(self.n),
+        }
+        PLOT = Plot(files['histo'], data)
+        PLOT = Plot(files['histo_kde'], data)
+        PLOT = Plot(files['histo_kde_shade'], data)
+        PLOT.histos(ref, False)
+        PLOT.histos(ref, True)
+        PLOT.histos(ref, False)
+
+        self.REPORT['outputs'] = files
+        self.message = '----histograms:done!'
+
+    def boxplots(self):
+        ref = ''
+        if(current_project(['global', 'hvar']) != None):
+            ref = current_project(['global', 'hvar'])
+        else:
+            print('boxlplots: var does not exists')
+            ref = input('boxplots: insert variable now: ')
+            if not does_exists(ref):
+                self.message = '----boxplots:variable not exists'
+        files = {
+            'boxplot_basic':'boxplot_{}_basic.png'.format(self.n)
+        }
+        self.REPORT['outputs'] = files
+        PLOT = Plot(files['boxplot_basic'], data[ref])
+        PLOT.boxplot()
+        self.message = '----boxplots:done!'
