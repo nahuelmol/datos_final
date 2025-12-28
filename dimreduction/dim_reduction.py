@@ -24,112 +24,98 @@ def data_separator(data, ref):
     data = data.loc[:, ~data.columns.isin(cols_to_drop)]
     return data, target
 
+class Reductor:
+    def __init__(self, data, cmd):
+        self.data   = data
+        self.ref    = cmd.ref
+        self.data, self.target = data_separator(self.data, cmd.ref)
+        self.cmp_names = []
+        for i in range(cmd.ncomps):
+            i += 1
+            self.cmp_names.append(f"{cmd.method}_cmp{i}")
+        
+        self.ncomps         = cmd.ncomps
+        self.REPORT['time'] = str(datetime.now())
+        self.REPORT['n']    = taken('methods', cmd.method)
+        
+        self.cmps       = None
+        self.complete   = None
+        self.pcs        = None
+        self.ics        = None
+        self.tsnes      = None
+        self.transform  = None  
 
-def PCAnalysis(data, cmd):
-    data, target = data_separator(data, cmd.ref)
-    pcnames = []
-    for i in range(cmd.ncomps):
-        i += 1
-        pcnames.append(f"pc{i}")
+        if(cmd.method == 'pca'):
+            self.PCAnalysis()
+        elif (cmd.method = 'ica'):
+            self.ICAnalysis()
+        elif (cmd.method = 'tsnes'):
+            self.TSNEanalysis()
+        else:
+            print('not recognized method')
 
-    pca = PCA(n_components=cmd.ncomps)
-    pca.fit(data)
-    pcs             = pca.transform(data)
-    data_with_pcs   = pd.DataFrame(data=pcs,
-                                columns=pcnames)
-    complete = pd.concat([data_with_pcs, target], axis=1)
+    def build(self):
+        self.transform  = self.cmps.transform(self.data)
+        data_with_cmps  = pd.DataFrame(data=self.pcs, columns=self.cmp_names)
+        self.complete   = pd.concat([data_with_pcs, self.target], axis=1)
+        Plotter(self.complete, self.plot_name, self.file_plot_name, self.ref)
+        res, msg = write_csv(data_with_cmps, self.file_data_name)
 
-    variance_ratio = pca.explained_variance_ratio_
-    lost_information = (1-np.sum(variance_ratio))
-    time = str(datetime.now())
-    n = taken('methods', 'pca')
-    files = {
-        'pca_basic_chart_pcn': 'pca_{}_basic_pcn.png'.format(n),
-        'pca_pcs':'pca_{}_pcs.csv'.format(n),
-    }
-    REPORT = {
-        'method': 'pca',
-        'n':n,
-        'time': time,
-        'lost_information':lost_information,
-        'variance_ratio':variance_ratio.tolist(),
-        'outputs': files,
-    }
-    Plotter(complete, 'PCA - Principal Components Analysis', files['pca_basic_chart_pcn'], cmd.ref)
-    res, msg = write_csv(data_with_pcs, files['pca_pcs'])
-    print(msg)
-    add('methods', REPORT)
+    def PCAnalysis(self):
+        self.cmps       = PCA(n_components=self.ncomps)
+        self.cmps.fit(self.data)
 
-def ICAnalysis(data, cmd):
-    data, target = data_separator(data, cmd.ref)
-    scaler = StandardScaler()
-    x_scaled = scaler.fit_transform(data)
+        variance_ratio = self.cmps.explained_variance_ratio_
+        lost_information = (1-np.sum(variance_ratio))
+        files = {
+            'pca_basic_chart_pcn': 'pca_{}_basic_pcn.png'.format(n),
+            'pca_pcs':'pca_{}_pcs.csv'.format(n),
+        }
+        self.REPORT['lost_information'] = lost_information
+        self.REPORT['variance_ratio']   = variance_ratio.tolist()
+        self.REPORT['outputs']          = files
+        self.plot_name                  = 'PCA - Principal Components Analysis'
+        self.file_plot_name             = files['pca_basic_chart_pcn']
+        self.file_data_name             = files['pca_pcs']
 
-    icnames = []
-    for i in range(cmd.ncomps):
-        i += 1
-        icnames.append(f"ic{i}")
-    ica = FastICA(n_components=cmd.ncomps, random_state=0)
-    x_ica   = ica.fit_transform(x_scaled)
-    ics  = pd.DataFrame(x_ica, columns=icnames)
-    complete  = pd.concat([ics, target], axis=1)
+    def ICAnalysis(data, cmd):
+        scaler = StandardScaler()
+        x_scaled = scaler.fit_transform(self.data)
 
-    comps = ica.components_.tolist()
-    mixin = ica.mixing_.tolist()
-    meann = ica.mean_.tolist()
-    white = ica.whitening_.tolist()
-    time = str(datetime.now())
+        self.cmps       = FastICA(n_components=self.ncomps, random_state=0)
+        self.ics        = ica.fit_transform(x_scaled)
+        data_with_ics   = pd.DataFrame(self.ics, columns=self.cmp_names)
+        self.complete   = pd.concat([data_with_ics, self.target], axis=1)
 
-    n = taken('methods', 'ica')
-    files = {
-        'ica_basic_chart_icn': 'ica_{}_basic_icn.png'.format(n),
-        'ica_ics':'ica_{}_ics.csv'.format(n),
-    }
-    Plotter(complete, 'ICA - Independent Components Analysis', files['ica_basic_chart_icn'], cmd.ref)
-    res, msg = write_csv(files['ica_ics'])
-    print(msg)
-    REPORT = {
-        'method': 'ica',
-        'n':n,
-        'time': time,
-        'comps':comps,
-        'mixin':mixin,
-        'meann':meann,
-        'white':white,
-        'outputs': files,
-    }
-    add('methods', REPORT)
+        comps = self.cmps.components_.tolist()
+        mixin = self.cmps.mixing_.tolist()
+        meann = self.cmps.mean_.tolist()
+        white = self.cmps.whitening_.tolist()
 
-def TSNEanalysis(data, cmd):
-    data, target = data_separator(data, cmd.ref)
-    for col in data.columns:
-        if is_object_dtype(data[col]):
-            data[col] = pd.to_numeric(data[col], errors='coerce')
-    data = data.fillna(data.mean(numeric_only=True))
-    tsne = TSNE(n_components=cmd.ncomps, random_state=42)
-    x_tsne = tsne.fit_transform(data)
-    time = str(datetime.now())
+        files = {
+            'ica_basic_chart_icn': 'ica_{}_basic_icn.png'.format(n),
+            'ica_ics':'ica_{}_ics.csv'.format(n),
+        }
+        self.REPORT['comps'] = comps
+        self.REPORT['mixin'] = mixin
+        self.REPORT['meann'] = meann
+        self.REPORT['white'] = white,
+        self.REPORT['outputs'] = files
 
-    tsnenames = []
-    for i in range(cmd.ncomps):
-        i += 1
-        tsnenames.append(f"tsne{i}")
-    tsnes   = pd.DataFrame(x_tsne, columns=tsnenames)
-    complete= pd.concat([tsnes, target], axis=1)
+    def TSNEanalysis(self):
+        for col in self.data.columns:
+            if is_object_dtype(self.data[col]):
+                self.data[col] = pd.to_numeric(self.data[col], errors='coerce')
+        self.data = self.data.fillna(self.data.mean(numeric_only=True))
 
-    n = taken('methods', 'tsne')
-    files = {
-        'tsne_basic_chart_comps': 'tsne_{}_basic_comps.png'.format(n),
-        'tsne_comps':'tsne_{}_comps.csv'.format(n),
-    }
-    Plotter(complete, 'tSNE Analysis', files['tsne_basic_chart_comps'], cmd.ref)
-    res, msg = write_csv(tsnes, files['tsne_comps'])
-    print(msg)
-    REPORT = {
-        'method':'tsne',
-        'n':n,
-        'time': time,
-        'outputs': files,
-    }
-    add('methods', REPORT)
+        self.cmps       = TSNE(n_components=cmd.ncomps, random_state=42)
+        self.tsnes      = tsne.fit_transform(data)
+        data_with_tsnes = pd.DataFrame(self.tsnes, columns=tsnenames)
+        self.complete   = pd.concat([data_with_tsnes, self.target], axis=1)
+
+        files = {
+            'tsne_basic_chart_comps': 'tsne_{}_basic_comps.png'.format(n),
+            'tsne_comps':'tsne_{}_comps.csv'.format(n),
+        }
+        self.REPORT['outputs'] = files
 
