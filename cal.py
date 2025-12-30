@@ -13,7 +13,7 @@ from abss.commands import Command
 from abss.change import Change
 from abss.checker import checker
 from abss.fs import newProject, delProject, current_project, outProject, switchProject
-from abss.story import story_cleaner, order
+from abss.story import StoryCleaner, order
 from abss.dataSetting import setData, delData
 from abss.plotViewer import seePlot
 from abss.outputs import delOutputs
@@ -44,8 +44,9 @@ def switch(cmd):
         msg = current_project(['project_name'])
         return True, msg
     elif cmd.rootCommand == 'cl':
-        res, msg = story_cleaner(cmd)
-        return True, msg
+        SC = StoryCleaner(cmd)
+        SC.run()
+        return True, SC.message
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)

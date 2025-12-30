@@ -83,13 +83,64 @@ def del_file(outputs):
         else:
             print('{} does not exists'.format(filepath))
 
+class StoryCleaner:
+    def __init__(self, cmd):
+        self.survival = []
+        self.indata = None
+        self.code   = None
+        self.data   = {}
+        self.storypath = current_project(['storypath'])
+        if cmd.all == False:
+            res, code = set_condition(cmd.cond)
+            if res == True
+                self.code = code
+        self.all    = cmd.all
+        self.unique = cmd.unique
 
+        with open(self.storypath, 'r') as f:
+            self.data = json.load(f)
+
+        if(cmd.target == 'meths'):
+            self.indata = 'methods'
+            self.ineach = 'method'
+        elif(cmd.target == 'mods'):
+            self.indata = 'models'
+            self.ineach = 'model'
+        elif(cmd.target == 'pols'):
+            self.indata = 'polys'
+            self.ineach = 'poly'
+        elif(cmd.target == 'exps'):
+            self.indata = 'exploratory_analysis'
+            self.ineach = 'metric'
+
+    def run(self):
+        if self.all == False:
+            if cmd.unique == True:
+                for each in data[self.indata]:
+                    if (each[ineach] == code):
+                        n = int(cmd.number)
+                        if (each['n'] != n):
+                            survivals.append(each)
+                        else:
+                            del_file(each['outputs'])
+                    else:
+                        survivals.append(each)
+            else:
+                for each in data[self.indata]:
+                    if (each[self.ineach] != code):
+                        survivals.append(each)
+                    else:
+                        del_file(each['outputs'])
+
+        else:
+            for each in data[self.indata]:
+                del_file(each['outputs'])
+        data[self.indata] = survivals
+        with open(self.storypath, 'w') as f:
+            json.dump(self.data, f, indent=4)
+        self.message = '----story cleaned'
+"""
 def story_cleaner(cmd):
-    storypath = current_project(['storypath'])
-    data = {}
-    survivals = []
-    with open(storypath, 'r') as f:
-        data = json.load(f)
     if cmd.target == 'meths':
         if cmd.all == False:
             res, code = set_condition(cmd.cond)
@@ -192,4 +243,4 @@ def story_cleaner(cmd):
     with open(storypath, 'w') as f:
         json.dump(data, f, indent=4)
     return True, '----story cleaned'
-
+"""
