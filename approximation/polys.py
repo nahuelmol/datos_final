@@ -20,6 +20,8 @@ class Polymaker:
         res, data = get_data(datapath, '\t')
         filename = datapath.split('\\')[-1]
 
+        self.firstday   = [5,6]
+        self.secndday   = [1,2,3,4]
         self.mhu        = 0.00000125
         self.s          = 40
         self.w          = 2 * math.pi * 3600
@@ -60,6 +62,8 @@ class Polymaker:
         self.n          = None
         self.REPORT     = {}
         self.filename   = {}
+
+        self.framed_locs= None
 
     def build_poly(self):
         if self.poly_type == 'l':
@@ -182,15 +186,84 @@ class Polymaker:
             'Lon': lon
         })
         ready.to_csv('data/locations.dat', index=False)
+        return True
     
+    def transf_locs(self):
+        new_lat = None
+        new_lon = None
+        for idx, row in self.framed_locs.iterrows():
+            print('{} - {}'.format(row['Lat'], row['Lon']))
+            if self.nprofile in self.firstday:
+                if selflocs.iloc[idx-1] == None:
+                    next_lon = abs(self.framed_locs.iloc[idx+1]['Lon'])
+                    next_lat = abs(self.framed_locs.iloc[idx+1]['Lat'])
+                    curr_lon = abs(row['Lon'])
+                    curr_lat = abs(row['Lat'])
+                    if next_lon < curr_lon:
+                        if math.copysign(1, row['Lon']) == -1.0:
+                            new_lon = row['Lon'] - 0.00018
+                        elif math.copysign(1, row['Lon']) == 1.0:
+                            new_lon = row['Lon'] + 0.00018
+                    else:
+                        if math.copysign(1, row['Lon']) == -1.0:
+                            new_lon = row['Lon'] + 0.00018
+                        elif math.copysign(1, row['Lon']) == 1.0:
+                            new_lon = row['Lon'] - 0.00018
+
+                    if next_lat < curr_lat:
+                        if math.copysign(1, row['Lat']) == -1.0:
+                            new_lat = row['Lat'] - 0.00018
+                        elif math.copysign(1, row['Lat']) == 1.0:
+                            new_lat = row['Lat'] + 0.00018
+                    else:
+                        if math.copysign(1, row['Lat']) == -1.0:
+                            new_lon = row['Lat'] + 0.00018
+                        elif math.copysign(1, row['Lat']) == 1.0:
+                            new_lon = row['Lat'] - 0.00018
+
+            elif self.nprofile in self.secndday:
+                if self.framed_locs.iloc[idx+1] == None:
+                    prev_lon = abs(self.framed_locs.iloc[idx-1]['Lon'])
+                    prev_lat = abs(self.framed_locs.iloc[idx-1]['Lat'])
+                    curr_lon = abs(row['Lon'])
+                    curr_lat = abs(row['Lat'])
+                    if prev_lon < curr_lon:
+                        if math.copysign(1, row['Lon']) == -1.0:
+                            new_lon = row['Lon'] - 0.00018
+                        elif math.copysign(1, row['Lon']) == 1.0:
+                            new_lon = row['Lon'] + 0.00018
+                    else:
+                        if math.copysign(1, row['Lon']) == -1.0:
+                            new_lon = row['Lon'] + 0.00018
+                        elif math.copysign(1, row['Lon']) == 1.0:
+                            new_lon = row['Lon'] - 0.00018
+
+                    if prev_lat < curr_lat:
+                        if math.copysign(1, row['Lat']) == -1.0:
+                            new_lon = row['Lat'] - 0.00018
+                        elif math.copysign(1, row['Lat']) == 1.0:
+                            new_lon = row['Lat'] + 0.00018
+                    else:
+                        if math.copysign(1, row['Lat']) == -1.0:
+                            new_lon = row['Lat'] + 0.00018
+                        elif math.copysign(1, row['Lat']) == 1.0:
+                            new_lon = row['Lat'] - 0.00018
+
+                else:
+                    new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
+                    new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
+            self.framed_locs.iloc[idx]['Lat'] = new_lat
+            self.framed_locs.iloc[idx]['Lon'] = new_lon
+
     def add_locs(self):
         nfirst  = self.Stats.iloc[0] - 1
         nlastt  = (self.Stats.iloc[-1])
         locs    = pd.read_csv("data/locations.dat")
 
-        framed_locs = locs.iloc[nfirst:nlastt]
-        lat     = framed_locs['Lat'].reset_index()
-        lon     = framed_locs['Lon'].reset_index()
+        self.framed_locs = locs.iloc[nfirst:nlastt]
+        self.transf_locs()
+        lat     = self.framed_locs['Lat'].reset_index()
+        lon     = self.framed_locs['Lon'].reset_index()
 
         ready = pd.concat([self.Stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
         output_name = "data/Profile {}".format(self.nprofile)
@@ -250,17 +323,31 @@ class Polymaker:
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
-    def complete_plot_ap(self):
+    def complete_plot_ap(self, which):
         pname = current_project(['project_name'])
         filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['complete'])
         plt.figure()
-        plt.plot(self.x_trained, self.output_ca, '-', label='Lagrange CAp')
-        plt.plot(self.x_trained, self.output_ra, '-', label='Lagrange RAp')
-        plt.plot(self.x, self.cond_ap, 'o', label='Data cond')
-        plt.plot(self.x, self.rest_ap, 'o', label='Data rest')
-        plt.ylim(-80, 80)
+        output = None
+        poly_label = ''
+        datarange = 10
+        if which == 'R':
+            output      = self.output_ra
+            poly_label  = 'Resistivity'
+            scatter = self.rest_ap
+            datarange = 5
+        elif which == 'C':
+            output      = self.output_ca
+            poly_label  = 'Conductivity'
+            scatter = self.cond_ap
+            datarange = 80
+        scatter_label = 'Data'
+
+        plt.plot(self.x_trained, output, '-', label=poly_label)
+        plt.plot(self.x, scatter, 'o', label=scatter_label)
+        plt.ylim(-datarange, datarange)
         plt.xlabel('x(prog)')
         plt.ylabel('y(cond)')
+        plt.title('Profile {}'.format(self.nprofile))
         plt.legend()
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()

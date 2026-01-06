@@ -9,7 +9,7 @@ def Approximation(cmd):
     #POLY.basic_plot()
     #POLY.polys_plot()
     #POLY.complete_plot_ipop()
-    POLY.complete_plot_ap()
+    POLY.complete_plot_ap('R')
     POLY.create_locs()
     POLY.add_locs()
     #POLY.build_grid()
