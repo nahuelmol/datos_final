@@ -8,10 +8,11 @@ def Approximation(cmd):
     res = POLY.build_poly()
     #POLY.basic_plot()
     #POLY.polys_plot()
-    POLY.complete_plot()
+    #POLY.complete_plot_ipop()
+    POLY.complete_plot_ap()
     POLY.create_locs()
     POLY.add_locs()
-    POLY.build_grid()
+    #POLY.build_grid()
     add('polys', POLY.REPORT)
     return res 
 

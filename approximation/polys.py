@@ -33,20 +33,30 @@ class Polymaker:
         self.x_trained  = np.linspace(min(self.x), max(self.x), 500)
         self.nrows      = data.shape[0]
 
-        module = np.sqrt(self.ip.pow(2) + self.op.pow(2))
-        self.rest_ap    = self.cte_rest / module 
+        self.cond_ap    = np.sqrt(self.ip.pow(2) + self.op.pow(2))
+        self.rest_ap    = self.cte_rest / self.cond_ap
 
         self.rest_ap.name = 'RA'
+        self.cond_ap.name = 'CA'
         self.ip.name    = 'IP'
         self.op.name    = 'OP'
 
         self.poly_type  = cmd.method
         self.poly_ip    = None 
         self.poly_op    = None 
+        self.poly_ra    = None 
+        self.poly_ca    = None 
+
         self.output_ip  = None
         self.output_op  = None
+        self.output_ra  = None
+        self.output_ca  = None
+
         self.coeffs_ip  = None
         self.coeffs_op  = None
+        self.coeffs_ra  = None
+        self.coeffs_ca  = None
+
         self.n          = None
         self.REPORT     = {}
         self.filename   = {}
@@ -69,15 +79,25 @@ class Polymaker:
             return False
         self.output_ip  = self.poly_ip(self.x_trained)
         self.output_op  = self.poly_op(self.x_trained)
+        self.output_ra  = self.poly_ra(self.x_trained)
+        self.output_ca  = self.poly_ca(self.x_trained)
+
         self.coeffs_ip  = self.poly_ip.coeffs
         self.coeffs_op  = self.poly_op.coeffs
+        self.coeffs_ra  = self.poly_ra.coeffs
+        self.coeffs_ca  = self.poly_ca.coeffs
         return True
 
     def Lagrange(self):
         self.coeffs_ip  = np.polyfit(self.x, self.ip, 20)
         self.coeffs_op  = np.polyfit(self.x, self.op, 20)
+        self.coeffs_ra  = np.polyfit(self.x, self.rest_ap, 20)
+        self.coeffs_ca  = np.polyfit(self.x, self.cond_ap, 20)
+
         self.poly_ip    = np.poly1d(self.coeffs_ip)
         self.poly_op    = np.poly1d(self.coeffs_op)
+        self.poly_ra    = np.poly1d(self.coeffs_ra)
+        self.poly_ca    = np.poly1d(self.coeffs_ca)
 
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
@@ -115,10 +135,17 @@ class Polymaker:
         grade = 20 
         self.coeffs_ip  = cheby.chebfit(self.x, self.ip, grade)
         self.coeffs_op  = cheby.chebfit(self.x, self.op, grade)
+        self.coeffs_ra  = cheby.chebfit(self.x, self.rest_ap, grade)
+        self.coeffs_ca  = cheby.chebfit(self.x, self.cond_ap, grade)
+
         cheb2poly_ip    = cheby.cheb2poly(self.coeffs_ip)
         cheb2poly_op    = cheby.cheb2poly(self.coeffs_op)
+        cheb2poly_ra    = cheby.cheb2poly(self.coeffs_ra)
+        cheb2poly_ca    = cheby.cheb2poly(self.coeffs_ca)
         self.poly_ip    = np.poly1d(cheb2poly_ip[::-1])
         self.poly_op    = np.poly1d(cheb2poly_op[::-1])
+        self.poly_ra    = np.poly1d(cheb2poly_ra[::-1])
+        self.poly_ca    = np.poly1d(cheb2poly_ca[::-1])
 
         files = {
             'basic': 'scatter_chebyshev_{}.png'.format(self.n),
@@ -157,8 +184,8 @@ class Polymaker:
         ready.to_csv('data/locations.dat', index=False)
     
     def add_locs(self):
-        nfirst  = self.Stats.iloc[0]
-        nlastt  = (self.Stats.iloc[-1] + 1)
+        nfirst  = self.Stats.iloc[0] - 1
+        nlastt  = (self.Stats.iloc[-1])
         locs    = pd.read_csv("data/locations.dat")
 
         framed_locs = locs.iloc[nfirst:nlastt]
@@ -208,7 +235,7 @@ class Polymaker:
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
-    def complete_plot(self):
+    def complete_plot_ipop(self):
         pname = current_project(['project_name'])
         filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['complete'])
         plt.figure()
@@ -223,3 +250,17 @@ class Polymaker:
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
+    def complete_plot_ap(self):
+        pname = current_project(['project_name'])
+        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['complete'])
+        plt.figure()
+        plt.plot(self.x_trained, self.output_ca, '-', label='Lagrange CAp')
+        plt.plot(self.x_trained, self.output_ra, '-', label='Lagrange RAp')
+        plt.plot(self.x, self.cond_ap, 'o', label='Data cond')
+        plt.plot(self.x, self.rest_ap, 'o', label='Data rest')
+        plt.ylim(-80, 80)
+        plt.xlabel('x(prog)')
+        plt.ylabel('y(cond)')
+        plt.legend()
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.close()

@@ -85,14 +85,14 @@ def del_file(outputs):
 
 class StoryCleaner:
     def __init__(self, cmd):
-        self.survival = []
+        self.survivals = []
         self.indata = None
         self.code   = None
         self.data   = {}
         self.storypath = current_project(['storypath'])
         if cmd.all == False:
             res, code = set_condition(cmd.cond)
-            if res == True
+            if res == True:
                 self.code = code
         self.all    = cmd.all
         self.unique = cmd.unique
@@ -116,131 +116,26 @@ class StoryCleaner:
     def run(self):
         if self.all == False:
             if cmd.unique == True:
-                for each in data[self.indata]:
+                for each in self.data[self.indata]:
                     if (each[ineach] == code):
                         n = int(cmd.number)
                         if (each['n'] != n):
-                            survivals.append(each)
+                            self.survivals.append(each)
                         else:
                             del_file(each['outputs'])
                     else:
-                        survivals.append(each)
+                        self.survivals.append(each)
             else:
-                for each in data[self.indata]:
+                for each in self.data[self.indata]:
                     if (each[self.ineach] != code):
-                        survivals.append(each)
+                        self.survivals.append(each)
                     else:
                         del_file(each['outputs'])
 
         else:
-            for each in data[self.indata]:
+            for each in self.data[self.indata]:
                 del_file(each['outputs'])
-        data[self.indata] = survivals
+        self.data[self.indata] = self.survivals
         with open(self.storypath, 'w') as f:
             json.dump(self.data, f, indent=4)
         self.message = '----story cleaned'
-"""
-def story_cleaner(cmd):
-    if cmd.target == 'meths':
-        if cmd.all == False:
-            res, code = set_condition(cmd.cond)
-            if cmd.unique == True:
-                for each in data['methods']:
-                    if (each['method'] == code):
-                        n = int(cmd.number)
-                        if (each['n'] != n):
-                            survivals.append(each)
-                        else:
-                            del_file(each['outputs'])
-                    else:
-                        survivals.append(each)
-            else:
-                for each in data['methods']:
-                    if (each['method'] != code):
-                        survivals.append(each)
-                    else:
-                        del_file(each['outputs'])
-        else:
-            for each in data['methods']:
-                del_file(each['outputs'])
-        data['methods'] = survivals
-
-    elif cmd.target == 'mods':
-        if cmd.all == False:
-            res, code = set_condition(cmd.cond)
-            if cmd.unique == True:
-                for each in data['models']:
-                    n = int(cmd.number)
-                    if (each['model'] == code):
-                        if(each['n'] != n):
-                            survivals.append(each)
-                        else:
-                            del_file(each['outputs'])
-                    else:
-                        survivals.append(each)
-            else:
-                for each in data['models']:
-                    if (each['model'] != code):
-                        survivals.append(each)
-                    else:
-                        del_file(each['outputs'])
-        else:
-            for each in data['models']:
-                del_file(each['outputs'])
-        data['models'] = survivals
-    elif cmd.target == 'exps':
-        if cmd.all == False:
-            res, code = set_condition(cmd.cond)
-            if cmd.unique == True:
-                for each in data['exploratory_analysis']:
-                    n = int(cmd.number)
-                    if (each['metric'] == code):
-                        if(each['n'] != n):
-                            survivals.append(each)
-                        else:
-                            del_file(each['outputs'])
-                    else:
-                        survivals.append(each)
-            else:
-                for each in data['exploratory_analysis']:
-                    if (each['metric'] != code):
-                        survivals.append(each)
-                    else:
-                        del_file(each['outputs'])
-        else:
-            print('all')
-            for each in data['exploratory_analysis']:
-                del_file(each['outputs'])
-        data['exploratory_analysis'] = survivals
-    elif cmd.target == 'pols':
-        if cmd.all == False:
-            res, code = set_condition(cmd.cond)
-            if cmd.unique == True:
-                for each in data['polys']:
-                    n = int(cmd.number)
-                    if (each['poly'] == code):
-                        if(each['n'] != n):
-                            survivals.append(each)
-                        else:
-                            del_file(each['outputs'])
-                    else:
-                        survivals.append(each)
-            else:
-                for each in data['polys']:
-                    if (each['poly'] != code):
-                        survivals.append(each)
-                    else:
-                        del_file(each['outputs'])
-                else:
-                    survivals.append(each)
-        else:
-            print('all')
-            for each in data['polys']:
-                del_file(each['outputs'])
-        data['polys'] = survivals
-    else:
-        return False, 'not available target'
-    with open(storypath, 'w') as f:
-        json.dump(data, f, indent=4)
-    return True, '----story cleaned'
-"""

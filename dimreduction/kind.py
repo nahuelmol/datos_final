@@ -4,7 +4,7 @@ from dimreduction.dim_reduction import Reductor
 from abss.data_setter import get_data
 from abss.fs import current_project
 
-def Reductor(cmd):
+def DimReduction(cmd):
     datapath = current_project(['datapath','src'])
     res, data = get_data(datapath, ',')
     REDUCTOR = Reductor(data, cmd)

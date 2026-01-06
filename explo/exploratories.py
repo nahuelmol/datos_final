@@ -100,7 +100,6 @@ class Explorer:
             'corr_matrix_plot': 'corr_matrix_{}.png'.format(self.n),
         }
         self.REPORT['outputs'] = files
-        }
         PLOT = Plot(files['corr_matrix_plot'], df)
         res  = PLOT.corr_plot()
         if res == True:

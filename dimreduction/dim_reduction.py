@@ -47,9 +47,9 @@ class Reductor:
 
         if(cmd.method == 'pca'):
             self.PCAnalysis()
-        elif (cmd.method = 'ica'):
+        elif (cmd.method == 'ica'):
             self.ICAnalysis()
-        elif (cmd.method = 'tsnes'):
+        elif (cmd.method == 'tsnes'):
             self.TSNEanalysis()
         else:
             print('not recognized method')
