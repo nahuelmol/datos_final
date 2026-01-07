@@ -33,7 +33,7 @@ def switch(cmd):
         elif cmd.targetType == 'a':
             Approximation(cmd)
         else:
-            return False, '--not recognized type'
+            return False, '--not recognized process'
     elif cmd.rootCommand == 'change':
         res, msg = Change(cmd)
         return True, msg

@@ -193,67 +193,49 @@ class Polymaker:
         new_lon = None
         for idx, row in self.framed_locs.iterrows():
             print('{} - {}'.format(row['Lat'], row['Lon']))
-            if self.nprofile in self.firstday:
+            if int(self.nprofile) in self.firstday:
                 if selflocs.iloc[idx-1] == None:
                     next_lon = abs(self.framed_locs.iloc[idx+1]['Lon'])
                     next_lat = abs(self.framed_locs.iloc[idx+1]['Lat'])
                     curr_lon = abs(row['Lon'])
                     curr_lat = abs(row['Lat'])
                     if next_lon < curr_lon:
-                        if math.copysign(1, row['Lon']) == -1.0:
-                            new_lon = row['Lon'] - 0.00018
-                        elif math.copysign(1, row['Lon']) == 1.0:
-                            new_lon = row['Lon'] + 0.00018
+                        new_lon = row['Lon'] + (math.copysign(1, row['Lon'])) * 0.00018
                     else:
-                        if math.copysign(1, row['Lon']) == -1.0:
-                            new_lon = row['Lon'] + 0.00018
-                        elif math.copysign(1, row['Lon']) == 1.0:
-                            new_lon = row['Lon'] - 0.00018
+                        new_lon = row['Lon'] - (math.copysign(1, row['Lon'])) * 0.00018
 
                     if next_lat < curr_lat:
-                        if math.copysign(1, row['Lat']) == -1.0:
-                            new_lat = row['Lat'] - 0.00018
-                        elif math.copysign(1, row['Lat']) == 1.0:
-                            new_lat = row['Lat'] + 0.00018
+                        new_lon = row['Lat'] + (math.copysign(1, row['Lat'])) * 0.00018
                     else:
-                        if math.copysign(1, row['Lat']) == -1.0:
-                            new_lon = row['Lat'] + 0.00018
-                        elif math.copysign(1, row['Lat']) == 1.0:
-                            new_lon = row['Lat'] - 0.00018
+                        new_lon = row['Lat'] - (math.copysign(1, row['Lat'])) * 0.00018
+                else:
+                    new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
+                    new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
 
-            elif self.nprofile in self.secndday:
-                if self.framed_locs.iloc[idx+1] == None:
+            elif int(self.nprofile) in self.secndday:
+                #if not self.framed_locs.iloc[idx+1].any():
+                if idx == (len(self.framed_locs) - 1):
                     prev_lon = abs(self.framed_locs.iloc[idx-1]['Lon'])
                     prev_lat = abs(self.framed_locs.iloc[idx-1]['Lat'])
                     curr_lon = abs(row['Lon'])
                     curr_lat = abs(row['Lat'])
                     if prev_lon < curr_lon:
-                        if math.copysign(1, row['Lon']) == -1.0:
-                            new_lon = row['Lon'] - 0.00018
-                        elif math.copysign(1, row['Lon']) == 1.0:
-                            new_lon = row['Lon'] + 0.00018
+                        new_lon = row['Lon'] + (math.copysign(1, row['Lon'])) * 0.00018
                     else:
-                        if math.copysign(1, row['Lon']) == -1.0:
-                            new_lon = row['Lon'] + 0.00018
-                        elif math.copysign(1, row['Lon']) == 1.0:
-                            new_lon = row['Lon'] - 0.00018
+                        new_lon = row['Lon'] - (math.copysign(1, row['Lon'])) * 0.00018
 
                     if prev_lat < curr_lat:
-                        if math.copysign(1, row['Lat']) == -1.0:
-                            new_lon = row['Lat'] - 0.00018
-                        elif math.copysign(1, row['Lat']) == 1.0:
-                            new_lon = row['Lat'] + 0.00018
+                        new_lon = row['Lat'] + (math.copysign(1, row['Lat'])) * 0.00018
                     else:
-                        if math.copysign(1, row['Lat']) == -1.0:
-                            new_lon = row['Lat'] + 0.00018
-                        elif math.copysign(1, row['Lat']) == 1.0:
-                            new_lon = row['Lat'] - 0.00018
-
+                        new_lon = row['Lat'] + (math.copysign(1, row['Lat'])) * 0.00018
                 else:
                     new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
                     new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
-            self.framed_locs.iloc[idx]['Lat'] = new_lat
-            self.framed_locs.iloc[idx]['Lon'] = new_lon
+
+                self.framed_locs.iloc[idx]['Lat'] = new_lat
+                self.framed_locs.iloc[idx]['Lon'] = new_lon
+            else:
+                print('not recognized profile')
 
     def add_locs(self):
         nfirst  = self.Stats.iloc[0] - 1
