@@ -16,6 +16,7 @@ from abss.data_setter import get_data
 
 class Polymaker:
     def __init__(self, cmd):
+        self.pname = current_project(['project_name'])
         datapath = current_project(['datapath','src'])
         res, data = get_data(datapath, '\t')
         filename = datapath.split('\\')[-1]
@@ -265,7 +266,6 @@ class Polymaker:
         comb.to_csv(output_name, index=False)
 
     def basic_plot(self):
-        pname = current_project(['project_name'])
         filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['basic'])
         plt.figure()
         plt.plot(self.x, self.ip, 'o', label='Data')
@@ -276,8 +276,7 @@ class Polymaker:
         plt.close()
 
     def polys_plot(self):
-        pname = current_project(['project_name'])
-        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['polys'])
+        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['polys'])
         plt.figure()
         #plt.plot(self.x_trained, Polynomial(self.coeffs_ip[::-1])(self.x_trained), label='Polynomial Ip')
         #plt.plot(self.x_trained, Polynomial(self.coeffs_op[::-1])(self.x_trained), label='Polynomial Op')
@@ -291,8 +290,7 @@ class Polymaker:
         plt.close()
 
     def complete_plot_ipop(self):
-        pname = current_project(['project_name'])
-        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['complete'])
+        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['complete'])
         plt.figure()
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
@@ -306,8 +304,7 @@ class Polymaker:
         plt.close()
 
     def complete_plot_ap(self, which):
-        pname = current_project(['project_name'])
-        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['complete'])
+        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['complete'])
         plt.figure()
         output = None
         poly_label = ''
@@ -333,3 +330,23 @@ class Polymaker:
         plt.legend()
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
+
+    def boxplots(self, which):
+        filepath = 'prs\{}\outputs\{}'.format(self.pname, 'boxplot_p{}_{}'.format(self.nprofile, self.n))
+        ready = pd.DataFrame()
+        if which == 'all':
+            for i in range(1, 7):
+                df = pd.read_csv('data\Profile {}'.format(i))
+                ready = pd.concat([ready, df['RA']], axis=1)
+            #ready = pd.concat([df['St.'], ready], axis=1)
+        else:
+            df = pd.read_csv('data\Profile {}'.format(int(which)))
+            #ready = pd.concat([df['St.'], ready], axis=1)
+
+        ready.plot(kind='box', title='boxplots')
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.close()
+
+
+
+
