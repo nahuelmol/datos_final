@@ -13,6 +13,7 @@ from pathlib import Path
 
 from abss.fs import current_project, taken
 from abss.data_setter import get_data
+from abss.story import add
 
 class Polymaker:
     def __init__(self, cmd):
@@ -28,8 +29,10 @@ class Polymaker:
         self.w          = 2 * math.pi * 3600
         self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
 
-        self.Stats      = data['St.']
-        self.nprofile   = filename[3]
+        self.profile    = data['P']
+        self.stats      = data['St.']
+        self.nplanilla  = filename[3]
+        self.nprofile   = None 
         self.x          = data['Pro.']
         self.ip         = data['Ip'] * data['XI']
         self.op         = data['Op'] * data['XO']
@@ -93,6 +96,60 @@ class Polymaker:
         self.coeffs_ca  = self.poly_ca.coeffs
         return True
 
+    def set_profile(self):
+        inf = 0
+        for i in range(1, len(self.profile)):
+            if (self.profile[i] != self.profile[i-1]) or (i == len(self.profile) - 1):
+                nprofile = self.profile[i-1]
+                print('{} - {}'.format(i, nprofile))
+                pname   = 'data/Profile{}.dat'.format(nprofile)
+                ready   = pd.DataFrame({
+                    'St.':self.stats.iloc[inf:i+1],
+                    'x': self.x.iloc[inf:i+1],
+                    'C': self.cond_ap.iloc[inf:i+1],
+                    'R': self.rest_ap.iloc[inf:i+1],
+                    'Ip':self.ip.iloc[inf:i+1],
+                    'Op':self.op.iloc[inf:i+1]
+                })
+                ready.to_csv(pname, index=False)
+                inf = i
+
+    def reset(self):
+        limi = None
+        lims = None
+        p = int(self.nplanilla)
+        if p == 1:
+            limi = 1
+            lims = 3
+        elif p == 2:
+            limi = 3
+            lims = 4
+        elif p == 3:
+            limi = 4
+            lims = 5
+        elif p == 4:
+            limi = 5
+            lims = 6
+        else:
+            print('not recognized planilla')
+            
+        for i in range(limi, lims+1):
+            self.profile    = 'data/Profile{}.dat'.format(i)
+            self.n          = i
+            data            = pd.read_csv(self.profile)
+            self.x          = data['x']
+            self.cond_ap    = data['C']
+            self.rest_ap    = data['R']
+            self.ip         = data['Ip']
+            self.op         = data['Op']
+            self.rest_ap.name   = 'RA'
+            self.cond_ap.name   = 'CA'
+            self.ip.name        = 'IP'
+            self.op.name        = 'OP'
+            self.build_poly()
+            self.basic_plot()
+            add('polys', self.REPORT)
+
     def Lagrange(self):
         self.coeffs_ip  = np.polyfit(self.x, self.ip, 20)
         self.coeffs_op  = np.polyfit(self.x, self.op, 20)
@@ -111,6 +168,7 @@ class Polymaker:
         }
         self.REPORT = {
             'poly':'lagrange',
+            'planilla':self.nplanilla,
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -130,6 +188,7 @@ class Polymaker:
         }
         self.REPORT = {
             'poly':'taylor',
+            'planilla':self.nplanilla,
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -159,6 +218,7 @@ class Polymaker:
         }
         self.REPORT = {
             'poly':'chebyshev',
+            'planilla':self.nplanilla,
             'n':self.n,
             'time':str(datetime.now()),
             'outputs': files,
@@ -193,7 +253,6 @@ class Polymaker:
         new_lat = None
         new_lon = None
         for idx, row in self.framed_locs.iterrows():
-            print('{} - {}'.format(row['Lat'], row['Lon']))
             if int(self.nprofile) in self.firstday:
                 if selflocs.iloc[idx-1] == None:
                     next_lon = abs(self.framed_locs.iloc[idx+1]['Lon'])
@@ -213,8 +272,10 @@ class Polymaker:
                     new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
                     new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
 
+                self.framed_locs.iloc[idx]['Lat'] = new_lat
+                self.framed_locs.iloc[idx]['Lon'] = new_lon
+
             elif int(self.nprofile) in self.secndday:
-                #if not self.framed_locs.iloc[idx+1].any():
                 if idx == (len(self.framed_locs) - 1):
                     prev_lon = abs(self.framed_locs.iloc[idx-1]['Lon'])
                     prev_lat = abs(self.framed_locs.iloc[idx-1]['Lat'])
@@ -233,14 +294,17 @@ class Polymaker:
                     new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
                     new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
 
+                    print('current: {} - next: {}'.format(row['Lat'], self.framed_locs.iloc[idx+1]['Lat']))
+                    print('\tnew lat: {}'.format(new_lat))
+
                 self.framed_locs.iloc[idx]['Lat'] = new_lat
                 self.framed_locs.iloc[idx]['Lon'] = new_lon
             else:
                 print('not recognized profile')
 
     def add_locs(self):
-        nfirst  = self.Stats.iloc[0] - 1
-        nlastt  = (self.Stats.iloc[-1])
+        nfirst  = self.stats.iloc[0] - 1
+        nlastt  = (self.stats.iloc[-1])
         locs    = pd.read_csv("data/locations.dat")
 
         self.framed_locs = locs.iloc[nfirst:nlastt]
@@ -248,8 +312,8 @@ class Polymaker:
         lat     = self.framed_locs['Lat'].reset_index()
         lon     = self.framed_locs['Lon'].reset_index()
 
-        ready = pd.concat([self.Stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
-        output_name = "data/Profile {}".format(self.nprofile)
+        ready = pd.concat([self.stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
+        output_name = "data/Profile{}_with_locs".format(self.nprofile)
         ready.to_csv(output_name, index=False)
 
     def build_grid(self):
@@ -266,7 +330,7 @@ class Polymaker:
         comb.to_csv(output_name, index=False)
 
     def basic_plot(self):
-        filepath = 'prs\{}\outputs\{}'.format(pname, self.filename['basic'])
+        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['basic'])
         plt.figure()
         plt.plot(self.x, self.ip, 'o', label='Data')
         plt.plot(self.x, self.op, 'o', label='Data')
