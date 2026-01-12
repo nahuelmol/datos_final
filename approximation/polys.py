@@ -22,8 +22,8 @@ class Polymaker:
         res, data = get_data(datapath, '\t')
         filename = datapath.split('\\')[-1]
 
-        self.firstday   = [5,6]
-        self.secndday   = [1,2,3,4]
+        self.firstday   = [12, 13]
+        self.secndday   = [1,2,3,4,5,6,7,8,9,10,11]
         self.mhu        = 0.00000125
         self.s          = 40
         self.w          = 2 * math.pi * 3600
@@ -146,9 +146,10 @@ class Polymaker:
             self.cond_ap.name   = 'CA'
             self.ip.name        = 'IP'
             self.op.name        = 'OP'
-            self.build_poly()
-            self.basic_plot()
-            add('polys', self.REPORT)
+            #self.build_poly()
+            #self.basic_plot()
+            #add('polys', self.REPORT)
+            #self.build_grid()
 
     def Lagrange(self):
         self.coeffs_ip  = np.polyfit(self.x, self.ip, 20)
@@ -291,11 +292,12 @@ class Polymaker:
                     else:
                         new_lon = row['Lat'] + (math.copysign(1, row['Lat'])) * 0.00018
                 else:
+                    print('{}/{}'.format(idx, len(self.framed_locs)))
                     new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
                     new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
 
-                    print('current: {} - next: {}'.format(row['Lat'], self.framed_locs.iloc[idx+1]['Lat']))
-                    print('\tnew lat: {}'.format(new_lat))
+                    #print('current:{} - next:{}'.format(row['Lat'], self.framed_locs.iloc[idx+1]['Lat']))
+                    #print('\tnew lat: {}'.format(new_lat))
 
                 self.framed_locs.iloc[idx]['Lat'] = new_lat
                 self.framed_locs.iloc[idx]['Lon'] = new_lon
@@ -303,18 +305,22 @@ class Polymaker:
                 print('not recognized profile')
 
     def add_locs(self):
-        nfirst  = self.stats.iloc[0] - 1
-        nlastt  = (self.stats.iloc[-1])
-        locs    = pd.read_csv("data/locations.dat")
+        for i in range(1,5):
+            pname   = 'data/Profile{}.dat'.format(i)
+            self.nprofile = i
+            data    = pd.read_csv(pname)
+            nfirst  = data['St.'].iloc[0] - 1
+            nlastt  = data['St.'].iloc[-1]
+            locs    = pd.read_csv("data/locations.dat")
 
-        self.framed_locs = locs.iloc[nfirst:nlastt]
-        self.transf_locs()
-        lat     = self.framed_locs['Lat'].reset_index()
-        lon     = self.framed_locs['Lon'].reset_index()
+            self.framed_locs = locs.iloc[nfirst:nlastt]
+            self.transf_locs()
+            lat     = self.framed_locs['Lat'].reset_index()
+            lon     = self.framed_locs['Lon'].reset_index()
 
-        ready = pd.concat([self.stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
-        output_name = "data/Profile{}_with_locs".format(self.nprofile)
-        ready.to_csv(output_name, index=False)
+            ready = pd.concat([self.stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
+            output_name = "data/Profile{}_with_locs".format(self.nprofile)
+            ready.to_csv(output_name, index=False)
 
     def build_grid(self):
         p = Path("data")
