@@ -122,14 +122,14 @@ class Polymaker:
             limi = 1
             lims = 3
         elif p == 2:
-            limi = 3
-            lims = 4
-        elif p == 3:
             limi = 4
             lims = 5
+        elif p == 3:
+            limi = 6
+            lims = 7
         elif p == 4:
-            limi = 5
-            lims = 6
+            limi = 8
+            lims = 9
         else:
             print('not recognized planilla')
             
@@ -142,13 +142,14 @@ class Polymaker:
             self.rest_ap    = data['R']
             self.ip         = data['Ip']
             self.op         = data['Op']
+            self.stats      = data['St.']
             self.rest_ap.name   = 'RA'
             self.cond_ap.name   = 'CA'
             self.ip.name        = 'IP'
             self.op.name        = 'OP'
-            #self.build_poly()
-            #self.basic_plot()
-            #add('polys', self.REPORT)
+            self.build_line()
+            self.lines_plot()
+            add('polys', self.REPORT)
             #self.build_grid()
 
     def Lagrange(self):
@@ -165,6 +166,7 @@ class Polymaker:
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
             'polys': 'polys_lagrange_{}.png'.format(self.n),
+            'lines': 'lines_lagrange_{}.png'.format(self.n),
             'complete': 'complete_lagrange_{}.png'.format(self.n),
         }
         self.REPORT = {
@@ -219,6 +221,20 @@ class Polymaker:
         }
         self.REPORT = {
             'poly':'chebyshev',
+            'planilla':self.nplanilla,
+            'n':self.n,
+            'time':str(datetime.now()),
+            'outputs': files,
+        }
+        self.filename = files
+
+    def build_line(self):
+        files = {
+            'basic': 'scatter_{}.png'.format(self.n),
+            'lines': 'lines_{}.png'.format(self.n),
+        }
+        self.REPORT = {
+            'line':'ivo',
             'planilla':self.nplanilla,
             'n':self.n,
             'time':str(datetime.now()),
@@ -348,14 +364,37 @@ class Polymaker:
     def polys_plot(self):
         filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['polys'])
         plt.figure()
-        #plt.plot(self.x_trained, Polynomial(self.coeffs_ip[::-1])(self.x_trained), label='Polynomial Ip')
-        #plt.plot(self.x_trained, Polynomial(self.coeffs_op[::-1])(self.x_trained), label='Polynomial Op')
-        plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
-        plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
+        plt.plot(self.x_trained, self.output_ip, '-', label='Ip')
+        plt.plot(self.x_trained, self.output_op, '-', label='Op')
         plt.ylim(-80, 80)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.legend()
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def lines_plot(self):
+        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['lines'])
+        #plt.figure()
+        fig, ax = plt.subplots()
+
+        ax.axhline(0, color='black', linewidth=0.8, linestyle='--')
+        ax.plot(self.x, self.ip, '-', label='Ip', color='red')
+        ax.plot(self.x, self.ip, 'o', color='red')
+        ax.plot(self.x, self.op, '-', label='Op', color='blue')
+        ax.plot(self.x, self.op, 'o', color='blue')
+        plt.ylim(-80, 80)
+        ax.set_title('Perfil {}'.format(self.n))
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+
+        ax_top = ax.twiny()
+        ax_top.set_xlim(ax.get_xlim())
+        ax_top.set_xticks(self.x)
+        ax_top.set_xticklabels(self.stats)
+        ax_top.set_xlabel("Stations")
+
+        ax.legend()
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
