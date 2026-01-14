@@ -6,7 +6,7 @@ class Command:
         self.args   = args[1:]
         self.all    = True
         self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', 
-                                       '-rs', '-ts', 'w', '-cls', 'is']
+                                       '-rs', '-ts', 'w', '-cls', 'is','-lt']
         self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm', 'cat', 'dis', 'box']
         self.aloneFlags = {}
         self.boxplot = False
@@ -79,6 +79,9 @@ class Command:
             cal app a:l
             cal app a:t
             cal app a:c
+            cal app a:s
+
+            cal app a:s -lt <linetype>
 
             """
             print(msg)
@@ -179,6 +182,8 @@ class Command:
             self.random_state   = float(self.currentFlags['-rs'])
         if '-ts' in self.currentFlags:
             self.test_size      = float(self.currentFlags['-ts'])
+        if '-lt' in self.currentFlags:
+            self.linetype = self.currentFlags['-lt']
         if 'w' in self.currentFlags:
             self.all = False
             self.cond = self.currentFlags['w']

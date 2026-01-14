@@ -5,7 +5,7 @@ from abss.story import add
 
 def Approximation(cmd):
     POLY = Polymaker(cmd)
-    POLY.set_profile()
+    #POLY.set_profile()
     POLY.reset()
     #res = POLY.build_poly()
     #POLY.basic_plot()

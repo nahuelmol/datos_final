@@ -22,6 +22,8 @@ class Polymaker:
         res, data = get_data(datapath, '\t')
         filename = datapath.split('\\')[-1]
 
+        self.linetype   = cmd.linetype
+
         self.firstday   = [12, 13]
         self.secndday   = [1,2,3,4,5,6,7,8,9,10,11]
         self.mhu        = 0.00000125
@@ -82,6 +84,11 @@ class Polymaker:
             self.poly_name = 'taylor'
             self.n = taken('polys', self.poly_name)
             self.Taylor()
+        elif self.poly_type == 's':
+            self.poly_name = 'line'
+            self.n = taken('lines', self.poly_name)
+            #self.set_profile()
+            #self.build_line(self.linetype)
         else:
             print('not recognized poly')
             return False
@@ -111,46 +118,37 @@ class Polymaker:
                     'Ip':self.ip.iloc[inf:i+1],
                     'Op':self.op.iloc[inf:i+1]
                 })
-                ready.to_csv(pname, index=False)
+                if(os.path.exists(pname)):
+                    prev_data = pd.read_csv(pname)
+                    ready = pd.concat([prev_data, ready], axis=0)
+                    ready.to_csv(pname, index=False)
+                else:
+                    ready.to_csv(pname, index=False)
                 inf = i
 
     def reset(self):
-        limi = None
-        lims = None
         p = int(self.nplanilla)
-        if p == 1:
-            limi = 1
-            lims = 3
-        elif p == 2:
-            limi = 4
-            lims = 5
-        elif p == 3:
-            limi = 6
-            lims = 7
-        elif p == 4:
-            limi = 8
-            lims = 9
-        else:
-            print('not recognized planilla')
-            
-        for i in range(limi, lims+1):
-            self.profile    = 'data/Profile{}.dat'.format(i)
-            self.n          = i
-            data            = pd.read_csv(self.profile)
-            self.x          = data['x']
-            self.cond_ap    = data['C']
-            self.rest_ap    = data['R']
-            self.ip         = data['Ip']
-            self.op         = data['Op']
-            self.stats      = data['St.']
-            self.rest_ap.name   = 'RA'
-            self.cond_ap.name   = 'CA'
-            self.ip.name        = 'IP'
-            self.op.name        = 'OP'
-            self.build_line()
-            self.lines_plot()
-            add('polys', self.REPORT)
-            #self.build_grid()
+        for profile in os.listdir('data/'):
+            if 'Profile' in profile:
+                self.profile    = 'data/{}'.format(profile)
+                self.n          = int(profile[7])
+                data            = pd.read_csv(self.profile)
+                self.x          = data['x']
+                self.cond_ap    = data['C']
+                self.rest_ap    = data['R']
+                self.ip         = data['Ip']
+                self.op         = data['Op']
+                self.stats      = data['St.']
+                self.rest_ap.name   = 'RA'
+                self.cond_ap.name   = 'CA'
+                self.ip.name        = 'IP'
+                self.op.name        = 'OP'
+                self.build_line(self.linetype)
+                #self.lines_plot('IO')
+                self.lines_plot()
+                #self.lines_plot('C')
+                add('polys', self.REPORT)
+                #self.build_grid()
 
     def Lagrange(self):
         self.coeffs_ip  = np.polyfit(self.x, self.ip, 20)
@@ -166,7 +164,6 @@ class Polymaker:
         files = {
             'basic': 'scatter_lagrange_{}.png'.format(self.n),
             'polys': 'polys_lagrange_{}.png'.format(self.n),
-            'lines': 'lines_lagrange_{}.png'.format(self.n),
             'complete': 'complete_lagrange_{}.png'.format(self.n),
         }
         self.REPORT = {
@@ -228,10 +225,11 @@ class Polymaker:
         }
         self.filename = files
 
-    def build_line(self):
+    def build_line(self, linetype):
+        self.linetype = linetype
         files = {
-            'basic': 'scatter_{}.png'.format(self.n),
-            'lines': 'lines_{}.png'.format(self.n),
+            'basic': 'scatt_{}_{}.png'.format(linetype, self.n),
+            'lines': 'lines_{}_{}.png'.format(linetype, self.n),
         }
         self.REPORT = {
             'line':'ivo',
@@ -379,14 +377,28 @@ class Polymaker:
         fig, ax = plt.subplots()
 
         ax.axhline(0, color='black', linewidth=0.8, linestyle='--')
-        ax.plot(self.x, self.ip, '-', label='Ip', color='red')
-        ax.plot(self.x, self.ip, 'o', color='red')
-        ax.plot(self.x, self.op, '-', label='Op', color='blue')
-        ax.plot(self.x, self.op, 'o', color='blue')
-        plt.ylim(-80, 80)
+        if self.linetype == 'IO':
+            plt.ylim(-80, 80)
+            ax.plot(self.x, self.ip, '-', label='Ip', color='red')
+            ax.plot(self.x, self.ip, 'o', color='red')
+            ax.plot(self.x, self.op, '-', label='Op', color='blue')
+            ax.plot(self.x, self.op, 'o', color='blue')
+            ax.set_ylabel('C')
+        elif self.linetype == 'R':
+            ax.set_yscale('log')
+            ax.plot(self.x, self.rest_ap, '-', label='Ra', color='black')
+            ax.plot(self.x, self.rest_ap, 'o', color='black')
+            ax.set_ylabel('R')
+        elif self.linetype == 'C':
+            ax.set_yscale('log')
+            ax.plot(self.x, self.cond_ap, '-', label='Ca', color='black')
+            ax.plot(self.x, self.cond_ap, 'o', color='black')
+            ax.set_ylabel('C')
+        else:
+            print('unrecognized option')
+
         ax.set_title('Perfil {}'.format(self.n))
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
+        ax.set_xlabel('x(m)')
 
         ax_top = ax.twiny()
         ax_top.set_xlim(ax.get_xlim())
