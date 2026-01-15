@@ -123,6 +123,22 @@ This is analogous to the previous one:
 cal app r:svr -r <reference>
 ```
 
+### Approximation models
+
+Polynomial approximation can be applied using Lagrange or Chebyshev algorithms by indicating them with l or c respectively. 
+
+```
+cal app a:l
+```
+
+Besides polynomials, lines can be used as approximations (which is not true because they're are just put together scattered points, that is the reason that not proccesing it carried out, there is not a model to generate)
+
+```
+cal app a:l -lt <linetype>
+```
+
+In <linetype> should be specfied the variable to plot.
+
 ### Checking
 
 To check the applied current project's methods or the models built, `ch` is used (which stands for check) as follows:
