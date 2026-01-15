@@ -3,17 +3,25 @@ import pandas as pd
 import os
 import math
 import matplotlib.pyplot as plt
+import plotly as px
+import seaborn as sns
+import folium
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
+from scipy.spatial import ConvexHull
+from scipy.stats import gaussian_kde
 from numpy.polynomial.polynomial import Polynomial
 from numpy.polynomial import chebyshev as cheby
 from datetime import datetime
 from pathlib import Path
+from matplotlib.path import Path
+from matplotlib.colors import LogNorm
 
 from abss.fs import current_project, taken
 from abss.data_setter import get_data
 from abss.story import add
+from folium.plugins import HeatMap
 
 class Polymaker:
     def __init__(self, cmd):
@@ -455,19 +463,77 @@ class Polymaker:
     def boxplots(self, which):
         filepath = 'prs\{}\outputs\{}'.format(self.pname, 'boxplot_p{}_{}'.format(self.nprofile, self.n))
         ready = pd.DataFrame()
-        if which == 'all':
-            for i in range(1, 7):
-                df = pd.read_csv('data\Profile {}'.format(i))
-                ready = pd.concat([ready, df['RA']], axis=1)
-            #ready = pd.concat([df['St.'], ready], axis=1)
+        if self.linetype == 'R':
+            for i in range(1, 10):
+                df = pd.read_csv('data\Profile{}.dat'.format(i))
+                ready = pd.concat([ready, df['R']], axis=1)
+        elif self.linetype == 'C':
+            for i in range(1, 10):
+                df = pd.read_csv('data\Profile{}.dat'.format(i))
+                ready = pd.concat([ready, df['C']], axis=1)
         else:
-            df = pd.read_csv('data\Profile {}'.format(int(which)))
-            #ready = pd.concat([df['St.'], ready], axis=1)
+            df = pd.read_csv('data\Profile{}.dat'.format(int(which)))
 
-        ready.plot(kind='box', title='boxplots')
+        ready.plot(kind='box', title='Aparente Resistivity(ohm)')
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
+    def heatmap(self):
+        df      = pd.read_csv('data/Grid')
+        lats    = df['Lat'].to_numpy()
+        lons    = df['Lon'].to_numpy()
+        z       = None
+        norm    = None
+        if self.linetype == 'R':
+            z   = df['RA'].to_numpy()
+        elif self.linetype == 'C':
+            z   = df['CA'].to_numpy()
+        elif self.linetype == 'I':
+            z   = df['IP'].to_numpy()
+        elif self.linetype == 'O':
+            z   = df['OP'].to_numpy()
 
+        filepath = 'heat_map_talacasto_{}.png'.format(self.linetype)
+
+        coords  = np.vstack([lons, lats])
+        kde     = gaussian_kde(
+                coords,
+                weights=z,
+                bw_method=0.5
+        )
+        points  = np.column_stack([lons, lats])
+        hull    = ConvexHull(points)
+
+        xmin, ymin = points[hull.vertices].min(axis=0)
+        xmax, ymax = points[hull.vertices].max(axis=0)
+
+        xi = np.linspace(xmin, xmax, 300)
+        yi = np.linspace(ymin, ymax, 300)
+        xi, yi = np.meshgrid(xi, yi)
+        zi = kde(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
+
+        hull_p  = Path(points[hull.vertices])
+        mask    = hull_p.contains_points(np.column_stack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
+        zi[~mask] = np.nan
+
+        fig, ax = plt.subplots(figsize=(8,6))
+
+        if self.linetype == 'R':
+            norm= LogNorm(vmin=np.nanmin(zi),
+                          vmax=np.nanmax(zi))
+        im  = ax.pcolormesh(
+            xi, yi, zi,
+            cmap="jet",
+            shading="auto",
+            norm=norm
+        )
+        ax.scatter(lons, lats, c="cyan", s=10, edgecolor="k")
+        ax.set_xlabel("Lon")
+        ax.set_ylabel("Lat")
+        ax.set_title("Resistivity Map")
+
+        plt.colorbar(im, label="Resistivity (ohm)")
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.close()
 
 
