@@ -123,15 +123,31 @@ This is analogous to the previous one:
 cal app r:svr -r <reference>
 ```
 
+<<<<<<< HEAD
 ### Approxiamtion with or without polynomials
 
 Specific polynomails can be used to aproximate to the data.
+=======
+### Approximation models
+
+Polynomial approximation can be applied using Lagrange or Chebyshev algorithms by indicating them with l or c respectively. 
+>>>>>>> 8f330140765727d30d221ed3406df205876e2c1b
 
 ```
 cal app a:l
 ```
 
+<<<<<<< HEAD
 `l` stands for lagrange, `c` for chebyschev. Besides that, `s` stands for lines and allows the plotting of raw data. Previously, for EMI data, profiles must be setted using `-`
+=======
+Besides polynomials, lines can be used as approximations (which is not true because they're are just put together scattered points, that is the reason that not proccesing it carried out, there is not a model to generate)
+
+```
+cal app a:l -lt <linetype>
+```
+
+In <linetype> should be specfied the variable to plot.
+>>>>>>> 8f330140765727d30d221ed3406df205876e2c1b
 
 ### Checking
 
