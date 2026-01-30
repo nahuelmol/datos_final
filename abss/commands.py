@@ -106,6 +106,8 @@ class Command:
 
             cal cl xp       w cm
             cal cl xp       w cm is 1
+
+            cal cl pols
             """
             print(msg)
         elif self.rootCommand == 'del':

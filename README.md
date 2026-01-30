@@ -123,6 +123,16 @@ This is analogous to the previous one:
 cal app r:svr -r <reference>
 ```
 
+### Approxiamtion with or without polynomials
+
+Specific polynomails can be used to aproximate to the data.
+
+```
+cal app a:l
+```
+
+`l` stands for lagrange, `c` for chebyschev. Besides that, `s` stands for lines and allows the plotting of raw data. Previously, for EMI data, profiles must be setted using `-`
+
 ### Checking
 
 To check the applied current project's methods or the models built, `ch` is used (which stands for check) as follows:
@@ -160,6 +170,10 @@ cal cl meths w pca
 
 ```
 cal cl meths w pca is 1
+```
+
+```
+cal cl pols
 ```
 
 ### Setting datasets

@@ -9,7 +9,7 @@ import folium
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, Delaunay
 from scipy.stats import gaussian_kde
 from numpy.polynomial.polynomial import Polynomial
 from numpy.polynomial import chebyshev as cheby
@@ -92,11 +92,15 @@ class Polymaker:
             self.poly_name = 'taylor'
             self.n = taken('polys', self.poly_name)
             self.Taylor()
+        elif self.poly_type == '-':
+            self.set_profile()
+            return True
         elif self.poly_type == 's':
             self.poly_name = 'line'
-            self.n = taken('lines', self.poly_name)
-            #self.set_profile()
-            #self.build_line(self.linetype)
+            self.n = taken('polys', self.poly_name)
+            self.build_line()
+            self.reset()
+            return True
         else:
             print('not recognized poly')
             return False
@@ -113,6 +117,7 @@ class Polymaker:
 
     def set_profile(self):
         inf = 0
+        print('{}'.format(len(self.profile)))
         for i in range(1, len(self.profile)):
             if (self.profile[i] != self.profile[i-1]) or (i == len(self.profile) - 1):
                 nprofile = self.profile[i-1]
@@ -151,12 +156,9 @@ class Polymaker:
                 self.cond_ap.name   = 'CA'
                 self.ip.name        = 'IP'
                 self.op.name        = 'OP'
-                self.build_line(self.linetype)
-                #self.lines_plot('IO')
+                self.build_line()
                 self.lines_plot()
-                #self.lines_plot('C')
                 add('polys', self.REPORT)
-                #self.build_grid()
 
     def Lagrange(self):
         self.coeffs_ip  = np.polyfit(self.x, self.ip, 20)
@@ -233,14 +235,21 @@ class Polymaker:
         }
         self.filename = files
 
-    def build_line(self, linetype):
-        self.linetype = linetype
+    def build_line(self):
         files = {
-            'basic': 'scatt_{}_{}.png'.format(linetype, self.n),
-            'lines': 'lines_{}_{}.png'.format(linetype, self.n),
+            'basic': 'scatt_{}_{}.png'.format(self.linetype, self.n),
+            'lines': 'lines_{}_{}.png'.format(self.linetype, self.n),
         }
+        poly = ''
+        if self.linetype == 'R':
+            poly = 'R'
+        elif self.linetype == 'IO':
+            poly = 'IO'
+        elif self.linetype == 'C':
+            poly = 'ivo'
+
         self.REPORT = {
-            'line':'ivo',
+            'poly':poly,
             'planilla':self.nplanilla,
             'n':self.n,
             'time':str(datetime.now()),
@@ -387,6 +396,7 @@ class Polymaker:
         ax.axhline(0, color='black', linewidth=0.8, linestyle='--')
         if self.linetype == 'IO':
             plt.ylim(-80, 80)
+            ax.grid()
             ax.plot(self.x, self.ip, '-', label='Ip', color='red')
             ax.plot(self.x, self.ip, 'o', color='red')
             ax.plot(self.x, self.op, '-', label='Op', color='blue')
@@ -483,26 +493,38 @@ class Polymaker:
         lats    = df['Lat'].to_numpy()
         lons    = df['Lon'].to_numpy()
         z       = None
+        newz    = None
         norm    = None
+        title   = None
+        bw_method = 0.4
         if self.linetype == 'R':
             z   = df['RA'].to_numpy()
+            title = 'Resistivity (ohm)'
         elif self.linetype == 'C':
             z   = df['CA'].to_numpy()
+            title = 'Conductivity'
         elif self.linetype == 'I':
             z   = df['IP'].to_numpy()
+            title = 'IP-conductivity'
         elif self.linetype == 'O':
             z   = df['OP'].to_numpy()
+            title = 'OP-conductivity'
 
         filepath = 'heat_map_talacasto_{}.png'.format(self.linetype)
 
         coords  = np.vstack([lons, lats])
-        kde     = gaussian_kde(
-                coords,
-                weights=z,
-                bw_method=0.5
+        if (self.linetype == 'I' or self.linetype == 'O'):
+            newz = z + abs(z.min())
+            bw_method = 0.3
+
+        kde1    = gaussian_kde(
+            coords,
+            weights=newz,
+            bw_method=bw_method
         )
         points  = np.column_stack([lons, lats])
         hull    = ConvexHull(points)
+        #hull    = Delaunay(points)
 
         xmin, ymin = points[hull.vertices].min(axis=0)
         xmax, ymax = points[hull.vertices].max(axis=0)
@@ -510,17 +532,17 @@ class Polymaker:
         xi = np.linspace(xmin, xmax, 300)
         yi = np.linspace(ymin, ymax, 300)
         xi, yi = np.meshgrid(xi, yi)
-        zi = kde(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
+        zi = kde1(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
 
         hull_p  = Path(points[hull.vertices])
         mask    = hull_p.contains_points(np.column_stack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
         zi[~mask] = np.nan
 
         fig, ax = plt.subplots(figsize=(8,6))
-
-        if self.linetype == 'R':
+        if (self.linetype == 'R'):
             norm= LogNorm(vmin=np.nanmin(zi),
                           vmax=np.nanmax(zi))
+
         im  = ax.pcolormesh(
             xi, yi, zi,
             cmap="jet",
@@ -528,12 +550,15 @@ class Polymaker:
             norm=norm
         )
         ax.scatter(lons, lats, c="cyan", s=10, edgecolor="k")
+        #cmap = plt.contourf(xi, yi, zi)
+        ax.set_xlim(-68.752,-68.736)
+        ax.set_ylim(-31.028,-31.017)
         ax.set_xlabel("Lon")
         ax.set_ylabel("Lat")
-        ax.set_title("Resistivity Map")
+        ax.set_title(title)
 
-        plt.colorbar(im, label="Resistivity (ohm)")
+        plt.colorbar(im, label=title)
+        #fig.colorbar(cmap)
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
-
 

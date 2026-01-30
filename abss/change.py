@@ -12,4 +12,3 @@ def Change(cmd):
         file.write(content)
     return True, 'change applied succesfully'
 
-
