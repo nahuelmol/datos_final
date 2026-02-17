@@ -92,6 +92,8 @@ class Command:
 
             cal ch mods     (all)
             cal ch mods     w log
+
+            cal ch pols     (all)
             """
             print(msg)
         elif self.rootCommand == 'cl':

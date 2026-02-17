@@ -1,4 +1,3 @@
-
 import json
 
 def setGlovar(cmd):

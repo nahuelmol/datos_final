@@ -1,5 +1,4 @@
 
-
 def setting(which):
     res = input('standard setting? (y/n)')
     response = {}

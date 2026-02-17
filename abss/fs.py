@@ -142,7 +142,7 @@ def newProject(cmd):
                     'exploratory_analysis':[],
                     'methods':[],
                     'models':[],
-                    'polyis':[],
+                    'polys':[],
             }
             json.dump(story, f, indent=4)
     else:
@@ -159,15 +159,17 @@ def newProject(cmd):
             story = {
                     'project':name,
                     'borntime':str(datetime.now()),
+                    'exploratory_analysis':[],
                     'methods':[],
                     'models':[],
+                    'polys':[],
             }
             json.dump(story, f, indent=4)
 
 def switchProject(cmd):
     projipath= 'prs\projects.txt'
 
-    current = current_project('project_name')
+    current = current_project(['project_name'])
     currentpath = 'prs\{}\manifest.json'.format(current)
     targetpath  = 'prs\{}\manifest.json'.format(cmd.target)
     if (os.path.exists(targetpath) and os.path.exists(currentpath)):

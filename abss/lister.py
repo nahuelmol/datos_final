@@ -22,4 +22,3 @@ def list_labs(cmd):
     for label in data.index:
         print(label)
 
-
