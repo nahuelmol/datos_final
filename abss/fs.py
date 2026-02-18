@@ -168,11 +168,25 @@ def newProject(cmd):
 
 def switchProject(cmd):
     projipath= 'prs\projects.txt'
+    pname = current_project(['project_name'])
+    if cmd.target == pname:
+        print('you are already in {} project'.format(pname))
+        return True
 
-    current = current_project(['project_name'])
-    currentpath = 'prs\{}\manifest.json'.format(current)
+    currentpath = 'prs\{}\manifest.json'.format(pname)
     targetpath  = 'prs\{}\manifest.json'.format(cmd.target)
     if (os.path.exists(targetpath) and os.path.exists(currentpath)):
         shutil.copy('manifest.json', currentpath)
         shutil.copy(targetpath, 'manifest.json')
+
+    newest  = ''
+    with open(projipath, 'r') as f:
+        content = f.read()
+        pname_in = '> {}'.format(pname)
+        target_in = '> {}'.format(cmd.target)
+        new = content.replace(pname_in, pname)
+        newest = new.replace(cmd.target, target_in)
+    with open(projipath, 'w') as f:
+        f.write(newest)
+
 

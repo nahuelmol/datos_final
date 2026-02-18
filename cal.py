@@ -107,7 +107,6 @@ def switch(cmd):
         msg = '----order:{}:done'.format(cmd.target)
         return True, msg
     elif cmd.rootCommand == '-help':
-        cmd.all == True 
         cmd.helper()
         return True, 'helping'
     else:

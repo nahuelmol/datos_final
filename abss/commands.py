@@ -44,108 +44,117 @@ class Command:
         self.rootCommand = self.args[0]
 
     def helper(self):
+        if self.target is not None:
+            print('Looking for: {} command\n'.format(self.target))
         if self.all == True:
             msg = """
-            These are the main root commands:
+        These are the main root commands:
 
-            cal app
-            cal ch
-            cal cl
-            cal del
-            cal set
-            cal xp
-            cal current
+        cal app
+        cal new
+        cal ch
+        cal cl
+        cal del
+        cal set
+        cal xp
+        cal current
+        cal switch
             """
             print(msg)
-        elif self.rootCommand == 'app':
+        elif self.target == 'app':
             msg = """
-            reference can be previously specified, or now too
-            
-            cal app dr:pca -r <target feature>
-            cal app dr:ica -r <target feature>
-            cal app dr:tsne -r <target feature>
+        reference can be previously specified, or now too
+        
+        cal app dr:pca          -r <target feature>
+        cal app dr:ica          -r <target feature>
+        cal app dr:tsne         -r <target feature>
 
-            cal app c:l -r <categorical>
-            cal app c:dt -r <target>
-            cal app c:knn
-            cal app c:svm
+        cal app c:l             -r <categorical>
+        cal app c:dt            -r <target>
+        cal app c:knn
+        cal app c:svm
 
-            cal app r:dt
-            cal app r:knn
-            cal app r:svr
-            cal app r:rr
-            cal app r:lr
+        cal app r:dt
+        cal app r:knn
+        cal app r:svr
+        cal app r:rr
+        cal app r:lr
 
-            cal app a:l
-            cal app a:t
-            cal app a:c
-            cal app a:s
+        cal app a:l
+        cal app a:t
+        cal app a:c
+        cal app a:s
 
-            cal app a:s -lt <linetype>
+        cal app a:s             -lt <linetype>
 
             """
             print(msg)
-        elif self.rootCommand == 'ch':
+        elif self.target == 'ch':
             msg = """
-            cal ch meths    (all)
-            cal ch meths    w pca
+        cal ch meths    (all)
+        cal ch meths    w pca
 
-            cal ch mods     (all)
-            cal ch mods     w log
+        cal ch mods     (all)
+        cal ch mods     w log
 
-            cal ch pols     (all)
+        cal ch pols     (all)
             """
             print(msg)
-        elif self.rootCommand == 'cl':
+        elif self.target == 'cl':
             msg = """
-            cal cl meths
-            cal cl meths    w pca
-            cal cl meths    w pca is 1
+        cal cl meths
+        cal cl meths    w pca
+        cal cl meths    w pca is 1
 
-            cal cl mods
-            cal cl mods     w log
-            cal cl mods     w log is 1
+        cal cl mods
+        cal cl mods     w log
+        cal cl mods     w log is 1
 
-            cal cl xp       w cm
-            cal cl xp       w cm is 1
+        cal cl xp       w cm
+        cal cl xp       w cm is 1
 
-            cal cl pols
+        cal cl pols
             """
             print(msg)
-        elif self.rootCommand == 'del':
+        elif self.target == 'del':
             msg = """
-            cal del p:<project name>
-            cal del p:all
+        cal del p:<project name>
+        cal del p:all
             """
             print(msg)
-        elif self.rootCommand == 'see':
+        elif self.target == 'see':
             msg = """
-            cal see w pca is 1
-            cal see w log is 1
+        cal see w pca is 1
+        cal see w log is 1
             """
             print(msg)
-        elif self.rootCommand == 'set':
+        elif self.target == 'set':
             msg = """
-            cal set d:src
-            cal set d:tt
-            cal set d:tn
+        cal set d:src
+        cal set d:tt
+        cal set d:tn
 
-            cal set g:var
-            cal set g:lab
+        cal set g:var
+        cal set g:lab
 
-            following, insert answer
+        following, insert answer
             """
             print(msg)
-        elif self.rootCommand == 'order':
+        elif self.target == 'sw':
             msg = """
-            cal order meths w pca
+        cal switch <target_project>
             """
             print(msg)
-        elif self.rootCommand == 'list':
+        elif self.target == 'order':
             msg = """
-            cal list vars
-            cal list vars n
-            cal list vars c
+        cal order meths w pca
+            """
+            print(msg)
+        elif self.target == 'list':
+            msg = """
+        cal list vars
+        cal list vars n
+        cal list vars c
             """
             print(msg)
         else:
@@ -370,14 +379,17 @@ class Command:
                     self.flagSetting()
         elif self.rootCommand == '-help':
             if self.manyArgs > 1:
-                self.options = self.args[1:]
-                self.flagSetting()
+                self.target = self.args[1]
+                self.all = False
+                if self.manyArgs > 2:
+                    self.options = self.args[2:]
+                    self.flagSetting()
         else:
             return False, '----not recognized root'
         return True, '----args setting'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['apply', 'new', 'switch', 'add', 'del', 'cl', 'order', 'xp', 'list', 'set']
+        availableCommands = ['app', 'new', 'sw', 'add', 'del', 'cl', 'order', 'xp', 'list', 'set']
         if self.rootCommand in availableCommands:
             return True, 'the command is available'
         else:
