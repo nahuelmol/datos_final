@@ -8,20 +8,21 @@
 ### This application
 
 For the Data Laboratory final exam I had to apply PCA using the R programming language.
-This rspository contains the same project, but also a version implemented in Python and extending by adding other analytical methods.
+This repository contains the same project, but also a version implemented in Python as a CMD tool that extends functionalities, adding more analytical methods.
 
-This application is a CLI tool that aims for:
-* handling raw data
+This application aims for:
+* data handling
 * data cleaning
 * data processing
-* data visualization through plots or data-file outputs
+* data visualization through plots and log files
 
-### Libraries used
+### Used libraries
 
 * Sklearn: provides machine learning algorithms making possible to build classification and regression models, implementing unsupervised techniques.
 * Scipy: provides scientific algorithms needed for statistics and signal processing. It makes possible to build polynomials that better fits a set of values.
 * Numpy: introduce multi dimensional arrays and a set of mathematical functions to operate on these ndarrays.
 * Pandas: allows to work with external data files in python which becomes very powerful at combining it with numpy functionalities.
+* Gnuplot: used externally to builds the 3D plots once the .dat files are ready
 
 ### Implemented methods
 
@@ -34,24 +35,29 @@ For now, the following methods were implemented:
 
 #### Classification algorithms
 * Logistic Regression
-* Decision Tree as classifier
-* Random Forest classifier
-* K-nearest neighbors classifier
-* Support vector classifer
+* Decision Tree as Classifier
+* Random Forest Classifier
+* K-Nearest Neighbors Classifier
+* Support Vector Classifer
 
 #### Regression algorithms
-* Linear regression
-* Ridge regression
-* Decision Tree regressor
-* K-nearest neighbor regressor
-* Support vector regressor
+* Linear Regression
+* Ridge Regression
+* Decision Tree Regressor
+* K-nearest Neighbor Regressor
+* Support Vector Regressor
 
 ### Polynomial algorithms
 * Lagrange
 * Chebyshev
-* Taylor (in progress)
+* Taylor (in discussion)
 
 ### Common commands
+
+Information about these commands can be found by using the help command.
+```
+cal help
+```
 
 Let's create a new project called heisenberg (walter white)
 
@@ -65,7 +71,7 @@ Later, for setting an specific source data file:
 cal set d:src
 ```
 
-Global variables or labels can be setted for exploratory univariate analysis like building histograms, boxplots or printing dispersion statistics.
+Global variables and labels can be setted for exploratory univariate analysis like building histograms, boxplots or printing dispersion statistics.
 
 ```
 cal set g:var
@@ -264,7 +270,6 @@ set dgrid3d 50, 50, 2
 splot "Grid" using 6:5:4 with pm3d
 ```
 
-
 ### Installation
 
 This repository should be cloned in your local machine or just download it as a zip. Later unzip it at an specific directory. Then use `pip` to all install libraries needed.
@@ -279,4 +284,4 @@ pyinstaller is used to compile the executable:
 pyinstaller cal.py
 ```
 
-The following is to paste the path to this executable in environment variables. This way the utility can be used globally.
+The following is to paste the path to this executable in the environment variables. This way the application can be used globally from the CMD.
