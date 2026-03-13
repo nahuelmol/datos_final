@@ -18,7 +18,9 @@ def does_exists(ref):
     return False
 
 class Explorer:
-    def __init__(self, data, cmd):
+    def __init__(self, cmd):
+        datapath = current_project(['datapath','src'])
+        res, data = get_data(datapath, '\t')
         self.data   = data
         self.cmd    = cmd
         self.MSG    = ''

@@ -25,7 +25,9 @@ def data_separator(data, ref):
     return data, target
 
 class Reductor:
-    def __init__(self, data, cmd):
+    def __init__(self, cmd):
+        datapath = current_project(['datapath','src'])
+        res, data = get_data(datapath, ',')
         self.data   = data
         self.ref    = cmd.ref
         self.data, self.target = data_separator(self.data, cmd.ref)

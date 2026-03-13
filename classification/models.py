@@ -48,7 +48,6 @@ def check_to_impute(X):
         X = imputer.fit_transform(X)
         return X
 
-
 def split_asker(cmd):
     res = input('split original data?')
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):

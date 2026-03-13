@@ -2,8 +2,8 @@ import sys
 import pandas as pd
 import numpy as np
 
-from dimreduction.kind import DimReduction
-from classification.kind import Classification
+from abss.data_setter import get_data
+from abss.fs import current_project
 from regression.kind import Regression
 from explo.kind import ExploratoryAnalysis
 from approximation.kind import Approximation
@@ -13,11 +13,16 @@ from abss.commands import Command
 from abss.change import Change
 from abss.checker import checker
 from abss.fs import newProject, delProject, current_project, outProject, switchProject
-from abss.story import StoryCleaner, order
+from abss.story import StoryCleaner, order, add
 from abss.dataSetting import setData, delData
 from abss.plotViewer import seePlot
 from abss.outputs import delOutputs
 from abss.glovary import setGlovar
+
+from classification.models import Classifier
+from regression.models import Regressor
+from dimreduction.methods import Reductor
+from approximation.polys import Polymaker
 
 def switch(cmd):
     if cmd.h == True:
@@ -25,13 +30,19 @@ def switch(cmd):
         return True, 'helping'
     if cmd.rootCommand == 'app':
         if cmd.targetType == 'dr':
-            DimReduction(cmd)
+            REDUCTOR = Reductor(data, cmd)
+            REDUCTOR.build()
         elif cmd.targetType == 'c':
-            Classification(cmd)
+            CLASSIFIER = Classifier(cmd)
+            CLASSIFIER.build()
+            add('models', CLASSIFIER.REPORT)
         elif cmd.targetType == 'r':
-            Regression(cmd)
+            REGRESSOR = Regressor(cmd)
+            REGRESSOR.build()
+            add('models', CLASSIFIER.REPORT)
         elif cmd.targetType == 'a':
-            Approximation(cmd)
+            POLY = Polymaker(cmd)
+            POLY.build_poly()
         else:
             return False, '--not recognized process'
     elif cmd.rootCommand == 'change':
@@ -69,7 +80,9 @@ def switch(cmd):
         msg = '----list:{}:done'.format(cmd.target)
         return True, msg
     elif cmd.rootCommand == 'xp':
-        res, msg = ExploratoryAnalysis(cmd)
+        EXPLORER = Explorer(cmd)
+        EXPLORER.build()
+        add('exploratory_analysis', EXPLORER.REPORT)
         return True, msg
     elif cmd.rootCommand == 'new':
         if cmd.targetType == 'project':
