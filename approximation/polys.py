@@ -524,7 +524,6 @@ class Polymaker:
         )
         points  = np.column_stack([lons, lats])
         hull    = ConvexHull(points)
-        #hull    = Delaunay(points)
 
         xmin, ymin = points[hull.vertices].min(axis=0)
         xmax, ymax = points[hull.vertices].max(axis=0)
@@ -550,7 +549,6 @@ class Polymaker:
             norm=norm
         )
         ax.scatter(lons, lats, c="cyan", s=10, edgecolor="k")
-        #cmap = plt.contourf(xi, yi, zi)
         ax.set_xlim(-68.752,-68.736)
         ax.set_ylim(-31.028,-31.017)
         ax.set_xlabel("Lon")
@@ -558,7 +556,6 @@ class Polymaker:
         ax.set_title(title)
 
         plt.colorbar(im, label=title)
-        #fig.colorbar(cmap)
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 

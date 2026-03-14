@@ -2,27 +2,23 @@ import sys
 import pandas as pd
 import numpy as np
 
-from abss.data_setter import get_data
-from abss.fs import current_project
-from regression.kind import Regression
-from explo.kind import ExploratoryAnalysis
-from approximation.kind import Approximation
-
-from abss.lister import list_vars, list_labs
-from abss.commands import Command
 from abss.change import Change
 from abss.checker import checker
-from abss.fs import newProject, delProject, current_project, outProject, switchProject
-from abss.story import StoryCleaner, order, add
+from abss.commands import Command
+from abss.data_setter import get_data
 from abss.dataSetting import setData, delData
-from abss.plotViewer import seePlot
-from abss.outputs import delOutputs
+from abss.fs import newProject, delProject, current_project, outProject, switchProject
 from abss.glovary import setGlovar
+from abss.lister import list_vars, list_labs
+from abss.outputs import delOutputs
+from abss.plotViewer import seePlot
+from abss.story import StoryCleaner, order, add
 
 from classification.models import Classifier
 from regression.models import Regressor
 from dimreduction.methods import Reductor
 from approximation.polys import Polymaker
+from exploratory.exploratories import Explorer 
 
 def switch(cmd):
     if cmd.h == True:
