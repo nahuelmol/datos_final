@@ -23,7 +23,7 @@ from abss.fs import current_project, taken
 from abss.setter import setting
 
 from classification.plotmaker import log_plot, cmx_plot 
-from dimreduction.dim_reduction import data_separator
+from dimreduction.methods import data_separator
 
 def check_var_type(data, ref):
     if is_numeric_dtype(data[ref]):

@@ -249,7 +249,10 @@ class Command:
         if '-h' in self.args:
             self.h = True
             self.all = False
-            return True, 'done'
+            self.target = self.rootCommand
+            print('{} will be analyzed'.format(self.rootCommand))
+            self.helper()
+            return True, 'help working!'
         if self.rootCommand == 'app':
             if self.manyArgs > 1:
                 tt = self.args[1].split(':')
@@ -264,8 +267,9 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
                     self.flagSetting()
+                return True, 'done!'
             else:
-                print('you need more arguments')
+                return False, 'More arguments needed'
         elif self.rootCommand == 'new':
             if self.manyArgs > 1:
                 cntt = self.args[1].split(':')
@@ -274,17 +278,16 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[1:]
                     self.flagSetting()
+                return True, 'done!'
             else:
-                print('you need more arguments')
+                return False, 'More arguments needed'
         elif self.rootCommand == 'current':
             if self.manyArgs == 1:
                 self.options = None
             else:
-                print('too much arguments')
+                print('Too much arguments for this solely command')
         elif self.rootCommand == 'cl':
-            if self.manyArgs == 1:
-                print('insuficient args')
-            elif self.manyArgs > 1:
+            if self.manyArgs > 1:
                 self.target = self.args[1]
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
@@ -292,16 +295,23 @@ class Command:
                 else:
                     self.all = True
                 self.flagSetting()
+                return True, 'done!'
+            else:
+                return False, 'More arguments needed'
         elif self.rootCommand == 'xp':
             if self.manyArgs == 1:
                 self.all = True
             elif self.manyArgs > 1:
                 self.options = self.args[1:]
                 self.flagSetting()
+                return True, 'done!'
+            return False, 'More arguments needed'
         elif self.rootCommand == 'see':
             if self.manyArgs > 1:
                 self.options = self.args[1:]
                 self.flagSetting()
+                return True, 'done!'
+            return False, 'More arguments needed'
         elif self.rootCommand == 'sw':
             if self.manyArgs > 1:
                 res = self.args[1].split(':')
@@ -310,7 +320,7 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
             else:
-                print('you need more arguments')
+                return False, 'More arguments needed'
         elif self.rootCommand == 'set':
             if self.manyArgs > 1:
                 res = self.args[1].split(':')
@@ -320,10 +330,10 @@ class Command:
                     self.options = self.args[2:]
                     self.flagSetting()
             else:
-                print('you need more arguments')
+                return False, 'More arguments needed'
         elif self.rootCommand == 'list':
             if self.manyArgs == 1:
-                print('not sufficient args')
+                print('not sufficient arguments')
             elif self.manyArgs > 1:
                 self.target = self.args[1]
                 if self.manyArgs > 2:
@@ -339,10 +349,6 @@ class Command:
                     self.flagSetting() 
             else:
                 print('you need more arguments')
-        elif self.rootCommand == 'out':
-            if self.manyArgs > 1:
-                print('{} not allowed'.format(self.args[1:]))
-                self.options = None
         elif self.rootCommand == 'change':
             if sel.manyArgs > 1:
                 self.options = self.args[1:]
@@ -366,9 +372,9 @@ class Command:
             elif (self.manyArgs == 1):
                 self.target = current_project()
             elif (self.manyArgs > 2):
-                print('args n:',self.manyArgs)
-                print('args: ', self.args)
-                print('to many arguments')
+                print('Args n:',self.manyArgs)
+                print('Args: ', self.args)
+                return False, 'Too many arguments'
             else:
                 print('misterious error')
         elif self.rootCommand == 'order':
@@ -377,7 +383,13 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
                     self.flagSetting()
-        elif self.rootCommand == '-help':
+
+        elif self.rootCommand == 'out':
+            if self.manyArgs > 1:
+                print('{} not allowed'.format(self.args[1:]))
+                self.options = None
+
+        elif self.rootCommand == 'h' or self.rootCommand == '-help':
             if self.manyArgs > 1:
                 self.target = self.args[1]
                 self.all = False
@@ -386,12 +398,11 @@ class Command:
                     self.flagSetting()
         else:
             return False, '----not recognized root'
-        return True, '----args setting'
+        return True, '----setting args'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['app', 'new', 'sw', 'add', 'del', 'cl', 'order', 'xp', 'list', 'set']
-        if self.rootCommand in availableCommands:
-            return True, 'the command is available'
-        else:
-            return False, 'command is not available'
+        availableCommands = ['add', 'app', 'cl', 'current', 'del', 'list'
+                             'new', 'order', 'set', 'sw', 'xp']
+        if not (self.rootCommand in availableCommands):
+            return False, 'Not available command'
 

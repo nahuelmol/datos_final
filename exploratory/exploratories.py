@@ -7,7 +7,7 @@ from abss.fs import taken, current_project
 from abss.data_setter import get_data
 
 from datetime import datetime
-from explo.plots import Plot
+from exploratory.plots import Plot
 
 def does_exists(ref):
     datapath= current_project(['datapath', 'src'])

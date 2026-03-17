@@ -48,7 +48,7 @@ def switch(cmd):
         res, msg = checker(cmd)
         return True, msg
     elif cmd.rootCommand == 'current':
-        msg = current_project(['project_name'])
+        msg = 'The current project is {}'.format(current_project(['project_name']))
         return True, msg
     elif cmd.rootCommand == 'cl':
         SC = StoryCleaner(cmd)
@@ -75,21 +75,26 @@ def switch(cmd):
             return False, '----list:unknown target'
         msg = '----list:{}:done'.format(cmd.target)
         return True, msg
+
     elif cmd.rootCommand == 'xp':
         EXPLORER = Explorer(cmd)
         EXPLORER.build()
         add('exploratory_analysis', EXPLORER.REPORT)
         return True, msg
+
     elif cmd.rootCommand == 'new':
         if cmd.targetType == 'project':
             newProject(cmd)
             return True, '----new:project:done'
+
     elif cmd.rootCommand == 'out':
         outProject()
         return True, '----out:project:done'
+
     elif cmd.rootCommand == 'see':
         seePlot(cmd)
         return True, '----see:project:done'
+
     elif cmd.rootCommand == 'sw':
         if cmd.targetType == 'project':
             switchProject(cmd)
@@ -97,6 +102,7 @@ def switch(cmd):
             return False, '----switch:unknown'
         msg = '----switch:{}:done'.format(cmd.targetType)
         return True, msg
+
     elif cmd.rootCommand == 'set':
         if cmd.targetType == 'data':
             setData(cmd)
@@ -106,6 +112,7 @@ def switch(cmd):
             return False, '----set:unknown'
         msg = '----set:{}:done'.format(cmd.targetType)
         return True, msg
+
     elif cmd.rootCommand == 'order':
         if cmd.target == 'meths':
             order('methods', cmd)
@@ -115,6 +122,7 @@ def switch(cmd):
             return False, '----unrecognized target'
         msg = '----order:{}:done'.format(cmd.target)
         return True, msg
+
     elif cmd.rootCommand == '-help':
         cmd.helper()
         return True, 'helping'
@@ -128,6 +136,10 @@ if __name__ == "__main__":
         command = Command(sys.argv)
     else:
         msg = 'please, be serious, type a valid command'
+        sys.exit(msg)
+    res, msg = command.isAvailableRootCommand()
+    if res == False:
+        print(msg)
         sys.exit(msg)
     command.setCommand()
     res, msg = command.setArgs()

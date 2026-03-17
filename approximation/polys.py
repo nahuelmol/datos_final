@@ -499,16 +499,16 @@ class Polymaker:
         bw_method = 0.4
         if self.linetype == 'R':
             z   = df['RA'].to_numpy()
-            title = 'Resistivity (ohm)'
+            title = 'Resistividad (ohm)'
         elif self.linetype == 'C':
             z   = df['CA'].to_numpy()
-            title = 'Conductivity'
+            title = 'Conductividad'
         elif self.linetype == 'I':
             z   = df['IP'].to_numpy()
-            title = 'IP-conductivity'
+            title = 'IP-conductividad'
         elif self.linetype == 'O':
             z   = df['OP'].to_numpy()
-            title = 'OP-conductivity'
+            title = 'OP-conductividad'
 
         filepath = 'heat_map_talacasto_{}.png'.format(self.linetype)
 
