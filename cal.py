@@ -2,7 +2,6 @@ import sys
 import pandas as pd
 import numpy as np
 
-from abss.change import Change
 from abss.checker import checker
 from abss.commands import Command
 from abss.data_setter import get_data
@@ -41,9 +40,6 @@ def switch(cmd):
             POLY.build_poly()
         else:
             return False, '--not recognized process'
-    elif cmd.rootCommand == 'change':
-        res, msg = Change(cmd)
-        return True, msg
     elif cmd.rootCommand == 'ch':
         res, msg = checker(cmd)
         return True, msg
@@ -135,11 +131,10 @@ if __name__ == "__main__":
     if (len(sys.argv) > 0):
         command = Command(sys.argv)
     else:
-        msg = 'please, be serious, type a valid command'
+        msg = 'Please, be serious, type a valid command'
         sys.exit(msg)
     res, msg = command.isAvailableRootCommand()
     if res == False:
-        print(msg)
         sys.exit(msg)
     command.setCommand()
     res, msg = command.setArgs()

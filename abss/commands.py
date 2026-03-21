@@ -9,13 +9,13 @@ class Command:
                                        '-rs', '-ts', 'w', '-cls', 'is','-lt']
         self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm', 'cat', 'dis', 'box']
         self.aloneFlags = {}
-        self.boxplot = False
+        self.boxplot    = False
         self.categorics = False
-        self.changeField = ''
-        self.class_ = 0
+        self.changeField= ''
+        self.class_     = 0
         self.currentFlags = {}
         self.cond = ''
-        self.corr_matrix = False
+        self.corr_matrix= False
         self.datatarget = ''
         self.dispersion = False
         self.h = False
@@ -25,17 +25,17 @@ class Command:
         self.mod    = None
         self.ncomps = 2
         self.number = 0
-        self.random_state = 42
-        self.ref        = None
-        self.rootCommand = None
-        self.target = None
+        self.random_state   = 42
+        self.ref            = None
+        self.rootCommand    = None
+        self.target     = None
         self.targetType = None
         self.test_size  = 0.2
-        self.forced = False
-        self.output = None
-        self.options = []
-        self.unique = False
-        self.varType = None
+        self.forced     = False
+        self.output     = None
+        self.options    = []
+        self.unique     = False
+        self.varType    = None
 
     def setReference(self, ref):
         self.ref = ref
@@ -58,7 +58,7 @@ class Command:
         cal set
         cal xp
         cal current
-        cal switch
+        cal sw
             """
             print(msg)
         elif self.target == 'app':
@@ -142,7 +142,7 @@ class Command:
             print(msg)
         elif self.target == 'sw':
             msg = """
-        cal switch <target_project>
+        cal sw p:<target_project>
             """
             print(msg)
         elif self.target == 'order':
@@ -403,6 +403,8 @@ class Command:
     def isAvailableRootCommand(self):
         availableCommands = ['add', 'app', 'cl', 'current', 'del', 'list'
                              'new', 'order', 'set', 'sw', 'xp']
-        if not (self.rootCommand in availableCommands):
+        if not (self.args[0] in availableCommands):
             return False, 'Not available command'
+        else:
+            return True, 'Available command'
 

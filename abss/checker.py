@@ -148,5 +148,3 @@ def checker(cmd):
         return False, msg
     return True, '----done----'
 
-
-
