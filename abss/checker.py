@@ -5,8 +5,19 @@ from abss.fs import current_project
 from abss.story import set_condition
 from abss.data_setter import checkAvailableData
 
-def printGreen(text, what):
-    print(text , f"\033[32m {what} \033[0m")
+def printit(text, what, color):
+    numcode = ''
+    if color == 'red':
+        numcode = '31'
+    elif color == 'green':
+        numcode = '32'
+    elif color == 'yellow':
+        numcode = '33'
+    elif color == 'blue':
+        numcode = '34'
+    else:
+        print('color not found')
+    print(text , f"\033[{numcode}m {what} \033[0m")
     print(f"\033[32m {text}\033[0m")
 
 def takeType(file, ft):
@@ -78,7 +89,7 @@ def memocheck(cmd):
         if cmd.all == True:
             print('{} - {} - {}'.format(each[it], each['time'], each['n']))
             if cmd.ac == True:
-                printGreen(each['ac'], 'ac')
+                printit(each['ac'], 'ac', 'green')
             return True, '--done--'
         else:
             res, code = set_condition(cmd.cond)
@@ -92,7 +103,7 @@ def memocheck(cmd):
                 else:
                     print('{}, {}, {}'.format(each[it], each['n'], each['time']))
                     if cmd.ac == True:
-                        printGreen(each['ac'], 'ac')
+                        printit(each['ac'], 'ac', 'green')
             return True, '--done--'
 
 def checker(cmd):
@@ -107,6 +118,7 @@ def checker(cmd):
         elif '-all' in cmd.currentFlags:
             for file in files:
                 print('file: ', file)
+
     elif cmd.target == 'mods':
         res, msg = memocheck(cmd)
         if res == False:
@@ -137,6 +149,7 @@ def checker(cmd):
         pname = current_project(['project_name'])
         print('current project {}'.format(pname))
         return True, '----done----curr----'
+
     elif cmd.target == '-all':
         res, cnt = checkAvailableData()
         if res == False:
