@@ -450,12 +450,12 @@ class Polymaker:
         datarange = 10
         if which == 'R':
             output      = self.output_ra
-            poly_label  = 'Resistivity'
+            poly_label  = 'Resistividad'
             scatter = self.rest_ap
             datarange = 5
         elif which == 'C':
             output      = self.output_ca
-            poly_label  = 'Conductivity'
+            poly_label  = 'Conductividad'
             scatter = self.cond_ap
             datarange = 80
         scatter_label = 'Data'
@@ -484,7 +484,7 @@ class Polymaker:
         else:
             df = pd.read_csv('data\Profile{}.dat'.format(int(which)))
 
-        ready.plot(kind='box', title='Aparente Resistivity(ohm)')
+        ready.plot(kind='box', title='Resistividad Aparente (ohm)')
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
