@@ -24,4 +24,3 @@ def Plotter(cs, title, filename, ref):
     plt.savefig(filepath, dpi=300)
     plt.close()
 
-

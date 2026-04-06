@@ -9,13 +9,14 @@ from abss.data_setter import get_data
 from datetime import datetime
 from exploratory.plots import Plot
 
-def does_exists(ref):
-    datapath= current_project(['datapath', 'src'])
-    res, data    = get_data(datapath, ',')
-    if res == True:
-        if ref in data.columns.tolist():
-            return True
-    return False
+def insert_variable(which, data):
+    msg = '{}: insert variable now: '.format(which)
+    ref = input(msg)
+    if ref in data.columns.tolist():
+        return ref
+    else:
+        print('{} does not exists, try again!'.format(ref))
+        insert_variable(which, data)
 
 class Explorer:
     def __init__(self, cmd):
@@ -143,8 +144,7 @@ class Explorer:
         if(current_project(['global', 'hvar']) != None):
             ref = current_project(['global', 'hvar'])
         else:
-            print('dispersions: var does not exists')
-            ref = input('dispersions: insert variable now: ')
+            ref = insert_variable('dispersions', data)
         var = data[ref].var()
         std = data[ref].std()
         mea = data[ref].mean()
@@ -164,8 +164,7 @@ class Explorer:
         if(current_project(['global', 'hvar']) != None):
             ref = current_project(['global', 'hvar'])
         else:
-            print('histogram: var does not exists')
-            ref = input('histogram: insert variable now: ')
+            ref = insert_variable('histogram', data)
         files   = {
             'histo':'histo_{}.png'.format(self.n),
             'histo_kde':'histo_{}_kde.png'.format(self.n),
@@ -186,10 +185,7 @@ class Explorer:
         if(current_project(['global', 'hvar']) != None):
             ref = current_project(['global', 'hvar'])
         else:
-            print('boxlplots: var does not exists')
-            ref = input('boxplots: insert variable now: ')
-            if not does_exists(ref):
-                self.message = '----boxplots:variable not exists'
+            ref = insert_variable('boxplots', data)
         files = {
             'boxplot_basic':'boxplot_{}_basic.png'.format(self.n)
         }

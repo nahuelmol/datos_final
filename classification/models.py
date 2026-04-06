@@ -43,9 +43,9 @@ def check_to_impute(X):
         where = np.where(np.isnan(X))[0]
         print('NaN: {}\nidx: {}'.format(np.isnan(X).any(), where))
         print('infinite:', np.isinf(X).any())
-        print("cleaning")
+        print('cleaning')
         imputer = SimpleImputer(strategy='mean') #median, most_frequent
-        X = imputer.fit_transform(X)
+        X       = imputer.fit_transform(X)
         return X
 
 def split_asker(cmd):
@@ -55,7 +55,10 @@ def split_asker(cmd):
         res, data = get_data(datapath, ',')
         cmd.ref = check_var_type(data, cmd.ref)
         data, target = data_separator(data, cmd.ref)
-        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=cmd.test_size, random_state=cmd.random_state)
+        X_train, X_test, y_train, y_test = train_test_split(data, 
+                                                            target, 
+                                                            test_size=cmd.test_size, 
+                                                            random_state=cmd.random_state)
         return True, X_train, X_test, y_train, y_test
     else:
         res, result = extract_data(cmd.ref)
@@ -192,7 +195,6 @@ class Classifier:
 
         classifier = RandomForestClassifier(n_estimators=nestm, random_state=ranst)
         classifier.fit(self.X_train, self.y_train)
-
         self.REPORT['outputs'] = {}
 
     def SupportVector(cmd):
@@ -204,5 +206,5 @@ class Classifier:
 
         classifier = SVC(kernel=kernel, C=C, gamma=gamma)
         classifier.fit(X_train, y_train)
-
         self.REPORT['outputs'] = {}
+
