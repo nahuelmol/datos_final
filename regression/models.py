@@ -10,7 +10,7 @@ import json
 
 from abss.setter import setting
 from abss.story import add
-from abss.data_setter import get_data
+from abss.dataSetting import getData
 from abss.fs import current_project, taken
 from regression.plotmaker import Plot
 

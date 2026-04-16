@@ -16,7 +16,7 @@ from sklearn.impute import SimpleImputer
 from datetime import datetime
 from pandas.api.types import is_numeric_dtype
 
-from abss.data_setter import get_data
+from abss.dataSetting import getData
 from abss.story import add
 from abss.dataSetting import extract_data
 from abss.fs import current_project, taken

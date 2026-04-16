@@ -4,8 +4,7 @@ import numpy as np
 
 from abss.checker import checker
 from abss.commands import Command
-from abss.data_setter import get_data
-from abss.dataSetting import setData, delData
+from abss.dataSetting import setData, delData, getData
 from abss.fs import newProject, delProject, current_project, outProject, switchProject
 from abss.glovary import setGlovar
 from abss.lister import list_vars, list_labs

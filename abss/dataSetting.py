@@ -3,6 +3,29 @@ import os
 import pandas as pd
 import numpy as np
 
+def getData(filepath, sep):
+    try:
+        df = pd.read_csv(filepath, sep)
+        return True, df
+    except:
+        print('err')
+        return False, None
+
+def checkAvailableData():
+    datapath = ''
+    with open('manifest.json', 'r') as f:
+        data = json.load(f)
+        datapath = data['datapath']
+    if os.path.exists(datapath):
+        cnts = os.listdir(datapath)
+        if len(cnts) > 0:
+            return True, cnts
+        else:
+            return False, None
+    else:
+        os.mkdir(datapath)
+        return False, None
+
 def availableFile(path):
     if os.path.exists(path):
         return True

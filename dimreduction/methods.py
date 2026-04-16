@@ -9,9 +9,8 @@ from pandas.api.types import is_object_dtype
 from sklearn.decomposition import PCA, FastICA
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
-from abss.fs import write_csv
 
-from abss.fs import current_project, taken
+from abss.fs import current_project, taken, write_csv
 from .plotmaker import Plotter
 from abss.story import add
 

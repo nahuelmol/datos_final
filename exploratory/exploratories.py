@@ -4,7 +4,7 @@ import numpy as np
 
 from abss.story import add
 from abss.fs import taken, current_project
-from abss.data_setter import get_data
+from abss.dataSetting import getData
 
 from datetime import datetime
 from exploratory.plots import Plot

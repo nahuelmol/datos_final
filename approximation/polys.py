@@ -19,7 +19,7 @@ from matplotlib.path import Path
 from matplotlib.colors import LogNorm
 
 from abss.fs import current_project, taken
-from abss.data_setter import get_data
+from abss.dataSetting import getData
 from abss.story import add
 from folium.plugins import HeatMap
 
