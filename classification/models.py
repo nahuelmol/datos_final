@@ -16,9 +16,8 @@ from sklearn.impute import SimpleImputer
 from datetime import datetime
 from pandas.api.types import is_numeric_dtype
 
-from abss.dataSetting import getData
 from abss.story import add
-from abss.dataSetting import extract_data
+from abss.dataSetting import extract_data, getData
 from abss.fs import current_project, taken
 from abss.setter import setting
 
@@ -52,7 +51,7 @@ def split_asker(cmd):
     res = input('split original data?')
     if(res == 's' or res == 'S' or res == 'si' or res == 'Si'):
         datapath = current_project(['datapath','src'])
-        res, data = get_data(datapath, ',')
+        res, data = getData(datapath, ',')
         cmd.ref = check_var_type(data, cmd.ref)
         data, target = data_separator(data, cmd.ref)
         X_train, X_test, y_train, y_test = train_test_split(data, 
@@ -78,7 +77,7 @@ class Classifier:
             self.classification = 'SVC' 
 
         datapath = current_project(['datapath','src'])
-        res, self.data = get_data(datapath, ',')
+        res, self.data = getData(datapath, ',')
 
         self.classifier = None
         self.target     = None

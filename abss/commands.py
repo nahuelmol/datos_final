@@ -270,6 +270,7 @@ class Command:
                 return True, 'done!'
             else:
                 return False, 'More arguments needed'
+
         elif self.rootCommand == 'new':
             if self.manyArgs > 1:
                 cntt = self.args[1].split(':')
@@ -281,11 +282,13 @@ class Command:
                 return True, 'done!'
             else:
                 return False, 'More arguments needed'
+
         elif self.rootCommand == 'current':
             if self.manyArgs == 1:
                 self.options = None
             else:
                 print('Too much arguments for this solely command')
+
         elif self.rootCommand == 'cl':
             if self.manyArgs > 1:
                 self.target = self.args[1]
@@ -298,6 +301,7 @@ class Command:
                 return True, 'done!'
             else:
                 return False, 'More arguments needed'
+
         elif self.rootCommand == 'xp':
             if self.manyArgs == 1:
                 self.all = True
@@ -306,12 +310,14 @@ class Command:
                 self.flagSetting()
                 return True, 'done!'
             return False, 'More arguments needed'
+
         elif self.rootCommand == 'see':
             if self.manyArgs > 1:
                 self.options = self.args[1:]
                 self.flagSetting()
                 return True, 'done!'
             return False, 'More arguments needed'
+
         elif self.rootCommand == 'sw':
             if self.manyArgs > 1:
                 res = self.args[1].split(':')
@@ -321,6 +327,7 @@ class Command:
                     self.options = self.args[2:]
             else:
                 return False, 'More arguments needed'
+
         elif self.rootCommand == 'set':
             if self.manyArgs > 1:
                 res = self.args[1].split(':')
@@ -331,6 +338,7 @@ class Command:
                     self.flagSetting()
             else:
                 return False, 'More arguments needed'
+
         elif self.rootCommand == 'list':
             if self.manyArgs == 1:
                 print('not sufficient arguments')
@@ -341,6 +349,7 @@ class Command:
                     if self.manyArgs > 3:
                         self.options = self.args[3:]
                         self.flagSetting()
+
         elif self.rootCommand == 'ch':
             if self.manyArgs > 1:
                 self.target = self.args[1]
@@ -349,6 +358,7 @@ class Command:
                     self.flagSetting() 
             else:
                 print('you need more arguments')
+
         elif self.rootCommand == 'change':
             if sel.manyArgs > 1:
                 self.options = self.args[1:]
@@ -377,6 +387,7 @@ class Command:
                 return False, 'Too many arguments'
             else:
                 print('misterious error')
+
         elif self.rootCommand == 'order':
             if self.manyArgs > 1:
                 self.target = self.args[1]
@@ -396,6 +407,7 @@ class Command:
                 if self.manyArgs > 2:
                     self.options = self.args[2:]
                     self.flagSetting()
+
         else:
             return False, '----not recognized root'
         return True, '----setting args'

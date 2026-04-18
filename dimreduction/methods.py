@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from abss.fs import current_project, taken, write_csv
 from .plotmaker import Plotter
 from abss.story import add
+from abss.dataSetting import getData
 
 def data_separator(data, ref):
     target = data.pop(ref)
@@ -26,7 +27,7 @@ def data_separator(data, ref):
 class Reductor:
     def __init__(self, cmd):
         datapath = current_project(['datapath','src'])
-        res, data = get_data(datapath, ',')
+        res, data = getData(datapath, ',')
         self.data   = data
         self.ref    = cmd.ref
         self.data, self.target = data_separator(self.data, cmd.ref)

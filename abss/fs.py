@@ -170,7 +170,7 @@ def switchProject(cmd):
     projipath= 'prs\projects.txt'
     pname = current_project(['project_name'])
     if cmd.target == pname:
-        print('you are already in {} project'.format(pname))
+        print('You are already in {} project'.format(pname))
         return True
 
     currentpath = 'prs\{}\manifest.json'.format(pname)

@@ -27,7 +27,7 @@ class Polymaker:
     def __init__(self, cmd):
         self.pname = current_project(['project_name'])
         datapath = current_project(['datapath','src'])
-        res, data = get_data(datapath, '\t')
+        res, data = getData(datapath, '\t')
         filename = datapath.split('\\')[-1]
 
         self.linetype   = cmd.linetype

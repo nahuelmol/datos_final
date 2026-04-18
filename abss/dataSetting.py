@@ -113,7 +113,6 @@ def delData(cmd):
     with open('manifest.json', 'w') as f:
         json.dump(cnt, f, indent=4)
 
-
 def setData(cmd):
     cnt = {}
     with open('manifest.json', 'r') as f:

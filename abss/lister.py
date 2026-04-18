@@ -1,9 +1,9 @@
 from abss.fs import current_project
-from abss.data_setter import get_data
+from abss.dataSetting import getData
 
 def list_vars(cmd):
     datapath = current_project(['datapath', 'src'])
-    res, data = get_data(datapath)
+    res, data = getData(datapath)
     if cmd.varType == 'n':
         for col in data.select_dtypes(include=["number"]).columns:
             print(col)
@@ -18,7 +18,7 @@ def list_vars(cmd):
 
 def list_labs(cmd):
     datapath = current_project(['datapath', 'src'])
-    res, data = get_data(datapath)
+    res, data = getData(datapath)
     for label in data.index:
         print(label)
 
