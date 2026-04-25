@@ -5,6 +5,8 @@ import pandas as pd
 from datetime import date, datetime
 
 def current_project(val):
+    if not (os.path.exists('manifest.json')):
+        return None
     with open('manifest.json', 'r') as f:
         cnt = json.load(f)
         for key in val:

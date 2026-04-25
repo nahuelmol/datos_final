@@ -3,7 +3,7 @@ import os
 
 from abss.fs import current_project
 from abss.story import set_condition
-from abss.data_setter import checkAvailableData
+from abss.dataSetting import checkAvailableData
 
 def printit(text, what, color):
     numcode = ''

@@ -1,7 +1,8 @@
 import cv2
 import os
 import pyautogui
-import imghdr
+from PIL import Image
+#import imghdr
 
 from abss.fs import current_project
 
@@ -44,10 +45,11 @@ def find_plt_file(code, number):
     outs = []
     for file in files:
         filepath = 'prs\{}\outputs\{}'.format(pname, file)
-        if(imghdr.what(filepath) == 'png'):
-            outs.append(1)
-        else:
-            outs.append(0)
+        with Image.open(filepath) as img:
+            if img.format.lower() == 'png':
+                outs.append(1)
+            else:
+                outs.append(0)
 
     for idx, item in enumerate(outs):
         if item == 0:

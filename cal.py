@@ -43,6 +43,8 @@ def switch(cmd):
         res, msg = checker(cmd)
         return True, msg
     elif cmd.rootCommand == 'current':
+        if current_project(['project_name']) == None:
+            return False, 'There is not a current project'
         msg = 'The current project is {}'.format(current_project(['project_name']))
         return True, msg
     elif cmd.rootCommand == 'cl':

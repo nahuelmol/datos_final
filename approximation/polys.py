@@ -5,7 +5,7 @@ import math
 import matplotlib.pyplot as plt
 import plotly as px
 import seaborn as sns
-import folium
+#import folium
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
@@ -21,7 +21,7 @@ from matplotlib.colors import LogNorm
 from abss.fs import current_project, taken
 from abss.dataSetting import getData
 from abss.story import add
-from folium.plugins import HeatMap
+#from folium.plugins import HeatMap
 
 class Polymaker:
     def __init__(self, cmd):
