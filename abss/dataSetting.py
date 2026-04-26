@@ -110,13 +110,15 @@ def delData(cmd):
     for each in which:
         for cada in cnt['datapath'][each]:
             cnt['datapath'][each][cada] = [] 
-    with open('manifest.json', 'w') as f:
-        json.dump(cnt, f, indent=4)
+    if os.path.exists('manifest.json'):
+        with open('manifest.json', 'w') as f:
+            json.dump(cnt, f, indent=4)
 
 def setData(cmd):
     cnt = {}
-    with open('manifest.json', 'r') as f:
-        cnt = json.load(f)
+    if os.path.exists('manifest.json'):
+        with open('manifest.json', 'r') as f:
+            cnt = json.load(f)
     if cmd.target == 'tt':
         print('gimme test data file')
         path = input(': ')

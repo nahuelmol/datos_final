@@ -413,8 +413,7 @@ class Command:
         return True, '----setting args'
 
     def isAvailableRootCommand(self):
-        availableCommands = ['add', 'app', 'cl', 'current', 'del', 'list'
-                             'new', 'order', 'set', 'sw', 'xp']
+        availableCommands = ['add', 'app', 'cl', 'current', 'del', 'list', 'new', 'order', 'set', 'sw', 'xp']
         if not (self.args[0] in availableCommands):
             return False, 'Not available command'
         else:
