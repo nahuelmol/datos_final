@@ -120,12 +120,12 @@ def setData(cmd):
         with open('manifest.json', 'r') as f:
             cnt = json.load(f)
     if cmd.target == 'tt':
-        print('gimme test data file')
+        print('give me the data test file')
         path = input(': ')
         xpath = 'data\{}'.format(path)
         cnt['datapath']['test'].append(path)
     elif cmd.target == 'tn':
-        print('gimme a train data file')
+        print('give me a data train file')
         path = input(': ')
         path = 'data\{}'.format(path)
         cnt['datapath']['train'].append(path)
@@ -139,7 +139,7 @@ def setData(cmd):
         else:
             print('----error in src')
     else:
-        print('not valid target')
+        print('not a valid target')
     with open('manifest.json', 'w') as f:
         json.dump(cnt, f, indent=4)
 

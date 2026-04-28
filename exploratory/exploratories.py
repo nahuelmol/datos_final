@@ -54,7 +54,6 @@ class Explorer:
             self.MSG = '{}\n{}'.format(self.MSG, self.message)
             return True, self.MSG
         else:
-
             if self.cmd.corr_matrix == True:
                 self.correlation_matrix(self.data)
                 self.n = taken('exploratory_analysis', 'corr_matrix')
@@ -133,7 +132,7 @@ class Explorer:
         }
         self.REPORT['outputs'] = files
         PLOT = Plot(files['categorical_plot'], data[ref])
-        res  = PLOT.hist()
+        res  = PLOT.cate()
         if res == True:
             self.message = '----categorical view:done!'
         else:
@@ -193,3 +192,4 @@ class Explorer:
         PLOT = Plot(files['boxplot_basic'], data[ref])
         PLOT.boxplot()
         self.message = '----boxplots:done!'
+

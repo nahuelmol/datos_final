@@ -22,7 +22,7 @@ class Plot:
         plt.savefig(self.fpath, dpi=300)
         plt.close()
 
-    def hist(self):
+    def cate(self):
         sns.countplot(x=self.data)
         pname = current_project(['project_name'])
         plt.savefig(self.fpath, dpi=300)
