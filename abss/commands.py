@@ -5,8 +5,7 @@ class Command:
         self.ac     = False
         self.args   = args[1:]
         self.all    = True
-        self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', 
-                                       '-rs', '-ts', 'w', '-cls', 'is','-lt']
+        self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', '-rs', '-ts', 'w', '-cls', 'is','-lt']
         self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm', 'cat', 'dis', 'box']
         self.aloneFlags = {}
         self.boxplot    = False
@@ -159,7 +158,6 @@ class Command:
             print(msg)
         else:
             True, 'not command specified'
-        True, 'well provided command'
 
     def setType(self, code):
         if code == 'p':
@@ -184,7 +182,6 @@ class Command:
             return self.output
 
     def addFlags(self):
-        #here, flags activate or deactivate command variables like all, w (where), etc
         if '-r' in self.currentFlags:
             self.ref = self.currentFlags['-r']
         if '-o' in self.currentFlags:
@@ -206,7 +203,6 @@ class Command:
             self.number = self.currentFlags['is']
         if '-cls' in self.currentFlags:
             self.class_ = int(self.currentFlags['-cls'])
-
         if '-ac' in self.aloneFlags:
             self.ac = True
         if '-all' in self.aloneFlags:
@@ -250,9 +246,10 @@ class Command:
             self.h = True
             self.all = False
             self.target = self.rootCommand
-            print('{} will be analyzed'.format(self.rootCommand))
+            print('{} command will be analyzed'.format(self.rootCommand))
             self.helper()
-            return True, 'help working!'
+            return True, 'help is working!'
+
         if self.rootCommand == 'app':
             if self.manyArgs > 1:
                 tt = self.args[1].split(':')
@@ -341,7 +338,7 @@ class Command:
 
         elif self.rootCommand == 'list':
             if self.manyArgs == 1:
-                print('not sufficient arguments')
+                print('Not sufficient arguments')
             elif self.manyArgs > 1:
                 self.target = self.args[1]
                 if self.manyArgs > 2:
@@ -357,7 +354,7 @@ class Command:
                     self.options = self.args[2:]
                     self.flagSetting() 
             else:
-                print('you need more arguments')
+                print('You need more arguments')
 
         elif self.rootCommand == 'change':
             if sel.manyArgs > 1:

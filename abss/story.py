@@ -9,7 +9,6 @@ def add(what, report):
     with open(storypath, 'r') as file:
         current = json.load(file)
         current[what].append(report)
-
     with open(storypath, 'w') as file:
         json.dump(current, file, indent=4)
 
