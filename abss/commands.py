@@ -79,6 +79,7 @@ class Command:
         cal app r:rr
         cal app r:lr
 
+        cal app a:-
         cal app a:l
         cal app a:t
         cal app a:c

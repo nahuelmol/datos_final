@@ -25,19 +25,21 @@ from abss.story import add
 
 class Polymaker:
     def __init__(self, cmd):
-        self.pname = current_project(['project_name'])
-        datapath = current_project(['datapath','src'])
-        res, data = getData(datapath, '\t')
-        filename = datapath.split('\\')[-1]
+        self.pname  = current_project(['project_name'])
+        datapath    = current_project(['datapath','src'])
+        res, data   = getData(datapath, '\t')
+        filename    = datapath.split('\\')[-1]
 
         self.linetype   = cmd.linetype
-
         self.firstday   = [12, 13]
         self.secndday   = [1,2,3,4,5,6,7,8,9,10,11]
         self.mhu        = 0.00000125
         self.s          = 40
         self.w          = 2 * math.pi * 3600
         self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
+
+        if (data['P'] == None or data['St.'] == None):
+            return False, 'Profile and Station or not available in the EMI source file'
 
         self.profile    = data['P']
         self.stats      = data['St.']
@@ -326,9 +328,6 @@ class Polymaker:
                     print('{}/{}'.format(idx, len(self.framed_locs)))
                     new_lat = (row['Lat'] + self.framed_locs.iloc[idx+1]['Lat']) / 2
                     new_lon = (row['Lon'] + self.framed_locs.iloc[idx+1]['Lon']) / 2
-
-                    #print('current:{} - next:{}'.format(row['Lat'], self.framed_locs.iloc[idx+1]['Lat']))
-                    #print('\tnew lat: {}'.format(new_lat))
 
                 self.framed_locs.iloc[idx]['Lat'] = new_lat
                 self.framed_locs.iloc[idx]['Lon'] = new_lon
