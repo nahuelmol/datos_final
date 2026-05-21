@@ -43,8 +43,9 @@ class Command:
         self.rootCommand = self.args[0]
 
     def helper(self):
-        if self.target is not None:
-            print('Looking for: {} command\n'.format(self.target))
+        if self.target is None:
+            return False, "specified command is NULL/None"
+        print('Looking for: {} command\n'.format(self.target))
         if self.all == True:
             msg = """
         These are the main root commands:
@@ -58,8 +59,8 @@ class Command:
         cal xp
         cal current
         cal sw
+
             """
-            print(msg)
         elif self.target == 'app':
             msg = """
         reference can be previously specified, or now too
@@ -88,7 +89,6 @@ class Command:
         cal app a:s             -lt <linetype>
 
             """
-            print(msg)
         elif self.target == 'ch':
             msg = """
         cal ch meths    (all)
@@ -99,7 +99,6 @@ class Command:
 
         cal ch pols     (all)
             """
-            print(msg)
         elif self.target == 'cl':
             msg = """
         cal cl meths
@@ -115,19 +114,16 @@ class Command:
 
         cal cl pols
             """
-            print(msg)
         elif self.target == 'del':
             msg = """
         cal del p:<project name>
         cal del p:all
             """
-            print(msg)
         elif self.target == 'see':
             msg = """
         cal see w pca is 1
         cal see w log is 1
             """
-            print(msg)
         elif self.target == 'set':
             msg = """
         cal set d:src
@@ -139,26 +135,23 @@ class Command:
 
         following, insert answer
             """
-            print(msg)
         elif self.target == 'sw':
             msg = """
         cal sw p:<target_project>
             """
-            print(msg)
         elif self.target == 'order':
             msg = """
         cal order meths w pca
             """
-            print(msg)
         elif self.target == 'list':
             msg = """
         cal list vars
         cal list vars n
         cal list vars c
             """
-            print(msg)
         else:
             True, 'not command specified'
+        print(msg)
 
     def setType(self, code):
         if code == 'p':
@@ -247,9 +240,7 @@ class Command:
             self.h = True
             self.all = False
             self.target = self.rootCommand
-            print('{} command will be analyzed'.format(self.rootCommand))
-            self.helper()
-            return True, 'help is working!'
+            return True, 'help: active'
 
         if self.rootCommand == 'app':
             if self.manyArgs > 1:
