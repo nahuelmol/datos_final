@@ -131,13 +131,13 @@ cal app r:svr -r <reference>
 
 ### Approximation models
 
-Polynomial approximation can be applied using Lagrange or Chebyshev algorithms by indicating them with l or c respectively. 
+Polynomial approximation can be applied using Lagrange or Chebyshev algorithms by indicating l or c respectively. 
 
 ```
 cal app a:l
 ```
 
-Besides polynomials, lines can be used as approximations (which is not true because they're are just put together scattered points, that is the reason that not proccesing it carried out, there is not a model to generate)
+Besides polynomials, lines can be used as approximations (which is not true because they're are put together scattered points, that is why not proccesing is carried out, there is not a model to generate)
 
 ```
 cal app a:l -lt <linetype>
@@ -160,7 +160,7 @@ cal app a:s -lt <linetype>
 
 ### Checking
 
-To check the applied current project's methods or the models built, `ch` is used (which stands for check) as follows:
+`ch` (stands for check) is used for checking the applied current project's methods or the model built as follows:
 
 ```
 cal ch meths
