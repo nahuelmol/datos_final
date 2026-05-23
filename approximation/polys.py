@@ -5,7 +5,6 @@ import math
 import matplotlib.pyplot as plt
 import plotly as px
 import seaborn as sns
-#import folium
 
 from scipy.interpolate import lagrange, approximate_taylor_polynomial
 from scipy.special import chebyt
@@ -17,17 +16,23 @@ from datetime import datetime
 from pathlib import Path
 from matplotlib.path import Path
 from matplotlib.colors import LogNorm
+from pathlib import Path
 
 from abss.fs import current_project, taken
 from abss.dataSetting import getData
 from abss.story import add
-#from folium.plugins import HeatMap
 
 class Polymaker:
     def __init__(self, cmd):
+        self.data_state  = "AV" 
+        self.msg    = ''
         self.pname  = current_project(['project_name'])
         datapath    = current_project(['datapath','src'])
         res, data   = getData(datapath, '\t')
+        if data.empty:
+            self.data_state = "NA"
+            self.msg = "Data is empty"
+
         filename    = datapath.split('\\')[-1]
 
         self.linetype   = cmd.linetype
@@ -37,9 +42,6 @@ class Polymaker:
         self.s          = 40
         self.w          = 2 * math.pi * 3600
         self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
-
-        if (data['P'] == None or data['St.'] == None):
-            return False, 'Profile and Station or not available in the EMI source file'
 
         self.profile    = data['P']
         self.stats      = data['St.']
@@ -421,7 +423,7 @@ class Polymaker:
         ax_top.set_xlim(ax.get_xlim())
         ax_top.set_xticks(self.x)
         ax_top.set_xticklabels(self.stats)
-        ax_top.set_xlabel("Stations")
+        ax_top.set_xlabel("Estaciones")
 
         ax.legend()
         plt.savefig(filepath, bbox_inches='tight', dpi=300)

@@ -22,6 +22,7 @@ def switch(cmd):
     if cmd.h == True:
         cmd.helper()
         return True, 'helping'
+
     if cmd.rootCommand == 'app':
         if cmd.targetType == 'dr':
             REDUCTOR = Reductor(data, cmd)
@@ -36,21 +37,28 @@ def switch(cmd):
             add('models', CLASSIFIER.REPORT)
         elif cmd.targetType == 'a':
             POLY = Polymaker(cmd)
-            POLY.build_poly()
+            if POLY.data_state == "NA":
+                print(POLY.msg)
+            else:
+                POLY.build_poly()
         else:
             return False, '--not recognized process'
+
     elif cmd.rootCommand == 'ch':
         res, msg = checker(cmd)
         return True, msg
+
     elif cmd.rootCommand == 'current':
         if current_project(['project_name']) == None:
             return False, 'There is not a current project'
         msg = 'The current project is {}'.format(current_project(['project_name']))
         return True, msg
+
     elif cmd.rootCommand == 'cl':
         SC = StoryCleaner(cmd)
         SC.run()
         return True, SC.message
+
     elif cmd.rootCommand == 'del':
         if cmd.targetType == 'project':
             delProject(cmd)

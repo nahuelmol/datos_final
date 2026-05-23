@@ -5,10 +5,10 @@ import numpy as np
 
 def getData(filepath, sep):
     try:
-        df = pd.read_csv(filepath, sep)
+        df = pd.read_csv(filepath, sep=sep)
         return True, df
     except:
-        print('err')
+        print('Err: impossible to read')
         return False, None
 
 def checkAvailableData():

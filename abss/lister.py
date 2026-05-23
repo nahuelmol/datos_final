@@ -3,7 +3,7 @@ from abss.dataSetting import getData
 
 def list_vars(cmd):
     datapath = current_project(['datapath', 'src'])
-    res, data = getData(datapath)
+    res, data = getData(datapath, '\t')
     if cmd.varType == 'n':
         for col in data.select_dtypes(include=["number"]).columns:
             print(col)
