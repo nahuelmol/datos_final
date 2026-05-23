@@ -131,25 +131,29 @@ cal app r:svr -r <reference>
 
 ### Approximation models
 
-Polynomial approximation can be applied using Lagrange or Chebyshev algorithms by indicating l or c respectively. 
+Polynomial approximation can be applied using Lagrange or Chebyshev algorithms by indicating l or c respectively, and the data column to take:
 
 ```
 cal app a:l
 ```
 
-Besides polynomials, lines can be used as approximations (which is not true because they're are put together scattered points, that is why not proccesing is carried out, there is not a model to generate)
-
 ```
 cal app a:l -lt <linetype>
 ```
 
+Besides polynomials, lines can be used as approximations (these are created by connecting the scattered points, not proccesing is carried out, there is not a model to generate)
+
 In <linetype> should be specfied the variable to plot like 'R' for aparent resistivity, 'C' for aparent conductivity or 'IO' for the Ip and Op component in EMI prospecting data.
+
+First, profiles should be generated using the following command:
 
 ```
 cal app a:- -lt <linetype>
 ```
 
-`-` stands for setting. It's used for building EMI profiles from field sheets. Once profiles are ready, plotlines can be built.
+`-` stands for setting. It's used for building EMI profiles from the field sheets as long as it's specified. 
+
+Once profiles are ready, lines can be plotted using:
 
 ```
 cal app a:s -lt <linetype>
