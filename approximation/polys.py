@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import plotly as px
 import seaborn as sns
 
-from scipy.interpolate import lagrange, approximate_taylor_polynomial
+from scipy.interpolate import lagrange, approximate_taylor_polynomial, griddata
 from scipy.special import chebyt
 from scipy.spatial import ConvexHull, Delaunay
 from scipy.stats import gaussian_kde
@@ -14,9 +14,8 @@ from numpy.polynomial.polynomial import Polynomial
 from numpy.polynomial import chebyshev as cheby
 from datetime import datetime
 from pathlib import Path
-from matplotlib.path import Path
+from matplotlib.path import Path as MplPath
 from matplotlib.colors import LogNorm
-from pathlib import Path
 
 from abss.fs import current_project, taken
 from abss.dataSetting import getData
@@ -104,6 +103,11 @@ class Polymaker:
             self.n = taken('polys', self.poly_name)
             self.build_line()
             self.reset()
+            return True
+        elif self.poly_type == 'i':
+            self.poly_name = 'inter'
+            self.n = taken('polys', self.poly_name)
+            self.heatmap()
             return True
         else:
             print('not recognized poly')
@@ -368,7 +372,7 @@ class Polymaker:
         comb.to_csv(output_name, index=False)
 
     def basic_plot(self):
-        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['basic'])
+        filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['basic'])
         plt.figure()
         plt.plot(self.x, self.ip, 'o', label='Data')
         plt.plot(self.x, self.op, 'o', label='Data')
@@ -378,7 +382,7 @@ class Polymaker:
         plt.close()
 
     def polys_plot(self):
-        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['polys'])
+        filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['polys'])
         plt.figure()
         plt.plot(self.x_trained, self.output_ip, '-', label='Ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Op')
@@ -390,7 +394,7 @@ class Polymaker:
         plt.close()
 
     def lines_plot(self):
-        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['lines'])
+        filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['lines'])
         #plt.figure()
         fig, ax = plt.subplots()
 
@@ -430,7 +434,7 @@ class Polymaker:
         plt.close()
 
     def complete_plot_ipop(self):
-        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['complete'])
+        filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['complete'])
         plt.figure()
         plt.plot(self.x_trained, self.output_ip, '-', label='Lagrange ip')
         plt.plot(self.x_trained, self.output_op, '-', label='Lagrange op')
@@ -444,7 +448,7 @@ class Polymaker:
         plt.close()
 
     def complete_plot_ap(self, which):
-        filepath = 'prs\{}\outputs\{}'.format(self.pname, self.filename['complete'])
+        filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['complete'])
         plt.figure()
         output = None
         poly_label = ''
@@ -472,7 +476,7 @@ class Polymaker:
         plt.close()
 
     def boxplots(self, which):
-        filepath = 'prs\{}\outputs\{}'.format(self.pname, 'boxplot_p{}_{}'.format(self.nprofile, self.n))
+        filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, 'boxplot_p{}_{}'.format(self.nprofile, self.n))
         ready = pd.DataFrame()
         if self.linetype == 'R':
             for i in range(1, 10):
@@ -513,16 +517,17 @@ class Polymaker:
 
         filepath = 'heat_map_talacasto_{}.png'.format(self.linetype)
 
-        coords  = np.vstack([lons, lats])
+        #coords  = np.vstack([lons, lats])
         if (self.linetype == 'I' or self.linetype == 'O'):
             newz = z + abs(z.min())
             bw_method = 0.3
 
-        kde1    = gaussian_kde(
-            coords,
-            weights=newz,
-            bw_method=bw_method
-        )
+        #kde1    = gaussian_kde(
+        #    coords,
+        #    weights=newz,
+        #    bw_method=bw_method
+        #)
+
         points  = np.column_stack([lons, lats])
         hull    = ConvexHull(points)
 
@@ -532,9 +537,17 @@ class Polymaker:
         xi = np.linspace(xmin, xmax, 300)
         yi = np.linspace(ymin, ymax, 300)
         xi, yi = np.meshgrid(xi, yi)
-        zi = kde1(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
 
-        hull_p  = Path(points[hull.vertices])
+        zi = griddata(
+            points,
+            z,
+            (xi, yi),
+            method="linear"
+        )
+
+        #zi = kde1(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
+
+        hull_p  = MplPath(points[hull.vertices])
         mask    = hull_p.contains_points(np.column_stack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
         zi[~mask] = np.nan
 

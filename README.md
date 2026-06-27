@@ -161,6 +161,14 @@ cal app a:s -lt <linetype>
 
 `s` stands for lines. It only builds the mentioned plotlines.
 
+## Interpolation
+
+It's also possible to create a heatmap from the grid of data:
+
+```
+cal app a:i -lt <linetype>
+```
+
 
 ### Checking
 
