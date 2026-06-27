@@ -21,6 +21,21 @@ from abss.fs import current_project, taken
 from abss.dataSetting import getData
 from abss.story import add
 
+def idw_interpolation(points, values, xi, yi, power=2):
+    grid = np.column_stack((xi.ravel(), yi.ravel()))
+    dist = np.sqrt(
+        (grid[:, None, 0] - points[:, 0])**2 +
+        (grid[:, None, 1] - points[:, 1])**2
+    )
+    dist[dist == 0] = 1e-12
+
+    weights = 1 / dist**power
+    weights /= weights.sum(axis=1, keepdims=True)
+
+    zi = np.sum(weights * values, axis=1)
+
+    return zi.reshape(xi.shape)
+
 class Polymaker:
     def __init__(self, cmd):
         self.data_state  = "AV" 
@@ -538,12 +553,20 @@ class Polymaker:
         yi = np.linspace(ymin, ymax, 300)
         xi, yi = np.meshgrid(xi, yi)
 
-        zi = griddata(
-            points,
-            z,
-            (xi, yi),
-            method="linear"
-        )
+        #zi = griddata(
+        #    points,
+        #    z,
+        #    (xi, yi),
+        #    method="linear"
+        #)
+
+        zi = idw_interpolation(
+                points,
+                z,
+                xi,
+                yi,
+                power=2,
+                )
 
         #zi = kde1(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
 
@@ -560,7 +583,9 @@ class Polymaker:
             xi, yi, zi,
             cmap="jet",
             shading="auto",
-            norm=norm
+            norm=norm,
+            vmin=np.min(zi),
+            vmax=np.max(zi),
         )
         ax.scatter(lons, lats, c="cyan", s=10, edgecolor="k")
         ax.set_xlim(-68.752,-68.736)
