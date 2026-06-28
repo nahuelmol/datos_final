@@ -49,7 +49,11 @@ class Polymaker:
 
         filename    = datapath.split('\\')[-1]
 
-        self.linetype   = cmd.linetype
+        if hasattr(cmd, 'linetype'):
+            self.linetype   = cmd.linetype
+        else:
+            self.linetype   = None
+
         self.firstday   = [12, 13]
         self.secndday   = [1,2,3,4,5,6,7,8,9,10,11]
         self.mhu        = 0.00000125
@@ -70,8 +74,18 @@ class Polymaker:
         self.cond_ap    = np.sqrt(self.ip.pow(2) + self.op.pow(2))
         self.rest_ap    = self.cte_rest / self.cond_ap
 
+        #for low induction number (B)
+        self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * self.op
+        self.rest_ap_lin = (1 / self.cond_ap_lin)
+
+        self.skin_depth = np.sqrt(2/(self.w * self.mhu * self.cond_ap_lin))
+        self.b  = self.s / self.skin_depth
+
+        self.b.name = 'B'
         self.rest_ap.name = 'RA'
         self.cond_ap.name = 'CA'
+        self.rest_ap_lin.name = 'RA_lin'
+        self.cond_ap_lin.name = 'CA_lin'
         self.ip.name    = 'IP'
         self.op.name    = 'OP'
 
@@ -152,7 +166,8 @@ class Polymaker:
                     'C': self.cond_ap.iloc[inf:i+1],
                     'R': self.rest_ap.iloc[inf:i+1],
                     'Ip':self.ip.iloc[inf:i+1],
-                    'Op':self.op.iloc[inf:i+1]
+                    'Op':self.op.iloc[inf:i+1],
+                    'B':self.b.iloc[inf:i+1]
                 })
                 if(os.path.exists(pname)):
                     prev_data = pd.read_csv(pname)
@@ -175,10 +190,14 @@ class Polymaker:
                 self.ip         = data['Ip']
                 self.op         = data['Op']
                 self.stats      = data['St.']
+                self.b          = data['B']
                 self.rest_ap.name   = 'RA'
                 self.cond_ap.name   = 'CA'
+                self.rest_ap_lin.name = 'RA_lin'
+                self.cond_ap_lin.name = 'CA_lin'
                 self.ip.name        = 'IP'
                 self.op.name        = 'OP'
+                self.b.name         = 'B'
                 self.build_line()
                 self.lines_plot()
                 add('polys', self.REPORT)
@@ -270,6 +289,8 @@ class Polymaker:
             poly = 'IO'
         elif self.linetype == 'C':
             poly = 'ivo'
+        elif self.linetype == 'B':
+            poly = 'lin'
 
         self.REPORT = {
             'poly':poly,
@@ -432,6 +453,10 @@ class Polymaker:
             ax.plot(self.x, self.cond_ap, '-', label='Ca', color='black')
             ax.plot(self.x, self.cond_ap, 'o', color='black')
             ax.set_ylabel('C')
+        elif self.linetype == 'B':
+            ax.set_yscale('log')
+            ax.plot(self.x, self.b, '-', label='B', color='black')
+            ax.set_ylabel('B')
         else:
             print('unrecognized option')
 
