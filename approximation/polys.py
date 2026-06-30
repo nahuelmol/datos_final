@@ -5,7 +5,9 @@ import math
 import matplotlib.pyplot as plt
 import plotly as px
 import seaborn as sns
+import rasterio
 
+from rasterio.transform import from_origin
 from scipy.interpolate import lagrange, approximate_taylor_polynomial, griddata
 from scipy.special import chebyt
 from scipy.spatial import ConvexHull, Delaunay
@@ -138,6 +140,12 @@ class Polymaker:
             self.n = taken('polys', self.poly_name)
             self.heatmap()
             return True
+        elif self.poly_type == 'g':
+            self.poly_name = 'grid'
+            self.n = taken('polys', self.poly_name)
+            self.add_locs()
+            self.build_grid()
+            return True
         else:
             print('not recognized poly')
             return False
@@ -167,7 +175,9 @@ class Polymaker:
                     'R': self.rest_ap.iloc[inf:i+1],
                     'Ip':self.ip.iloc[inf:i+1],
                     'Op':self.op.iloc[inf:i+1],
-                    'B':self.b.iloc[inf:i+1]
+                    'B':self.b.iloc[inf:i+1],
+                    'RA_lin':self.rest_ap_lin.iloc[inf:i+1],
+                    'CA_lin':self.cond_ap_lin.iloc[inf:i+1],
                 })
                 if(os.path.exists(pname)):
                     prev_data = pd.read_csv(pname)
@@ -191,6 +201,9 @@ class Polymaker:
                 self.op         = data['Op']
                 self.stats      = data['St.']
                 self.b          = data['B']
+                self.rest_ap_lin = data['RA_lin']
+                self.cond_ap_lin = data['CA_lin']
+
                 self.rest_ap.name   = 'RA'
                 self.cond_ap.name   = 'CA'
                 self.rest_ap_lin.name = 'RA_lin'
@@ -377,7 +390,7 @@ class Polymaker:
                 print('not recognized profile')
 
     def add_locs(self):
-        for i in range(1,5):
+        for i in range(1,10):
             pname   = 'data/Profile{}.dat'.format(i)
             self.nprofile = i
             data    = pd.read_csv(pname)
@@ -385,18 +398,21 @@ class Polymaker:
             nlastt  = data['St.'].iloc[-1]
             locs    = pd.read_csv("data/locations.dat")
 
+            print("Profile {} - {} -> {}".format(i, nfirst, nlastt)) 
             self.framed_locs = locs.iloc[nfirst:nlastt]
-            self.transf_locs()
+            #self.transf_locs()
+            #print(self.framed_locs)
             lat     = self.framed_locs['Lat'].reset_index()
             lon     = self.framed_locs['Lon'].reset_index()
 
-            ready = pd.concat([self.stats, self.ip, self.op, self.rest_ap, lat['Lat'], lon['Lon']], axis=1)
+            ready = pd.concat([data['St.'], data['Ip'], data['Op'], data['RA_lin'], lat['Lat'], lon['Lon']], axis=1)
+            print(ready)
             output_name = "data/Profile{}_with_locs".format(self.nprofile)
             ready.to_csv(output_name, index=False)
 
     def build_grid(self):
         p = Path("data")
-        profs = list(p.rglob(f'Profile*'))
+        profs = list(p.rglob(f'Profile*_with_locs'))
         locs = pd.read_csv("data/locations.dat")
         n = locs.shape[0]
         my_pds = []
@@ -533,7 +549,7 @@ class Polymaker:
         plt.close()
 
     def heatmap(self):
-        df      = pd.read_csv('data/Grid')
+        df      = pd.read_csv('data/Grid_with_lin')
         lats    = df['Lat'].to_numpy()
         lons    = df['Lon'].to_numpy()
         z       = None
@@ -553,19 +569,18 @@ class Polymaker:
         elif self.linetype == 'O':
             z   = df['OP'].to_numpy()
             title = 'OP-conductividad'
+        elif self.linetype == 'RA_lin':
+            z   = df['RA_lin'].to_numpy()
+            title = 'Resistividad-lin'
+        elif self.linetype == 'CA_lin':
+            z   = df['CA_lin'].to_numpy()
+            title = 'Conductividad-lin'
 
         filepath = 'heat_map_talacasto_{}.png'.format(self.linetype)
 
-        #coords  = np.vstack([lons, lats])
         if (self.linetype == 'I' or self.linetype == 'O'):
             newz = z + abs(z.min())
             bw_method = 0.3
-
-        #kde1    = gaussian_kde(
-        #    coords,
-        #    weights=newz,
-        #    bw_method=bw_method
-        #)
 
         points  = np.column_stack([lons, lats])
         hull    = ConvexHull(points)
@@ -577,13 +592,6 @@ class Polymaker:
         yi = np.linspace(ymin, ymax, 300)
         xi, yi = np.meshgrid(xi, yi)
 
-        #zi = griddata(
-        #    points,
-        #    z,
-        #    (xi, yi),
-        #    method="linear"
-        #)
-
         zi = idw_interpolation(
                 points,
                 z,
@@ -591,8 +599,6 @@ class Polymaker:
                 yi,
                 power=2,
                 )
-
-        #zi = kde1(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
 
         hull_p  = MplPath(points[hull.vertices])
         mask    = hull_p.contains_points(np.column_stack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
@@ -621,4 +627,30 @@ class Polymaker:
         plt.colorbar(im, label=title)
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
+
+        res_x = float(xi[0, 1] - xi[0, 0])
+        res_y = float(yi[1, 0] - yi[0, 0])
+        res = (res_x, res_y)
+
+        transform = from_origin(
+            xmin := xi.min(),
+            ymax := yi.max(),
+            res[0],
+            res[1]
+        )
+        
+        zi = np.flipud(zi)
+        with rasterio.open(
+            filepath.replace(".png", ".tif"),
+            "w",
+            driver="GTiff",
+            height=zi.shape[0],
+            width=zi.shape[1],
+            count=1,
+            dtype=zi.dtype,
+            crs="EPSG:4326",
+            transform=transform,
+            nodata=np.nan
+        ) as dst:
+            dst.write(zi, 1)
 
