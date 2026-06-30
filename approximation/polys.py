@@ -75,8 +75,8 @@ class Polymaker:
         self.rest_ap    = self.cte_rest / self.cond_ap
 
         #for low induction number (B)
-        self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * self.op
-        self.rest_ap_lin = (1 / self.cond_ap_lin)
+        self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * abs(self.op)
+        self.rest_ap_lin = 1 / self.cond_ap_lin
 
         self.skin_depth = np.sqrt(2/(self.w * self.mhu * self.cond_ap_lin))
         self.b  = self.s / self.skin_depth
@@ -454,7 +454,6 @@ class Polymaker:
             ax.plot(self.x, self.cond_ap, 'o', color='black')
             ax.set_ylabel('C')
         elif self.linetype == 'B':
-            ax.set_yscale('log')
             ax.plot(self.x, self.b, '-', label='B', color='black')
             ax.set_ylabel('B')
         else:
@@ -465,8 +464,8 @@ class Polymaker:
 
         ax_top = ax.twiny()
         ax_top.set_xlim(ax.get_xlim())
-        ax_top.set_xticks(self.x)
-        ax_top.set_xticklabels(self.stats)
+        ax_top.set_xticks(self.x[::4])
+        ax_top.set_xticklabels(self.stats[::4])
         ax_top.set_xlabel("Estaciones")
 
         ax.legend()
