@@ -34,9 +34,11 @@ def idw_interpolation(points, values, xi, yi, power=2):
     weights = 1 / dist**power
     weights /= weights.sum(axis=1, keepdims=True)
 
-    zi = np.sum(weights * values, axis=1)
-
-    return zi.reshape(xi.shape)
+    if(np.isnan(weights).any()):
+        return False, "NaN vaues cannot be used"
+    else:
+        zi = np.sum(weights * values, axis=1)
+        return zi.reshape(xi.shape)
 
 class Polymaker:
     def __init__(self, cmd):
@@ -78,7 +80,7 @@ class Polymaker:
 
         #for low induction number (B)
         self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * abs(self.op)
-        self.rest_ap_lin = 1 / self.cond_ap_lin
+        self.rest_ap_lin = (1 / self.cond_ap_lin)
 
         self.skin_depth = np.sqrt(2/(self.w * self.mhu * self.cond_ap_lin))
         self.b  = self.s / self.skin_depth
@@ -145,6 +147,7 @@ class Polymaker:
             self.n = taken('polys', self.poly_name)
             self.add_locs()
             self.build_grid()
+            self.do_mult_100()
             return True
         else:
             print('not recognized poly')
@@ -400,13 +403,10 @@ class Polymaker:
 
             print("Profile {} - {} -> {}".format(i, nfirst, nlastt)) 
             self.framed_locs = locs.iloc[nfirst:nlastt]
-            #self.transf_locs()
-            #print(self.framed_locs)
             lat     = self.framed_locs['Lat'].reset_index()
             lon     = self.framed_locs['Lon'].reset_index()
 
             ready = pd.concat([data['St.'], data['Ip'], data['Op'], data['RA_lin'], lat['Lat'], lon['Lon']], axis=1)
-            print(ready)
             output_name = "data/Profile{}_with_locs".format(self.nprofile)
             ready.to_csv(output_name, index=False)
 
@@ -422,6 +422,13 @@ class Polymaker:
         comb = pd.concat(my_pds, ignore_index=True)
         output_name = "data/Grid"
         comb.to_csv(output_name, index=False)
+
+    def do_mult_100(self):
+        data = pd.read_csv("data/Grid")
+        ra_lin_100 = data['RA_lin'] * 100
+        ra_lin_100.name = "RA_lin_100"
+        resu = pd.concat([data, ra_lin_100], axis=1)
+        resu.to_csv("grid_with_100", index=False)
 
     def basic_plot(self):
         filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['basic'])
@@ -549,12 +556,14 @@ class Polymaker:
         plt.close()
 
     def heatmap(self):
-        df      = pd.read_csv('data/Grid_with_lin')
+        df      = pd.read_csv('data/Grid_with_lin_100')
         lats    = df['Lat'].to_numpy()
         lons    = df['Lon'].to_numpy()
         z       = None
         newz    = None
         norm    = None
+        vmin    = None
+        vmax    = None
         title   = None
         bw_method = 0.4
         if self.linetype == 'R':
@@ -572,6 +581,9 @@ class Polymaker:
         elif self.linetype == 'RA_lin':
             z   = df['RA_lin'].to_numpy()
             title = 'Resistividad-lin'
+        elif self.linetype == 'RA_lin_100':
+            z   = df['RA_lin_100'].to_numpy()
+            title = 'Resistividad-lin-100'
         elif self.linetype == 'CA_lin':
             z   = df['CA_lin'].to_numpy()
             title = 'Conductividad-lin'
@@ -588,34 +600,43 @@ class Polymaker:
         xmin, ymin = points[hull.vertices].min(axis=0)
         xmax, ymax = points[hull.vertices].max(axis=0)
 
-        xi = np.linspace(xmin, xmax, 300)
-        yi = np.linspace(ymin, ymax, 300)
+        xi = np.linspace(xmin, xmax, 300) 
+        yi = np.linspace(ymin, ymax, 300) 
         xi, yi = np.meshgrid(xi, yi)
+ 
+        #zi = idw_interpolation(
+        #        points,
+        #        z,
+        #        xi,
+        #        yi,
+        #        power=2,
+        #        )
 
-        zi = idw_interpolation(
-                points,
-                z,
-                xi,
-                yi,
-                power=2,
-                )
+        zi = griddata(
+            points,
+            z,
+            (xi, yi),
+            method="cubic"
+            )
 
         hull_p  = MplPath(points[hull.vertices])
         mask    = hull_p.contains_points(np.column_stack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
         zi[~mask] = np.nan
 
         fig, ax = plt.subplots(figsize=(8,6))
-        if (self.linetype == 'R'):
-            norm= LogNorm(vmin=np.nanmin(zi),
-                          vmax=np.nanmax(zi))
+        if (self.linetype == 'R' or self.linetype == 'RA_lin'):
+            norm= LogNorm(vmin=np.nanmin(zi), vmax=np.nanmax(zi))
+        else:
+            vmin=np.min(zi)
+            vmax=np.max(zi)
 
         im  = ax.pcolormesh(
             xi, yi, zi,
-            cmap="jet",
+            cmap="viridis",
             shading="auto",
             norm=norm,
-            vmin=np.min(zi),
-            vmax=np.max(zi),
+            vmin=vmin,
+            vmax=vmax,
         )
         ax.scatter(lons, lats, c="cyan", s=10, edgecolor="k")
         ax.set_xlim(-68.752,-68.736)
