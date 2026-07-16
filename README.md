@@ -297,3 +297,19 @@ pyinstaller cal.py
 ```
 
 The following is to paste the path to this executable in the environment variables. This way the application can be used globally from the CMD.
+
+### practice
+
+Per EMIX.txt file
+
+```
+python cal.py set d:src
+python cal.py app a:-
+```
+
+Later:
+
+```
+python cal.py app a:g
+python cal.py app a:i 
+```
