@@ -43,6 +43,7 @@ def idw_interpolation(points, values, xi, yi, power=2):
 class Polymaker:
     def __init__(self, cmd):
         self.data_state  = "AV" 
+        self.all = cmd.all
         self.msg    = ''
         self.pname  = current_project(['project_name'])
         datapath    = current_project(['datapath','src'])
@@ -64,34 +65,9 @@ class Polymaker:
         self.s          = 40
         self.w          = 2 * math.pi * 3600
         self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
-
-        self.profile    = data['P']
-        self.stats      = data['St.']
         self.nplanilla  = filename[3]
-        self.nprofile   = None 
-        self.x          = data['Pro.']
-        self.ip         = data['Ip'] * data['XI']
-        self.op         = data['Op'] * data['XO']
-        self.x_trained  = np.linspace(min(self.x), max(self.x), 500)
-        self.nrows      = data.shape[0]
 
-        self.cond_ap    = np.sqrt(self.ip.pow(2) + self.op.pow(2))
-        self.rest_ap    = self.cte_rest / self.cond_ap
-
-        #for low induction number (B)
-        self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * abs(self.op)
-        self.rest_ap_lin = (1 / self.cond_ap_lin)
-
-        self.skin_depth = np.sqrt(2/(self.w * self.mhu * self.cond_ap_lin))
-        self.b  = self.s / self.skin_depth
-
-        self.b.name = 'B'
-        self.rest_ap.name = 'RA'
-        self.cond_ap.name = 'CA'
-        self.rest_ap_lin.name = 'RA_lin'
-        self.cond_ap_lin.name = 'CA_lin'
-        self.ip.name    = 'IP'
-        self.op.name    = 'OP'
+        self.rebuilt(data, False)
 
         self.poly_type  = cmd.method
         self.poly_ip    = None 
@@ -114,6 +90,34 @@ class Polymaker:
         self.filename   = {}
 
         self.framed_locs= None
+
+    def rebuilt(self, data, opc):
+
+        self.profile    = data['P']
+        self.stats      = data['St.']
+        self.nprofile   = None 
+        self.x          = data['Pro.']
+
+        self.ip         = data['Ip'] * data['XI']
+        self.op         = data['Op'] * data['XO']
+        self.x_trained  = np.linspace(min(self.x), max(self.x), 500)
+        self.nrows      = data.shape[0]
+
+        self.cond_ap    = np.sqrt((self.ip/2).pow(2) + (self.op/2).pow(2))
+        self.rest_ap    = self.cte_rest / self.cond_ap
+        self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * abs(self.cond_ap)
+        self.rest_ap_lin = (1 / self.cond_ap_lin)
+        self.skin_depth = np.sqrt(2/(self.w * self.mhu * self.cond_ap_lin))
+        self.b  = self.s / self.skin_depth
+
+        self.b.name = 'B'
+        self.rest_ap.name = 'RA'
+        self.cond_ap.name = 'CA'
+        self.rest_ap_lin.name = 'RA_lin'
+        self.cond_ap_lin.name = 'CA_lin'
+        self.ip.name    = 'IP'
+        self.op.name    = 'OP'
+        self.skin_depth.name = 'SD'
 
     def build_poly(self):
         if self.poly_type == 'l':
@@ -142,6 +146,9 @@ class Polymaker:
             self.n = taken('polys', self.poly_name)
             self.heatmap()
             return True
+        elif self.poly_type == 'bar':
+            self.makebar()
+            return True
         elif self.poly_type == 'g':
             self.poly_name = 'grid'
             self.n = taken('polys', self.poly_name)
@@ -164,36 +171,74 @@ class Polymaker:
         return True
 
     def set_profile(self):
-        inf = 0
-        print('{}'.format(len(self.profile)))
-        for i in range(1, len(self.profile)):
-            if (self.profile[i] != self.profile[i-1]) or (i == len(self.profile) - 1):
-                nprofile = self.profile[i-1]
-                print('{} - {}'.format(i, nprofile))
-                pname   = 'data/Profile{}.dat'.format(nprofile)
-                ready   = pd.DataFrame({
-                    'St.':self.stats.iloc[inf:i+1],
-                    'x': self.x.iloc[inf:i+1],
-                    'C': self.cond_ap.iloc[inf:i+1],
-                    'R': self.rest_ap.iloc[inf:i+1],
-                    'Ip':self.ip.iloc[inf:i+1],
-                    'Op':self.op.iloc[inf:i+1],
-                    'B':self.b.iloc[inf:i+1],
-                    'RA_lin':self.rest_ap_lin.iloc[inf:i+1],
-                    'CA_lin':self.cond_ap_lin.iloc[inf:i+1],
-                })
-                if(os.path.exists(pname)):
-                    prev_data = pd.read_csv(pname)
-                    ready = pd.concat([prev_data, ready], axis=0)
-                    ready.to_csv(pname, index=False)
-                else:
-                    ready.to_csv(pname, index=False)
-                inf = i
+        if (self.all == False):
+            inf = 0
+            pls = 0
+            for i in range(1, len(self.profile)):
+                if (self.profile[i] != self.profile[i-1]) or (i == len(self.profile) - 1):
+                    if (i == len(self.profile) - 1):
+                        pls = 1
+                    nprofile = self.profile[i-1]
+                    print('nprofile {}: stats [{} - {}]'.format(nprofile, inf+1, i))
+                    pname   = 'data/Profile{}.dat'.format(nprofile)
+                    ready   = pd.DataFrame({
+                        'St.':self.stats.iloc[inf:i+pls],
+                        'x': self.x.iloc[inf:i+pls],
+                        'C': self.cond_ap.iloc[inf:i+pls],
+                        'R': self.rest_ap.iloc[inf:i+pls],
+                        'Ip':self.ip.iloc[inf:i+pls],
+                        'Op':self.op.iloc[inf:i+pls],
+                        'B':self.b.iloc[inf:i+pls],
+                        'RA_lin':self.rest_ap_lin.iloc[inf:i+pls],
+                        'CA_lin':self.cond_ap_lin.iloc[inf:i+pls],
+                    })
+                    if(os.path.exists(pname)):
+                        prev_data = pd.read_csv(pname)
+                        ready = pd.concat([prev_data, ready], axis=0)
+                        ready.to_csv(pname, index=False)
+                    else:
+                        ready.to_csv(pname, index=False)
+                    inf = i
+        else:
+            inf = 0
+            pls = 0
+            for i in range(1, 6):
+                pathfile = Path.cwd() / "data" / "EMI{}.txt".format(i)
+                res, data = getData(pathfile, '\t')
+                if data.empty:
+                    self.data_state = "NA"
+                    self.msg = "Data is empty"
+                self.rebuilt(data, True)
+                for i in range(1, len(self.profile)):
+                    if (self.profile[i] != self.profile[i-1]) or (i == len(self.profile) - 1):
+                        if (i == len(self.profile) - 1):
+                            pls = 1
+                        nprofile = self.profile[i-1]
+                        print('nprofile {}: stats [{} - {}]'.format(nprofile, inf+1, i))
+                        pname   = 'data/Profile{}.dat'.format(nprofile)
+                        ready   = pd.DataFrame({
+                            'St.':self.stats.iloc[inf:i+pls],
+                            'x': self.x.iloc[inf:i+pls],
+                            'C': self.cond_ap.iloc[inf:i+pls],
+                            'R': self.rest_ap.iloc[inf:i+pls],
+                            'Ip':self.ip.iloc[inf:i+pls],
+                            'Op':self.op.iloc[inf:i+pls],
+                            'B':self.b.iloc[inf:i+pls],
+                            'RA_lin':self.rest_ap_lin.iloc[inf:i+pls],
+                            'CA_lin':self.cond_ap_lin.iloc[inf:i+pls],
+                        })
+                        if(os.path.exists(pname)):
+                            prev_data = pd.read_csv(pname)
+                            ready = pd.concat([prev_data, ready], axis=0)
+                            ready.to_csv(pname, index=False)
+                        else:
+                            ready.to_csv(pname, index=False)
+                        inf = i
 
     def reset(self):
         p = int(self.nplanilla)
         for profile in os.listdir('data/'):
-            if 'Profile' in profile:
+            if('Profile' in profile and ("with_locs" not in profile)):
                 self.profile    = 'data/{}'.format(profile)
                 self.n          = int(profile[7])
                 data            = pd.read_csv(self.profile)
@@ -307,6 +352,10 @@ class Polymaker:
             poly = 'ivo'
         elif self.linetype == 'B':
             poly = 'lin'
+        elif self.linetype == 'RA_lin':
+            poly = 'RA_lin'
+        elif self.linetype == 'CA_lin':
+            poly = 'CA_lin'
 
         self.REPORT = {
             'poly':poly,
@@ -477,8 +526,22 @@ class Polymaker:
             ax.plot(self.x, self.cond_ap, 'o', color='black')
             ax.set_ylabel('C')
         elif self.linetype == 'B':
+            lim = np.max(self.b) * (1 + 1/10)
+            plt.ylim(-lim, lim)
             ax.plot(self.x, self.b, '-', label='B', color='black')
+            ax.plot(self.x, self.b, 'o', color='black')
             ax.set_ylabel('B')
+        elif self.linetype == 'RA_lin':
+            lim = np.max(self.rest_ap_lin) * (1 + 1/10)
+            plt.ylim(-lim, lim)
+            ax.plot(self.x, self.rest_ap_lin, '-', label='RA LIN', color='black')
+            ax.plot(self.x, self.rest_ap_lin, 'o', color='black')
+            ax.set_ylabel('RA LIN')
+        elif self.linetype == 'CA_lin':
+            lim = np.max(self.cond_ap_lin) * (1 + 1/10)
+            plt.ylim(-lim, lim)
+            ax.plot(self.x, self.cond_ap_lin, '-', label='CA LIN', color='black')
+            ax.set_ylabel('CA LIN')
         else:
             print('unrecognized option')
 
@@ -542,21 +605,21 @@ class Polymaker:
         ready = pd.DataFrame()
         if self.linetype == 'R':
             for i in range(1, 10):
-                df = pd.read_csv('data\Profile{}.dat'.format(i))
+                df = pd.read_csv('data\\Profile{}.dat'.format(i))
                 ready = pd.concat([ready, df['R']], axis=1)
         elif self.linetype == 'C':
             for i in range(1, 10):
-                df = pd.read_csv('data\Profile{}.dat'.format(i))
+                df = pd.read_csv('data\\Profile{}.dat'.format(i))
                 ready = pd.concat([ready, df['C']], axis=1)
         else:
-            df = pd.read_csv('data\Profile{}.dat'.format(int(which)))
+            df = pd.read_csv('data\\Profile{}.dat'.format(int(which)))
 
         ready.plot(kind='box', title='Resistividad Aparente (ohm)')
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
     def heatmap(self):
-        df      = pd.read_csv('data/Grid_with_lin_100')
+        df      = pd.read_csv('data/Grid')
         lats    = df['Lat'].to_numpy()
         lons    = df['Lon'].to_numpy()
         z       = None
@@ -625,7 +688,9 @@ class Polymaker:
 
         fig, ax = plt.subplots(figsize=(8,6))
         if (self.linetype == 'R' or self.linetype == 'RA_lin'):
-            norm= LogNorm(vmin=np.nanmin(zi), vmax=np.nanmax(zi))
+            norm= LogNorm(vmin=np.min(zi), vmax=np.max(zi))
+            vmin=None
+            vmax=None
         else:
             vmin=np.min(zi)
             vmax=np.max(zi)
@@ -675,3 +740,45 @@ class Polymaker:
         ) as dst:
             dst.write(zi, 1)
 
+    def makebar(self):
+        import matplotlib as mpl
+
+        df      = pd.read_csv('data/Grid')
+        if self.linetype == 'R':
+            z   = df['RA'].to_numpy()
+            title = 'Resistividad (ohm)'
+        elif self.linetype == 'C':
+            z   = df['CA'].to_numpy()
+            title = 'Conductividad'
+        elif self.linetype == 'I':
+            z   = df['IP'].to_numpy()
+            title = 'IP-conductividad'
+        elif self.linetype == 'O':
+            z   = df['OP'].to_numpy()
+            title = 'OP-conductividad'
+        elif self.linetype == 'RA_lin':
+            z   = df['RA_lin'].to_numpy()
+            title = 'Resistividad-lin'
+        elif self.linetype == 'RA_lin_100':
+            z   = df['RA_lin_100'].to_numpy()
+            title = 'Resistividad-lin-100'
+        elif self.linetype == 'CA_lin':
+            z   = df['CA_lin'].to_numpy()
+            title = 'Conductividad-lin'
+        vmin = np.nanmin(z)
+        vmax = np.nanmax(z)
+
+        fig, ax = plt.subplots(figsize=(1.5, 6))
+
+        sm = mpl.cm.ScalarMappable(
+            norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax),
+            cmap="turbo"
+        )
+
+        plt.colorbar(sm, ax=ax, label="Resisitividad Aparente")
+        ax.remove()
+        
+        filepath = "bar"
+
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.close()

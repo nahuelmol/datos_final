@@ -6,7 +6,7 @@ class Command:
         self.args   = args[1:]
         self.all    = True
         self.availableCoupledFlags  = ['-o', '-r', '-n', '-me', '-mo', '-ft', '-rs', '-ts', 'w', '-cls', 'is','-lt']
-        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm', 'cat', 'dis', 'box']
+        self.availableAloneFlags    = ['-f', '-all', '-ac', '-h', '-help', 'cm', 'cat', 'dis', 'box', '-']
         self.aloneFlags = {}
         self.boxplot    = False
         self.categorics = False
@@ -197,6 +197,7 @@ class Command:
             self.number = self.currentFlags['is']
         if '-cls' in self.currentFlags:
             self.class_ = int(self.currentFlags['-cls'])
+
         if '-ac' in self.aloneFlags:
             self.ac = True
         if '-all' in self.aloneFlags:
@@ -219,8 +220,10 @@ class Command:
             self.all = False
             self.boxplot = True
         if 'hst' in self.aloneFlags:
-            self.all   = False
-            self.histo = True
+            self.all    = False
+            self.histo  = True
+        if '-' in self.aloneFlags:
+            self.all    = False
 
     def flagSetting(self):
         for flag in self.options:
