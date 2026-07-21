@@ -192,6 +192,7 @@ class Polymaker:
                         'RA_lin':self.rest_ap_lin.iloc[inf:i+pls],
                         'CA_lin':self.cond_ap_lin.iloc[inf:i+pls],
                     })
+
                     if(os.path.exists(pname)):
                         prev_data = pd.read_csv(pname)
                         ready = pd.concat([prev_data, ready], axis=0)
@@ -199,10 +200,11 @@ class Polymaker:
                     else:
                         ready.to_csv(pname, index=False)
                     inf = i
+                    pls = 0
         else:
-            inf = 0
-            pls = 0
-            for i in range(1, 6):
+            for i in range(1, 7):
+                inf = 0
+                pls = 0
                 pathfile = Path.cwd() / "data" / "EMI{}.txt".format(i)
                 res, data = getData(pathfile, '\t')
                 if data.empty:
@@ -214,7 +216,6 @@ class Polymaker:
                         if (i == len(self.profile) - 1):
                             pls = 1
                         nprofile = self.profile[i-1]
-                        print('nprofile {}: stats [{} - {}]'.format(nprofile, inf+1, i))
                         pname   = 'data/Profile{}.dat'.format(nprofile)
                         ready   = pd.DataFrame({
                             'St.':self.stats.iloc[inf:i+pls],
@@ -234,6 +235,7 @@ class Polymaker:
                         else:
                             ready.to_csv(pname, index=False)
                         inf = i
+                        pls = 0
 
     def reset(self):
         p = int(self.nplanilla)
