@@ -64,7 +64,7 @@ class Polymaker:
         self.mhu        = 0.00000125
         self.s          = 40
         self.w          = 2 * math.pi * 3600
-        self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
+        #self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
         self.nplanilla  = filename[3]
 
         self.rebuilt(data, False)
@@ -98,13 +98,13 @@ class Polymaker:
         self.nprofile   = None 
         self.x          = data['Pro.']
 
-        self.ip         = data['Ip'] * data['XI']
-        self.op         = data['Op'] * data['XO']
+        self.ip         = (data['Ip'] * data['XI'])/100
+        self.op         = (data['Op'] * data['XO'])/100
         self.x_trained  = np.linspace(min(self.x), max(self.x), 500)
         self.nrows      = data.shape[0]
 
-        self.cond_ap    = np.sqrt((self.ip/2).pow(2) + (self.op/2).pow(2))
-        self.rest_ap    = self.cte_rest / self.cond_ap
+        self.cond_ap    = np.sqrt((self.ip).pow(2) + (self.op).pow(2))
+        self.rest_ap    = (1 / self.cond_ap)
         self.cond_ap_lin = (4 / (self.w * self.mhu * pow(self.s, 2))) * abs(self.cond_ap)
         self.rest_ap_lin = (1 / self.cond_ap_lin)
         self.skin_depth = np.sqrt(2/(self.w * self.mhu * self.cond_ap_lin))
@@ -154,7 +154,6 @@ class Polymaker:
             self.n = taken('polys', self.poly_name)
             self.add_locs()
             self.build_grid()
-            self.do_mult_100()
             return True
         else:
             print('not recognized poly')
@@ -474,13 +473,6 @@ class Polymaker:
         output_name = "data/Grid"
         comb.to_csv(output_name, index=False)
 
-    def do_mult_100(self):
-        data = pd.read_csv("data/Grid")
-        ra_lin_100 = data['RA_lin'] * 100
-        ra_lin_100.name = "RA_lin_100"
-        resu = pd.concat([data, ra_lin_100], axis=1)
-        resu.to_csv("grid_with_100", index=False)
-
     def basic_plot(self):
         filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['basic'])
         plt.figure()
@@ -745,39 +737,36 @@ class Polymaker:
     def makebar(self):
         import matplotlib as mpl
 
-        df      = pd.read_csv('data/Grid')
+        df = pd.read_csv('data/Grid')
         if self.linetype == 'R':
             z   = df['RA'].to_numpy()
-            title = 'Resistividad (ohm)'
+            label = 'Resistividad (ohm)'
         elif self.linetype == 'C':
             z   = df['CA'].to_numpy()
-            title = 'Conductividad'
+            label = 'Conductividad'
         elif self.linetype == 'I':
-            z   = df['IP'].to_numpy()
-            title = 'IP-conductividad'
+            z   = df['Ip'].to_numpy()
+            label = 'IP-conductividad'
         elif self.linetype == 'O':
-            z   = df['OP'].to_numpy()
-            title = 'OP-conductividad'
+            z   = df['Op'].to_numpy()
+            label = 'OP-conductividad'
         elif self.linetype == 'RA_lin':
             z   = df['RA_lin'].to_numpy()
-            title = 'Resistividad-lin'
-        elif self.linetype == 'RA_lin_100':
-            z   = df['RA_lin_100'].to_numpy()
-            title = 'Resistividad-lin-100'
+            label = 'Resistividad-lin'
         elif self.linetype == 'CA_lin':
             z   = df['CA_lin'].to_numpy()
-            title = 'Conductividad-lin'
+            label = 'Conductividad-lin'
+
         vmin = np.nanmin(z)
         vmax = np.nanmax(z)
+        if self.linetype == 'RA_lin':
+            sm = mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=vmin, vmax=vmax), cmap="turbo")
+        else:
+            sm = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax), cmap="turbo")
 
         fig, ax = plt.subplots(figsize=(1.5, 6))
 
-        sm = mpl.cm.ScalarMappable(
-            norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax),
-            cmap="turbo"
-        )
-
-        plt.colorbar(sm, ax=ax, label="Resisitividad Aparente")
+        plt.colorbar(sm, ax=ax, label=label)
         ax.remove()
         
         filepath = "bar"
