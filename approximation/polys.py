@@ -91,6 +91,8 @@ class Polymaker:
 
         self.framed_locs= None
 
+        self.maxy = 0
+
     def rebuilt(self, data, opc):
 
         self.profile    = data['P']
@@ -154,6 +156,12 @@ class Polymaker:
             self.n = taken('polys', self.poly_name)
             self.add_locs()
             self.build_grid()
+            return True
+        elif self.poly_type == 'p':
+            self.paste()
+            return True
+        elif self.poly_type == 'bx':
+            self.boxplots()
             return True
         else:
             print('not recognized poly')
@@ -497,12 +505,26 @@ class Polymaker:
 
     def lines_plot(self):
         filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, self.filename['lines'])
-        #plt.figure()
         fig, ax = plt.subplots()
 
         ax.axhline(0, color='black', linewidth=0.8, linestyle='--')
+        for profile in os.listdir('data/'):
+            if('Profile' in profile and ("with_locs" not in profile)):
+                path = 'data/{}'.format(profile)
+                data = pd.read_csv(path)
+                maximo = 0
+                if self.linetype == 'IO':
+                    maximo = max(data['Ip'].max(), data['Op'].max())
+                elif self.linetype == 'RA_lin':
+                    maximo = data['RA_lin'].max() 
+                elif self.linetype == 'B':
+                    maximo = data['B'].max()
+                if(maximo > self.maxy):
+                    self.maxy = maximo
+
         if self.linetype == 'IO':
-            plt.ylim(-80, 80)
+            lim = np.max(self.ip) * (1 + 1/10)
+            plt.ylim(-1, 1)
             ax.grid()
             ax.plot(self.x, self.ip, '-', label='Ip', color='red')
             ax.plot(self.x, self.ip, 'o', color='red')
@@ -521,16 +543,27 @@ class Polymaker:
             ax.set_ylabel('C')
         elif self.linetype == 'B':
             lim = np.max(self.b) * (1 + 1/10)
-            plt.ylim(-lim, lim)
+            ax.grid()
+            plt.ylim(-1.5, 1.5)
             ax.plot(self.x, self.b, '-', label='B', color='black')
             ax.plot(self.x, self.b, 'o', color='black')
             ax.set_ylabel('B')
         elif self.linetype == 'RA_lin':
+            lim = np.max(self.rest_ap_lin)
+            plt.ylim(1, self.maxy)
+            ax.grid()
+            ax.plot(self.x, self.rest_ap_lin, '-', label='RA LIN', color='black')
+            ax.plot(self.x, self.rest_ap_lin, 'o', color='black')
+            plt.yscale("log")
+            ax.set_ylabel('Resistividad en regimen LIN')
+        elif self.linetype == 'RvR':
             lim = np.max(self.rest_ap_lin) * (1 + 1/10)
             plt.ylim(-lim, lim)
             ax.plot(self.x, self.rest_ap_lin, '-', label='RA LIN', color='black')
-            ax.plot(self.x, self.rest_ap_lin, 'o', color='black')
-            ax.set_ylabel('RA LIN')
+            ax.plot(self.x, self.rest_ap_lin, 'o', label='RA LIN', color='black')
+            ax.plot(self.x, self.rest_ap, '-', label='RA', color='blue')
+            ax.plot(self.x, self.rest_ap, 'o', label='RA', color='blue')
+            ax.set_ylabel('Resistividad')
         elif self.linetype == 'CA_lin':
             lim = np.max(self.cond_ap_lin) * (1 + 1/10)
             plt.ylim(-lim, lim)
@@ -594,21 +627,27 @@ class Polymaker:
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
-    def boxplots(self, which):
+    def boxplots(self):
         filepath = 'prs\\{}\\outputs\\{}'.format(self.pname, 'boxplot_p{}_{}'.format(self.nprofile, self.n))
         ready = pd.DataFrame()
-        if self.linetype == 'R':
-            for i in range(1, 10):
-                df = pd.read_csv('data\\Profile{}.dat'.format(i))
-                ready = pd.concat([ready, df['R']], axis=1)
-        elif self.linetype == 'C':
-            for i in range(1, 10):
-                df = pd.read_csv('data\\Profile{}.dat'.format(i))
-                ready = pd.concat([ready, df['C']], axis=1)
-        else:
-            df = pd.read_csv('data\\Profile{}.dat'.format(int(which)))
+        for i in range(1, 10):
+            path = Path('data\\Profile{}.dat'.format(i))
+            if path.exists():
+                df    = pd.read_csv(path)
+                col   = df[self.linetype].rename('RA_lin_{}'.format(i))
+                ready = pd.concat([ready, col], axis=1)
 
-        ready.plot(kind='box', title='Resistividad Aparente (ohm)')
+        title = None
+        if(self.linetype == 'RA_lin'):
+            title = 'Resistividad Aparente (ohm)'
+        else:
+            title = self.linetype
+        print(type(ready))
+        print(ready.shape)
+        print(ready.dtypes)
+        print(ready.head())
+
+        ready.plot(kind='box', title=title)
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
@@ -660,14 +699,6 @@ class Polymaker:
         xi = np.linspace(xmin, xmax, 300) 
         yi = np.linspace(ymin, ymax, 300) 
         xi, yi = np.meshgrid(xi, yi)
- 
-        #zi = idw_interpolation(
-        #        points,
-        #        z,
-        #        xi,
-        #        yi,
-        #        power=2,
-        #        )
 
         zi = griddata(
             points,
@@ -773,3 +804,25 @@ class Polymaker:
 
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
+
+    def paste(self):
+        targets = [[2, 8], [3, 7]]
+
+        for i in range(0,2):
+            prev = None
+            for j in range(0,2):
+                current = pd.read_csv('data/Profile{}.dat'.format(targets[i][j]))
+                if(j == 1):
+                    lastval = prev['x'].iloc[-1]
+                    current['x'] = current['x'] + lastval + 20
+                prev = pd.concat([prev, current], axis=0)
+            name = 'data/Profile{}.dat'.format(targets[i][0])
+            prev.to_csv(name, index=False)
+            os.remove('data/Profile{}.dat'.format(targets[i][1]))
+
+                
+
+
+
+
+
