@@ -64,7 +64,6 @@ class Polymaker:
         self.mhu        = 0.00000125
         self.s          = 40
         self.w          = 2 * math.pi * 3600
-        #self.cte_rest   = self.mhu * self.w * (math.pow(self.s, 2)) /4
         self.nplanilla  = filename[3]
 
         self.rebuilt(data, False)
@@ -521,11 +520,10 @@ class Polymaker:
                     maximo = data['B'].max()
                 if(maximo > self.maxy):
                     self.maxy = maximo
-
+        ax.grid()
         if self.linetype == 'IO':
             lim = np.max(self.ip) * (1 + 1/10)
             plt.ylim(-1, 1)
-            ax.grid()
             ax.plot(self.x, self.ip, '-', label='Ip', color='red')
             ax.plot(self.x, self.ip, 'o', color='red')
             ax.plot(self.x, self.op, '-', label='Op', color='blue')
@@ -543,7 +541,6 @@ class Polymaker:
             ax.set_ylabel('C')
         elif self.linetype == 'B':
             lim = np.max(self.b) * (1 + 1/10)
-            ax.grid()
             plt.ylim(-1.5, 1.5)
             ax.plot(self.x, self.b, '-', label='B', color='black')
             ax.plot(self.x, self.b, 'o', color='black')
@@ -551,7 +548,6 @@ class Polymaker:
         elif self.linetype == 'RA_lin':
             lim = np.max(self.rest_ap_lin)
             plt.ylim(1, self.maxy)
-            ax.grid()
             ax.plot(self.x, self.rest_ap_lin, '-', label='RA LIN', color='black')
             ax.plot(self.x, self.rest_ap_lin, 'o', color='black')
             plt.yscale("log")
@@ -642,10 +638,6 @@ class Polymaker:
             title = 'Resistividad Aparente (ohm)'
         else:
             title = self.linetype
-        print(type(ready))
-        print(ready.shape)
-        print(ready.dtypes)
-        print(ready.head())
 
         ready.plot(kind='box', title=title)
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
@@ -662,27 +654,22 @@ class Polymaker:
         vmax    = None
         title   = None
         bw_method = 0.4
-        if self.linetype == 'R':
-            z   = df['RA'].to_numpy()
-            title = 'Resistividad (ohm)'
-        elif self.linetype == 'C':
-            z   = df['CA'].to_numpy()
-            title = 'Conductividad'
+
+        if self.linetype in df.columns.tolist():
+            z   = df[self.linetype].to_numpy()
+
+        if self.linetype == 'RA':
+            title = 'Resistividad Aparente (ohm)'
+        elif self.linetype == 'CA':
+            title = 'Conductividad Aparente'
         elif self.linetype == 'I':
-            z   = df['IP'].to_numpy()
-            title = 'IP-conductividad'
+            title = 'Componente IP de conductividad'
         elif self.linetype == 'O':
-            z   = df['OP'].to_numpy()
-            title = 'OP-conductividad'
+            title = 'Componente OP de conductividad'
         elif self.linetype == 'RA_lin':
-            z   = df['RA_lin'].to_numpy()
-            title = 'Resistividad-lin'
-        elif self.linetype == 'RA_lin_100':
-            z   = df['RA_lin_100'].to_numpy()
-            title = 'Resistividad-lin-100'
+            title = 'Resistividad en LIN'
         elif self.linetype == 'CA_lin':
-            z   = df['CA_lin'].to_numpy()
-            title = 'Conductividad-lin'
+            title = 'Conductividad en LIN'
 
         filepath = 'heat_map_talacasto_{}.png'.format(self.linetype)
 
@@ -722,7 +709,7 @@ class Polymaker:
 
         im  = ax.pcolormesh(
             xi, yi, zi,
-            cmap="viridis",
+            cmap="turbo",
             shading="auto",
             norm=norm,
             vmin=vmin,
@@ -791,23 +778,22 @@ class Polymaker:
         vmin = np.nanmin(z)
         vmax = np.nanmax(z)
         if self.linetype == 'RA_lin':
-            sm = mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=vmin, vmax=vmax), cmap="turbo")
+            sm = mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=vmin, vmax=vmax),
+                                       cmap="turbo")
         else:
-            sm = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax), cmap="turbo")
+            sm = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax), 
+                                       cmap="turbo")
 
         fig, ax = plt.subplots(figsize=(1.5, 6))
-
         plt.colorbar(sm, ax=ax, label=label)
         ax.remove()
         
         filepath = "bar"
-
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
         plt.close()
 
     def paste(self):
         targets = [[2, 8], [3, 7]]
-
         for i in range(0,2):
             prev = None
             for j in range(0,2):
@@ -819,10 +805,4 @@ class Polymaker:
             name = 'data/Profile{}.dat'.format(targets[i][0])
             prev.to_csv(name, index=False)
             os.remove('data/Profile{}.dat'.format(targets[i][1]))
-
-                
-
-
-
-
 
